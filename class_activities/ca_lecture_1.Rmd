@@ -1,5 +1,5 @@
 ---
-title: "Class Activity, August 28"
+title: "Class Activity, January 17"
 output: 
   tufte::tufte_html:
     css: "lab.css"
@@ -8,7 +8,7 @@ output:
 link-citations: yes
 ---
 
-**Instruction:** Work with a neighbor to answer the following questions. Solutions will be posted on the course website. To get started, download the [class activity template](https://sta279-f23.github.io/class_activities/ca_lecture_1_template.qmd) file.
+**Instruction:** Work with a neighbor to answer the following questions. Solutions will be posted on the course website. To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_1_template.qmd) file.
 
 ## The birthday problem
 
