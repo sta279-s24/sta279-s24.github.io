@@ -1,0 +1,29 @@
+---
+title: "Class Activity, August 28"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instruction:** Work with a neighbor to answer the following questions. Solutions will be posted on the course website. To get started, download the [class activity template](https://sta279-f23.github.io/class_activities/ca_lecture_1_template.qmd) file.
+
+## The birthday problem
+
+Suppose we have a class of 30 students. What is the probability that there is at least one shared birthday?
+
+* Assume there are 365 days in a year
+* Assume that each day is equally likely as a birthday
+* Assume there are no multiple-birth siblings (e.g. twins, triplets, etc.) in the class
+
+1. Create a vector, `days`, to store the days of the year (numbered 1 to 365)
+
+2. Use the `sample` function to randomly choose birthdays for the class (shared birthdays are possible, so use `replace=TRUE` in the function!)
+
+3. Check the number of distinct birthdays (hints: `unique` returns the unique elements of a vector; `length` returns the length of a vector). Are there 30 distinct birthdays?
+
+4. Use a `for` loop to repeat the experiment $n_{sim} = 10000$ times, making sure to store the results. What is the probability of at least one shared birthday?
+
+5. Repeat the simulation with different class sizes. How many students do we need for the probability of a shared birthday to be approximately 50%?
