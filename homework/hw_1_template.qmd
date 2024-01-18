@@ -1,0 +1,15 @@
+---
+title: "Homework 1"
+format: html
+editor: source
+author: "Your name"
+---
+
+### Practice with for loops
+
+#### Question 1
+
+```{r}
+# code for question 1 goes here...
+```
+

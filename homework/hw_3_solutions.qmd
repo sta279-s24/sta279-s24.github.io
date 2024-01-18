@@ -1,0 +1,108 @@
+---
+title: "Homework 3 Solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+
+#### Question 1
+
+```{r}
+relu <- function(x){
+  return(ifelse(x > 0, x, 0))
+}
+
+relu(c(-1, 1))
+```
+
+#### Question 2
+
+```{r}
+leaky_relu <- function(x, a=0){
+  return(ifelse(x > 0, x, a*x))
+}
+```
+
+#### Question 3
+
+```{r}
+x <- list(rexp, list(rnorm), list(function(n){return(rchisq(n, 2))}))
+x[[1]](3)
+x[[2]][[1]](3)
+x[[3]][[1]](3)
+```
+
+#### Question 4
+
+```{r}
+library(tidyverse)
+library(Stat2Data)
+data("Kershaw")
+
+log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
+summary(log_reg)
+
+typeof(log_reg)
+```
+
+A list!
+
+#### Question 5
+
+```{r}
+length(log_reg)
+```
+
+#### Question 6
+
+```{r}
+log_reg[[1]]
+```
+
+The estimated coefficients of the model
+
+#### Question 7
+
+```{r}
+log_reg$aic
+```
+
+#### Question 8
+
+```{r}
+quant_resid <- function(mod){
+  # fitted values and response
+  yhat <- mod$fitted.values
+  y <- mod$y
+  
+  # sample from the uniform distribution, depending on y
+  u <- ifelse(y == 1, runif(length(y), 1-yhat, 1),
+              runif(length(y), 0, 1-yhat))
+  return(qnorm(u)) # quantile residuals
+}
+```
+
+**Note:** Assigment (`<-`) should be done *outside* an `ifelse` statement, not inside
+
+#### Question 9
+
+```{r}
+quant_resid_plot <- function(mod){
+  data.frame(fitted = mod$fitted.values,
+           residuals = quant_resid(mod)) |>
+  ggplot(aes(x = fitted, y = residuals)) +
+  geom_abline(slope = 0, intercept = 0, color = "blue") +
+  geom_point() +
+  labs(x = "Fitted values", y = "Residuals") +
+  theme_bw()
+}
+
+quant_resid_plot(log_reg)
+```
+
+
+
+

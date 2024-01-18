@@ -1,0 +1,169 @@
+---
+title: "Homework 9 solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+1.
+
+```{r, message=F, warning=F}
+library(rvest)
+library(tidyverse)
+
+read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+```
+
+2.
+
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\("),
+                       too_few = "align_start")
+```
+
+3.
+
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_4)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\("),
+                       too_few = "align_start")
+```
+
+There are several extra episodes which shouldn't be there, and which don't appear to have names. This is because of several "masterclass" episodes on that wikipedia page, which weren't part of the main show.
+
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_4)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  filter(str_detect(episode, ":")) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\s+\\("),
+                       too_few = "align_start")
+```
+
+5.
+
+```{r, message=F, warning=F}
+library(data.table)
+
+episode_list <- list()
+urls <- paste0("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_", 
+               2:13, ")")
+
+for(i in 2:13){
+  episodes <- read_html(urls[i-1]) |>
+    html_elements(".mw-headline[id^='Episode_']") |>
+    html_text2() 
+
+  episode_list[[i-1]] <- data.frame(episode = episodes) |> 
+    filter(str_detect(episode, ":")) |>
+    separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\s+\\("),
+                       too_few = "align_start") |>
+    mutate(series = i)
+}
+
+episodes <- rbindlist(episode_list)
+head(episodes)
+```
+
+6.
+
+```{r}
+episodes |>
+  count(episode_name) |>
+  filter(n == 1) |>
+  nrow()
+```
+
+7.
+
+```{r}
+episodes |>
+  count(episode_name, sort=T)
+```
+
+
+8.
+
+```{r}
+table_list <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements("table.wikitable.sortable") |>
+  html_table()
+```
+
+9.
+
+```{r}
+table_list[[1]]
+```
+
+10.
+
+
+```{r}
+table_list <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_5)") |>
+  html_elements("table.wikitable.sortable") |>
+  html_table()
+
+table_list[[1]]
+```
+
+12.
+
+```{r, echo=F}
+contestants <- list()
+for(i in 2:13){
+  contestants[[i-1]] <- read_html(urls[i-1]) |>
+    html_element("table.wikitable.sortable") |>
+    html_table() |>
+    rename(baker = starts_with("Baker"),
+           age = starts_with("Age"),
+           occupation = starts_with("occupation"),
+           hometown = starts_with("hometown")) |>
+    select(baker, age, occupation, hometown) |>
+    mutate(series = i)
+}
+
+contestants <- rbindlist(contestants)
+head(contestants)
+```
+
+
+13.
+
+```{r}
+contestants |>
+  group_by(series) |>
+  count()
+```
+
+14.
+
+```{r}
+contestants |>
+  group_by(series) |>
+  mutate(mean_age = mean(age)) |>
+  ggplot(aes(x = series, y = mean_age)) +
+  geom_point()
+```
+
+
+

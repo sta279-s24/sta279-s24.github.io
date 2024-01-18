@@ -14,5 +14,7 @@ January 17
 
 January 19
 : Simulation
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_2.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_2.pdf)
 
 : **Homework 1 released**{: .label .label-yellow }
+  : [HW 1](https://sta279-s24.github.io/homework/hw1.html)

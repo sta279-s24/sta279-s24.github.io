@@ -1,0 +1,363 @@
+---
+title: "Homework 2 Solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+Total points: 61
+
+**General grading notes:** 
+
+* They will write code in many different ways. As long as it works, they can receive credit for the question. If it doesn't work, but they made a reasonable attempt (at least some of the code has the right idea) then they receive partial credit.
+* If code is written particularly inefficiently, you don't need to take off points, but you can leave a comment on how to write it more simply
+
+#### Commenting code (2 pts)
+
+If they made a reasonable effort to comment code on at least some of the questions (particularly the simulations), then they get the 2 pts for the assignment. Otherwise, they do not receive the 2 pts.
+
+#### Setting a seed (2 pts)
+
+They get the 2 pts if they set a seed at the beginning of the document (or at least before any simulations). Otherwise, they do not receive the 2 pts.
+
+#### Naming (2 pts)
+
+Check that they used reasonable variable names on the assignment. If the names are generally terrible (e.g., `blah1` and `blah2` instead of `robotA` and `robotB`), they lose these 2 pts.
+
+#### Question 1 (8 pts)
+
+```{r}
+set.seed(111)
+
+n_people <- 100 # number of people in the theater
+nsim <- 1000 # number of simulations to estimate probability
+results <- rep(NA, nsim)
+seats <- 1:n_people
+
+for(i in 1:nsim){
+  # vector to store which seats are taken
+  # taken[i] is 0 when the seat is free
+  taken <- rep(0, n_people)
+  
+  # first person randomly chooses a seat
+  choice <- sample(seats, 1)
+  taken[choice] <- 1
+  
+  # now go through everyone else (except the last person)
+  for(j in 2:(n_people - 1)){
+    
+    # if the seat is free, take their seat. Otherwise,
+    # randomly choose a seat from the ones available
+    choice <- ifelse(taken[j] == 0, j, 
+                     sample(seats[taken == 0], 1))
+    taken[choice] <- 1
+  }
+  
+  results[i] <- taken[n_people]
+}
+
+mean(results)
+```
+
+**Notes:**
+
+* Make sure to use difference indices for the two `for` loops! Here I have used `i` and `j`
+* In the inner for loop, I used `2:(n_people - 1)` to do `2, 3, ..., 99`. This is *different* from `2:n_people - 1`, which would give us `1, 2, ..., 99`.
+* There are lots of other ways to code this question (e.g., you could use a counter to record the results, rather than a vector)
+* It is crucial to treat the first person separately from the rest
+
+**Grading:** 
+
+* 2 pts for correctly treating the first person differently than the others
+* 2 pts for correct logic with persons 2 through 99: if their seat is available, take it, otherwise choose a random seat
+* 1 pt for randomly choosing a seat from the *available* seats (e.g. `seats[taken == 0]`)
+* 2 pts for correctly checking whether the final person gets their seat
+* 1 pt for repeating the experiment many times to estimate a probability
+
+#### Question 2 (8 pts)
+
+```{r}
+# helper function so we can play the game for different values of a
+# input: the number of players who will be looking for slips
+# output: whether they all found their slips (TRUE) or not (FALSE)
+play_game <- function(a){
+  
+  # randomly assign slips to boxes
+  slips <- 1:a
+  boxes <- sample(slips, a, replace=F)
+  
+  # store whether each player saw their slip
+  # (could also use a counter here)
+  player_results <- rep(NA, a)
+  
+  for(player in 1:a){
+    # randomly choose a/2 boxes to open
+    opened_boxes <- sample(1:a, a/2, replace = F)
+    player_results[player] <- player %in% boxes[opened_boxes]
+  }
+  return(sum(player_results) == a)
+}
+
+a_values <- 2:20 # values of a to consider
+a_probs <- rep(NA, length(a_values)) # results for each a
+ngames <- 1000
+
+for(i in 1:length(a_values)){
+  game_results <- rep(NA, ngames)
+  
+  for(j in 1:ngames){
+    game_results[j] <- play_game(a_values[i])
+  }
+  a_probs[i] <- mean(game_results)
+}
+
+plot(a_values, a_probs)
+```
+
+As `a` increases, the probability of winning the game (all players seeing their slips) generally decreases. However, notice that the probability is slightly higher for even values of `a` rather than odd values of `a`. This is because each player gets to look in `a/2` boxes, and R rounds that down to the nearest integer in the `sample` function. So, when `a=3`, each player gets to look in 1 box, but when `a=4`, each player gets to look in two boxes!
+
+**Notes:**
+
+* a plot is not required here, but is helpful for viewing the relationship as `a` changes
+* writing a function is not required (you could just put the code in the inner `for` loop), but writing a function makes everything easier to read (and easier to modify in question 3!)
+* As always, there are other ways you could code this. E.g., you could have the function output the *probability* for each `a`, rather than the results of a single game.
+
+**Grading:** Note: we went over this question in class, so they really should have a correct solution
+
+* 1 pt for iterating over all $a$ players
+* 1 pt for randomly sampling $a/2$ boxes
+* 2 pts for correctly checking whether each player saw their slip
+* 1 pt for correctly checking whether the players collectively won the game (*everyone* saw their slip)
+* 1 pt for repeating the game many times to estimate a probability
+* 1 pt for repeating the process for different values of $a$
+* 1 pt for answering the question (does the probability change with $a$?)
+
+
+
+#### Question 3 (9 pts)
+
+All we have to modify is the `play_game` function here!
+
+```{r}
+# helper function so we can play the game for different values of a
+# input: the number of players who will be looking for slips
+# output: whether they all found/guessed their colors (TRUE) or not (FALSE)
+play_game_q3 <- function(a){
+  
+  # randomly assign slips to boxes, and randomly color the slips
+  slips <- 1:a
+  boxes <- sample(slips, a, replace=F)
+  slip_colors <- sample(c("red", "blue"), a, replace=T)
+  player_results <- rep(NA, a)
+  
+  for(player in 1:a){
+    
+    # randomly choose which boxes to open
+    opened_boxes <- sample(1:a, a/2, replace = F)
+    
+    # if the player sees their slip, they KNOW their color
+    # otherwise, they take a guess!
+    if(player %in% boxes[opened_boxes]){
+      player_results[player] <- TRUE
+    } else {
+      random_guess <- sample(c("red", "blue"), 1)
+      player_results[player] <- random_guess == slip_colors[player]
+    }
+  }
+  return(sum(player_results) == a)
+}
+
+a_values <- 2:20 # values of a to consider
+a_probs <- rep(NA, length(a_values)) # results for each a
+ngames <- 1000
+
+for(i in 1:length(a_values)){
+  game_results <- rep(NA, ngames)
+  
+  for(j in 1:ngames){
+    game_results[j] <- play_game(a_values[i])
+  }
+  a_probs[i] <- mean(game_results)
+}
+
+plot(a_values, a_probs)
+```
+
+**Grading:** 
+
+* 1 pt for iterating over all $a$ players
+* 1 pt for randomly sampling $a/2$ boxes
+* 1 pt for randomly assigning colors to the slips
+* 2 pts for correctly checking whether each player saw their slip
+* 2 pts for correctly implementing the color guessing if a player did *not* see their slip
+* 1 pt for correctly checking whether the players collectively won the game (*everyone* saw/guessed their color)
+* 1 pt for repeating the game many times to estimate a probability
+* Note: repeating for different values of $a$ is not required for this question
+
+#### Question 4 (3 pts)
+
+```{r}
+huber <- function(x){
+  return(ifelse(abs(x) <= 1, x^2, 2*abs(x) - 1))
+}
+```
+
+**Grading:** 
+
+* 1 pt for checking the correct condition ($|x| \leq 1$)
+* 1 pt for returning $x^2$ if $|x| \leq 1$
+* 1 pt for returning $2|x| - 1$ if $|x| > 1$
+* Note: the function does not technically have to be vectorized for question 4, but it *will* need to be vectorized for question 5
+
+#### Question 5 (2 pts)
+
+```{r}
+huber(c(0.5, 1, 2))
+```
+
+**Grading:** 2 pts if they get the correct answer. Otherwise no points.
+
+#### Question 6 (3 pts)
+
+There is a typo in this question. The original question reads
+
+$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2|x| - 1 & \text{if } |x| > a  \end{cases}$$
+
+Here is the code for that (incorrect) version:
+
+```{r}
+huber <- function(x, a=1){
+  return(ifelse(abs(x) <= a, x^2, 2*abs(x) - 1))
+}
+```
+
+The *correct* definition of $\psi_a(x)$ should be
+
+$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2a|x| - a^2 & \text{if } |x| > a  \end{cases}$$
+
+Here is code for the correct version:
+
+```{r}
+huber <- function(x, a=1){
+  return(ifelse(abs(x) <= a, x^2, 2*a*abs(x) - a^2))
+}
+```
+
+(For this homework assignment, either is ok).
+
+**Grading:** 
+
+* 1 pt for updating the condition to be $|x| \leq a$
+* 1 pt for including `a` as an argument for the function
+* 1 pt for setting `a=1` as the default
+
+#### Question 7 (3 pts)
+
+```{r}
+n <- 50
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, sd = 1)
+y <- 0.5 + 1*x + noise
+    
+# caclulate a CI and check if it contains beta1
+lm_mod <- lm(y ~ x)
+ci <- confint(lm_mod, "x", level = 0.95)
+ci[1] < 1 & ci[2] > 1
+```
+
+**Grading:**
+
+* 1 pt for correctly generating the data
+* 1 pt for correctly calculating the CI
+* 1 pt for checking whether the CI contains $\beta_1$
+
+#### Questions 8 -- 13
+
+A clean way to write the code for these questions is to write a function (`assess_coverage`) which takes both the sample size `n` and the standard deviation function `noise_sd`. The function is not required, but please suggest it in the comments if they did not use one.
+
+```{r}
+# inputs: 
+#   n: sample size
+#   nsim: number of simulations
+#   beta0: intercept
+#   beta1: slope
+#   level: confidence level (default 0.95, for a 95% CI)
+#   noise_sd: a function that takes in a vector x, and returns
+#             the standard deviation for each observation as a function of x
+#
+# output: confidence interval coverage
+assess_coverage <- function(n, nsim, beta0, beta1, level = 0.95, noise_sd){
+  results <- rep(NA, nsim)
+
+  for(i in 1:nsim){
+    # simulate the data
+    x <- runif(n, min=0, max=1)
+    noise <- rnorm(n, sd = noise_sd(x))
+    y <- beta0 + beta1*x + noise
+    
+    # caclulate a CI and check if it contains beta1
+    lm_mod <- lm(y ~ x)
+    ci <- confint(lm_mod, "x", level = level)
+    results[i] <- ci[1] < beta1 & ci[2] > beta1
+  }
+  return(mean(results))
+}
+```
+
+Next, we need to iterate over the different sample sizes and standard deviations. They are *not* required to use `for` loops here (it is acceptable for them to run the simulation separately for each configuration in questions 8 -- 12, and manually enter the results into a table). But I will use `for` loops and automatically generate the table of results.
+
+```{r}
+n_values <- c(10, 50, 1000)
+sd_functions <- list(function(x){return(1)},
+                     function(x){return(x)},
+                     function(x){return(x^2)})
+
+results <- matrix(NA, nrow=length(n_values), ncol = length(sd_functions))
+for(i in 1:length(n_values)){
+  for(j in 1:length(sd_functions)){
+    results[i,j] <- assess_coverage(n_values[i], nsim=1000, 
+                                    beta0 = 0.5, beta1 = 1, 
+                                    noise_sd = sd_functions[[j]])
+  }
+}
+
+results
+```
+
+
+Finally, we want to make the results table look nice! I will use the `kable` function from the `knitr` package here, which converts R output into Markdown for use in documents. I am adding the sample sizes as the initial column, then adding column names.
+
+```{r}
+knitr::kable(cbind(n_values, results),
+             col.names = c("n", "$\\sigma(X_i) = 1$", 
+                           "$\\sigma(X_i) = X_i$", 
+                           "$\\sigma(X_i) = X_i^2$"))
+```
+
+**Grading:**
+
+* **Question 8** (2 pts)
+  * 1 pt for repeating the simulation from question 7 10000 times
+  * 1 pt for reporting the fraction of CIs which contain $\beta_1$ (should be close to 95%)
+* **Question 9** (4 pts)
+  * 2 pts for correctly changing the standard deviation function
+  * 1 pt for repeating the simulation many times
+  * 1 pt for reporting the fraction of CIS which contain $\beta_1$ (should be slightly lower than 95%, maybe around 92% or so)
+* **Question 10** (4 pts)
+  * 2 pts for correctly changing the standard deviation function
+  * 1 pt for repeating the simulation many times
+  * 1 pt for reporting the fraction of CIS which contain $\beta_1$ (should be lower than 95%, maybe around 85% - 90% or so)
+* **Question 11** (2 pts)
+  * 1 pt for repeating the simulations with $n = 10$, for *each* standard devation function
+  * 1 pt for summarizing how (if at all) coverage changes
+* **Question 12** (2 pts)
+  * 1 pt for repeating the simulations with $n = 1000$, for *each* standard devation function
+  * 1 pt for summarizing how (if at all) coverage changes
+* **Question 13** (5 pts)
+  * 2 pts for the rough table (coverage results for each standard deviation function and sample size)
+  * 1 pt for adding the sample sizes
+  * 2 pts for column names
+  * Note: they do *not* need to generate the table programmatically (e.g. with `knitr`). It is ok if they manually create it with Markdown.
+  * Note: they do *not* need to use any LaTeX. The column names are acceptable as long as it is clear what the columns are

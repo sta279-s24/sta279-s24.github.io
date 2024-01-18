@@ -1,0 +1,36 @@
+---
+title: "Homework 5"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+### Fitting logistic regression models
+
+As you learned in STA 112, *linear* regression is used with quantitative responses, whereas *logistic* regression is used for binary responses ($Y_i = 0$ or $1$). In particular, if $\pi_i = P(Y_i = 1)$, then a simple logistic regression model (with explanatory variable $X_i$) is
+$$\log \left( \frac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 X_i$$
+
+As an example, consider a dataset of 3402 pitches thrown by MLB pitcher Clayton Kershaw in the 2013 season. The data is contained in the `Kershaw` data set, in the `Stat2Data` R package. We will focus on two specific variables for each pitch: 
+
+* `Result`: a negative result (a ball or a hit), or a positive result (a strike or an out)
+* `EndSpeed`: the speed at which the ball crossed home plate (in mph)
+
+Our goal is to investigate the relationship between pitch speed and result. We can fit a logistic regression model, with `EndSpeed` as the explanatory variable and `Result` as the response:
+
+```{r, eval=F}
+library(Stat2Data)
+data("Kershaw")
+
+log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
+summary(log_reg)
+```
+
+So far, so good! But how is the `glm` function calculating the estimates $\widehat{\beta}_0$ and $\widehat{\beta}_1$? As you can see from the output, an iterative process called *Fisher scoring* is used. Fisher scoring works like this:
+
+* Let $\beta = \begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix}$ (a vector containing both parameters, $\beta_0$ and $\beta_1$, which we want to estimate)
+* Let $\beta^{(0)}$ be some initial guess for $\beta$
+* Now we update our initial guess:
+$$\beta^{(1)} = \beta^{(0)} + \mathcal{I}^{-1}(\beta^{(0)}) \mathcal{U}(\beta^{(0)})$$
+* Continue 

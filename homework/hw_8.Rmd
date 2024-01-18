@@ -1,0 +1,236 @@
+---
+title: "Homework 8"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, November 3, 11:00am on Canvas
+
+**Instructions:** 
+
+* Download the [HW 8 template](https://sta279-f23.github.io/homework/hw_8_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Put your name in the file header
+* Click `Render`
+* Type all code and answers in the document (using `###` for section headings and `####` for question headings)
+* Render early and often to catch any errors!
+* When you are finished, submit the final rendered HTML to Canvas
+
+**Code guidelines:**
+
+* If a question requires code, and code is not provided, you will not receive full credit
+* You will be graded on the quality of your code. In addition to being correct, your code should also be easy to read
+  * No magic numbers
+  * Use descriptive names for your variables
+  * Set seeds where needed
+  * Comment code
+  * If a block of code is being called multiple times, put it in a function
+  
+**Resources:** In addition to the class notes and activities, I recommend reading the following resources:
+
+* [Chapter 15](https://mdsr-book.github.io/mdsr3e/15-sqlI.html) in *Modern Data Science with R*
+* [Chapter 22.5](https://r4ds.hadley.nz/databases#sql) in *R for Data Science* (2nd edition)
+
+
+# Practice with SQL
+
+In the first part of this assignment, you will continue practicing data wrangling with SQL. You will already be familiar with all of the ideas needed to complete these questions, but you might not have seen all of them for SQL. The book chapters listed above will be helpful.
+
+To practice with SQL, we will return to the `airlines` database we used in class.  Connect to the database and send a short query:
+
+```{r, eval=F}
+library(tidyverse)
+library(mdsr)
+library(DBI)
+
+db <- dbConnect_scidb("airlines")
+
+query <- "
+  SHOW TABLES;
+"
+dbGetQuery(db, query)
+```
+
+**Important note:** Make sure to always LIMIT the number of rows you return from your queries!
+
+
+:::{.question}
+#### Question 1
+
+Of all the destinations from Chicago O’Hare (ORD), which were the most common in 2010?
+
+:::
+
+:::{.question}
+#### Question 2
+
+Which airport had the highest average arrival delay time in 2010?
+
+:::
+
+:::{.question}
+#### Question 3
+
+Re-do Question 2, but this time display the full name of each airport in the output. (Hint: use a JOIN)
+
+:::
+
+:::{.question}
+#### Question 4
+
+Find all flights between JFK and SFO in 2010. How many were canceled? What percentage of the these flights were canceled?
+
+:::
+
+:::{.question}
+#### Question 5
+
+The following open-ended question may require more than one query and a thoughtful response. Based on data from 2012 only, and assuming that transportation to the airport is not an issue, would you rather fly out of JFK, LaGuardia (LGA), or Newark (EWR)? Why or why not?
+
+:::
+
+# k-means clustering
+
+## Unsupervised learning
+
+One common use of computing in statistics and data science is data cleaning and preparation; you have practiced this in the first part of the assignment in SQL, and in previous assignments with R and Python.
+
+Another common use is implementing statistical methods. For example, in a previous assignment you have written functions for the Huber loss and to fit a linear model.
+
+Methods like linear regression belong to a class of methods called *supervised* learning: we have a set of explanatory variables, a response variable, and we want to predict the response. However, sometimes we don't have a response variable, and we want to identify structure in a dataset. When there is no response variable, we are doing *unsupervised* learning. Examples of unsupervised learning include clustering and dimension-reduction, and you can learn a lot about unsupervised learning in STA 362 Multivariate Statistics.
+
+## Clustering
+
+One type of unsupervised learning is *clustering*, in which we group observations which look "similar" into *clusters*. For example, consider the `penguins` data from the `palmerpenguins` package, which contains information about three species of penguin: Adelie, Chinstrap, and Gentoo. If we plot flipper length and bill length, we can see differences between the species:
+
+```{r, warning=F, message=F}
+library(palmerpenguins)
+library(tidyverse)
+
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = species)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+But what if we didn't know there were separate species of penguin? We would still see potential groups in the data, we just wouldn't have labels for them:
+
+```{r, warning=F, message=F}
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+A clustering algorithm tries to systematically identify groups in the data. Often, the number of clusters $k$ is specified, and the algorithm clusters the observations into $k$ groups of points which look similar to each other, and different from the other groups. For example, here is the output of a basic k-means clustering algorithm with $k = 3$ on the flipper length and bill length measurements:
+
+
+```{r, warning=F, message=F}
+df <- penguins |>
+  select(flipper_length_mm, bill_length_mm) |>
+  drop_na() # remove missing values before clustering
+
+# cluster with k = 3
+clusters <- kmeans(df, 3, algorithm = "Lloyd", iter.max=20)$cluster
+
+df |>
+  mutate(cluster = as.factor(clusters)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = cluster)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+The resulting clusters align pretty closely with species, but not exactly.
+
+## The k-means algorithm
+
+There are a variety of ways to conduct k-means clustering. The most straightforward (though not necessarily the best) is Lloyd's algorithm:
+
+1. **Initialize:** Given a value of $k$, randomly select $k$ observations from the dataset to be the initial group means.
+2. **Calculate distances:** For every observation in the dataset, calculate the distance to each of the $k$ group means.
+3. **Assign groups:** Assign each observation to the nearest group mean.
+4. **Update means:** For each group, re-calculate the new group mean as the mean of the points assigned to that group in step 3. 
+5. **Iterate:** Repeat steps 2 - 4 until convergence (the group assignments stop changing) or until a maximum number of iterations has been reached.
+
+### Group means
+
+The k-means algorithm involves, as the name suggests, $k$ group means. Each group mean is a *vector*, containing the means of each variable for the groups. For example, consider the following matrix, which contains data for 6 observations on two variables, and the following vector of groups:
+
+```{r}
+example_mat <- matrix(c(1:12), nrow = 6, byrow = T)
+example_mat
+
+groups <- c(1, 1, 2, 2, 3, 3)
+
+# group mean for group 1
+colMeans(example_mat[groups == 1,])
+
+# group mean for group 2
+colMeans(example_mat[groups == 2,])
+
+# group mean for group 1
+colMeans(example_mat[groups == 3,])
+```
+
+The mean for group one is `c(2, 3)`, the mean for group 2 is `c(6, 7)`, and the mean for group 3 is `c(10, 11)`. Notice how we used the `colMeans` function to calculate means within each column of a matrix.
+
+### Calculating distances
+
+k-means requires us to define distances between observations. The typical distance measure used is Euclidean distance. Given vectors $x$ and $y$, Euclidean distance is given by $||x - y|| = \sqrt{\sum_i (x_i - y_i)^2}$.
+
+In R, we can use the `sweep` and `rowSums` functions to calculate distances with a matrix. For example, to find the distance between each observation in `example_mat` above and the group mean `c(2, 3)`:
+
+```{r}
+sqrt(rowSums(sweep(example_mat, 2, c(2, 3))^2))
+```
+
+Read the help information for the `sweep` and `rowSums` functions, and make sure you understand what they are doing.
+
+### Other helpful functions
+
+To implement the k-means algorithm, you may find two other functions helpful: `apply` and `which.min`.
+
+## Implementation
+
+In this assignment, you will write a k-means clustering function using Lloyd's algorithm as described above. 
+
+**Requirements:** 
+
+Your function should take three inputs:
+
+* The data to cluster
+* The number of clusters, $k$
+* The maximum number of iterations
+
+Your function should return a list containing two components:
+
+* The group assignments for each observation in the data
+* A matrix containing the $k$ group means
+
+Your function should be applicable to any dataset; do not write it just in terms of the penguins data.
+
+You may **not**:
+
+* Use any existing implementation of the k-means algorithm
+* Read any source code for other implementations of the algorithm
+* Use AI to generate an implementation of the algorithm
+
+
+:::{.question}
+#### Question 6
+
+Write a k-means clustering function with the above specifications, and demonstrate that it works with the penguins data.
+
+:::
+
+
+
+
+
+
+

@@ -1,0 +1,271 @@
+---
+title: "Homework 6"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, October 20, 11:00am on Canvas
+
+**Instructions:** 
+
+* Download the [HW 6 template](https://sta279-f23.github.io/homework/hw_6_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Put your name in the file header
+* Click `Render`
+* Type all code and answers in the document (using `###` for section headings and `####` for question headings)
+* Render early and often to catch any errors!
+* When you are finished, submit the final rendered HTML to Canvas
+
+**Code guidelines:**
+
+* If a question requires code, and code is not provided, you will not receive full credit
+* You will be graded on the quality of your code. In addition to being correct, your code should also be easy to read
+  * No magic numbers
+  * Use descriptive names for your variables
+  * Set seeds where needed
+  * Comment code
+  * If a block of code is being called multiple times, put it in a function
+  
+**Resources:** In addition to the class notes and activities, I recommend reading the following resources:
+
+* [Chapter 4](https://mdsr-book.github.io/mdsr3e/04-dataI.html) and [Chapter 6](https://mdsr-book.github.io/mdsr3e/06-dataII.html) in *Modern Data Science with R*
+* [Chapter 4](https://r4ds.hadley.nz/data-transform) and [Chapter 6](https://r4ds.hadley.nz/data-tidy) in *R for Data Science* (2nd edition)
+
+
+
+## Baseball data
+
+The `Teams` data in the `Lahman` package contains information on professional baseball teams since 1871. 
+
+:::{.question}
+#### Question 1
+
+Using the `Teams` data, create a plot of the number of home runs scored (`HR`) and allowed (`HRA`) by the Chicago Cubs (`teamID` CHN) in each season. Your plot should look like close to this:
+
+```{r, echo=F, message=F, warning=F}
+library(Lahman)
+library(tidyverse)
+
+Teams |>
+  filter(teamID == "CHN") |>
+  select(yearID, HR, HRA) |>
+  pivot_longer(-yearID,
+               names_to = "team",
+               values_to = "runs") |>
+  mutate(team = ifelse(team == "HR", "Cubs", "Opponent")) |>
+  ggplot(aes(x = yearID, y = runs, color = team)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Year", y = "Runs", color = "Team") +
+  theme_bw()
+```
+
+You may use whichever R functions you like to create the plot, but the axes and legend should be labeled as in the plot above.
+
+:::
+
+
+## Practice pivoting
+
+:::{.question}
+#### Question 2
+
+The code below creates a data frame called `df1`:
+
+```{r}
+df1 <- data.frame(
+  grp = c("A", "A", "B", "B"),
+  sex = c("F", "M", "F", "M"),
+  meanL = c(0.225, 0.47, 0.325, 0.547),
+  sdL = c(0.106, 0.325, 0.106, 0.308),
+  meanR = c(0.34, 0.57, 0.4, 0.647),
+  sdR = c(0.0849, 0.325, 0.0707, 0.274)
+)
+
+df1
+```
+
+Using `pivot_longer` and `pivot_wider`, reshape `df1` to produce the following output:
+
+```{r, echo=F}
+df1 |>
+  pivot_longer(-c(grp, sex),
+               names_to = "stat", values_to = "value") |>
+  pivot_wider(id_cols = grp,
+              names_from = c(sex, stat),
+              names_sep = ".",
+              values_from = value)
+```
+
+Remember that the `?` provides documentation in R. For example, running `?pivot_wider` in the console gives helpful information about the `pivot_wider` function.
+:::
+
+## Practice pivoting
+
+The code below creates a data frame called `df2`:
+
+```{r}
+df2 <- data.frame(id = rep(c(1, 2, 3), 2),
+                  group = rep(c("T", "C"), each=3),
+                  vals = c(4, 6, 8, 5, 6, 10))
+
+df2
+```
+
+An analyst wants to calculate the pairwise differences between the Treatment (T) and Control (C) values for each individual in this dataset. They use the following code:
+
+```{r}
+Treat <- filter(df2, group == "T")
+Control <- filter(df2, group == "C")
+all <- mutate(Treat, diff = Treat$vals - Control$vals)
+all
+```
+
+
+:::{.question}
+#### Question 3
+
+Verify that this code works for this example and generates the correct values of -1, 0, and -2. Describe two problems that might arise if the data set is not sorted in a particular order or if one of the observations is missing for one of the subjects.
+:::
+
+:::{.question}
+#### Question 4
+
+Provide an alternative approach to generate the `diff` variable, using `group_by` and `summarize` to produce the following output:
+
+```{r, echo=F}
+df2 |>
+  group_by(id) |>
+  summarize(diff = vals[group == "T"] - vals[group == "C"])
+```
+
+:::
+
+:::{.question}
+#### Question 5
+
+Provide an alternative approach to generate the `diff` variable that uses `pivot_wider` and `mutate` to produce the following output:
+
+```{r, echo=F}
+df2 |>
+  pivot_wider(id_cols = id,
+              names_from = group,
+              values_from = vals) |>
+  mutate(diff = T - C)
+```
+
+:::
+
+
+## Analyzing simulation results
+
+Your friend ran simulations to compare three different methods for calculating 95% confidence intervals for $\beta_1$ in a linear regression model. Their data is store in the file `sim_results.csv`, which can be imported into R as follows:
+
+```{r}
+sim_results <- read.csv("https://sta279-f23.github.io/homework/sim_results.csv")
+```
+
+
+The `sim_results` dataset is organized as follows:
+
+* The first column, `n`, records the sample size
+* For each method and sample size, your friend simulated 100 datasets and calculated a confidence interval. The results for method 1 are stored in columns `method1_1`, `method1_2`, ..., `method1_100` (with similar columns for methods 2 and 3). A 1 in a column indicates that the confidence interval captured $\beta_1$, while a 2 indicates the confidence interval did not capture $\beta_1$.
+
+:::{.question}
+#### Question 6
+
+Plot the observed coverage for each method (the fraction of times the confidence interval contained $\beta_1$) as a function of sample size. Your final plot should look as close as possible to this:
+
+```{r, echo=F}
+sim_results |>
+  mutate(across(-n, function(x) {2 - x})) |>
+  rowwise() |>
+  mutate(method1 = mean(c_across(contains("method1"))),
+         method2 = mean(c_across(contains("method2"))),
+         method3 = mean(c_across(contains("method3")))) |>
+  select(n, method1, method2, method3) |>
+  pivot_longer(-n, 
+               names_to = "method",
+               values_to = "coverage") |>
+  ggplot(aes(x = n, y = coverage, color = method)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Sample size (n)",
+       y = "Coverage",
+       color = "Method") +
+  theme_classic()
+```
+
+You will likely need to use some combination of the following functions: `pivot_longer`, `mutate`, `select`, `across`, `c_across`, `rowwise`
+
+:::
+
+
+## Fitting linear regression models
+
+The following code generates data $X_i \sim N(0, 1)$, $\varepsilon_i \sim N(0, 1)$, and 
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+with $\beta_0 = \beta_1 = 1$.
+
+```{r}
+n <- 100
+x <- rnorm(n)
+noise <- rnorm(n)
+y <- 1 + x + noise
+```
+
+To estimate $\beta_0$ and $\beta_1$, we can use the `lm` function:
+
+```{r}
+lm(y ~ x)
+```
+
+How are these estimated coefficients calculated? Mathematically, the vector of estimated coefficients $\widehat{\beta}$ is given by
+
+$$\widehat{\beta} = (X^T X)^{-1} X^T Y$$
+where $X$ is the *design matrix* and $Y$ is the vector of observed responses. For the model above,
+
+$$\widehat{\beta} = \begin{bmatrix}
+\widehat{\beta}_0 \\
+\widehat{\beta}_1
+\end{bmatrix} \hspace{0.5cm} X = \begin{bmatrix}
+1 & x_1 \\
+1 & x_2 \\
+1 & x_3 \\
+\vdots & \vdots \\
+1 & x_n
+\end{bmatrix} \hspace{0.5cm} Y = \begin{bmatrix}
+y_1 \\
+y_2 \\
+y_3 \\
+\vdots \\
+y_n
+\end{bmatrix}$$
+
+How would we do this math in R? Since $X$ is a matrix, and $\widehat{\beta}$ and $Y$ are both vectors, we want to work with *matrices* and *vectors* in R!
+
+* The vector `y` generated above already represents $Y$ (by default, vectors in R are column vectors)
+* We need to create the design matrix $X$, by adding a column of 1s to the `x` simulated above. The following code creates $X$:
+
+```{r, eval=F}
+X_mat <- cbind(1, x)
+```
+
+* Matrix multiplication in R is done with `%*%`. For example, if `A` and `B` are conformal matrices/vectors, then $AB$ would be calculated with `A %*% B`
+* Transposes are calculated with `t()`. E.g., $A^T$ is given by `t(A)`
+* Matrix inverses are calculated with `solve()`. E.g., $A^{-1}$ is given by `solve(A)`
+
+
+:::{.question}
+#### Question 7
+
+Using this information, write a function called `my_lm` which will calculate the estimated coefficients $\widehat{\beta}$ given a vector of responses `y` and a design matrix `X_mat`.
+:::
+
+
+
+

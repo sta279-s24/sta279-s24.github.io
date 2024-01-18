@@ -1,0 +1,183 @@
+---
+title: "Homework 1"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, January 26, 2:00pm on Canvas
+
+**Instructions:** 
+
+* Download the [HW 1 template](https://sta279-s24.github.io/homework/hw_1_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Put your name in the file header
+* Click `Render`
+* Type all code and answers in the document (using `###` for section headings and `####` for question headings)
+* Render early and often to catch any errors!
+* When you are finished, submit the final rendered HTML to Canvas
+
+**Code guidelines:**
+
+* If a question requires code, and code is not provided, you will not receive full credit
+* You will be graded on the quality of your code. In addition to being correct, your code should also be easy to read
+  * No magic numbers
+  * Use descriptive names for your variables
+  * Set seeds where needed
+  * Comment code
+  
+**Resources:** Homework 1 will give you practice with loops, `if` statements, and simulation. In addition to the class notes and activities, I recommend reading the following resources:
+
+* [Appendix B](https://mdsr-book.github.io/mdsr3e/B-appR.html) (overview of R) in *Modern Data Science with R*
+* [Chapter 3.1 -- 3.2](https://adv-r.hadley.nz/vectors-chap.html) (an introduction to vectors) in *Advanced R*
+* [Chapter 5](https://adv-r.hadley.nz/control-flow.html) (loops and choices) in *Advanced R*
+
+
+### Practice with `for` loops
+
+The purpose of this section is to give you some more practice working with for loops and sequences, which are useful tools for efficiently repeating a process many times. Here is an example for loop that calculates $\sqrt{x}$ for a sequence of numbers $x = 0, 0.1, 0.2, ..., 0.9, 1$:
+
+```r
+x <- seq(from=0, to=1, by=0.1)
+sqrt_x <- rep(0, length(x))
+for(i in 1:length(x)){
+  sqrt_x[i] <- sqrt(x[i])
+}
+sqrt_x
+```
+
+Below are some short practice questions to help you get more comfortable creating `for` loops.
+
+:::{.question}
+#### Question 1
+
+Modify the loop above so that instead of calculating $\sqrt{x}$, we calculate $x^{1/3}$.
+:::
+
+:::{.question}
+#### Question 2
+
+Modify the loop from Question 1 so that instead of considering $x = 0, 0.1, 0.2, ..., 0.9, 1$ (i.e. the numbers between 0 and 1, in increments of 0.1), we consider $x = 0, 0.05, 0.10, 0.15, ..., 1.95, 2$ (the numbers between 0 and 2, in increments of 0.05).
+:::
+
+**Note:** In Questions 1 and 2, you are applying a function to each element in a vector. Here you have used a `for` loop, because the purpose of these questions is to practice loops. However, `for` loops are not always the most efficient way to write code. Instead, many functions in R are *vectorized*: if you apply the function to a vector, it is applied to each element of the vector. For example,
+
+```r
+x <- seq(from=0, to=1, by=0.1)
+sqrt_x <- sqrt(x)
+sqrt_x
+```
+
+produces the same output as the `for` loop above.
+
+:::{.question}
+#### Question 3
+
+Re-write the code for Question 1, using vectorization instead of the `for` loop.
+:::
+
+
+### More practice with `for` loops
+
+Suppose we want to simulate a single draw from a normal distribution with mean 0 and standard deviation 1. The code in R is
+
+```r
+rnorm(n=1, mean=0, sd=1)
+```
+
+:::{.question}
+#### Question 4
+Fill in the following `for` loop to create a sample of 1000 draws from a normal distribution and plot a histogram of the results:
+
+```r
+n <- ...
+normal_sample <- rep(NA, n)
+for(i in 1:n){
+  normal_sample[i] <- ...
+}
+hist(normal_sample)
+```
+:::
+
+:::{.question}
+#### Question 5
+Look at the documentation for the `rnorm` function in R (you can get this with `?rnorm` in the console). Can you change the inputs to the `rnorm` function so that you take a sample of 1000 *without* using a loop?
+:::
+
+
+### Probability simulation
+
+Consider a tug-of-war competition for robots. In each match up, two robots take turns tugging the rope until the marker indicates that one of the robots won. The match starts with the marker at 0.
+
+* Robot A pulls the rope – use `runif(n=1,min=0,max=0.50)` to simulate the magnitude of the pull. Adding the simulated value to the marker position gives the new
+position of the marker.
+* Robot B pulls the rope in the opposite direction – use `runif(n=1,min=0,max=0.50)` to simulate the magnitude of the pull. Adding the simulated value to the marker position gives the new position of the marker.
+* The two robots continue taking turns until the marker moves past -0.50 or 0.50. *Note*: you should check whether the marker has passed-0.50 or 0.50 after *each* robot takes their turn!
+
+:::{.question}
+#### Question 6
+
+Write code that simulates 1000 robot tug of war battles.
+:::
+
+:::{.question}
+#### Question 7
+
+Report the results of 1000 simulated robot tug of war battles. Is the game fair? If not, what adjustments can be made to make it more fair?
+:::
+
+### Designing simulation studies
+
+Simulation is a widely-used tool in statistics to address a broad range of statistical questions. A simulation study allows us investigate these questions by simulating data under a variety of different conditions (e.g., different violations of the normality assumption), and seeing how the statistical methods behave under these different conditions.
+
+The paper ["Using simulation studies to evaluate statistical methods"](https://onlinelibrary.wiley.com/doi/10.1002/sim.8086) (Morris *et al.* 2019) provides a good overview of the important steps in designing a simulation study. Read sections 1 (Introduction) and 3 (Planning simulation studies), and then answer the following questions.
+
+:::{.question}
+#### Question 8
+
+What are some reasons researchers use simulation studies?
+:::
+
+:::{.question}
+#### Question 9
+
+According to the paper, what are the five components (abbreviated ADEMP) involved in planning a simulation study? Summarize each of the five components.
+:::
+
+### De-bugging practice
+
+Sometimes (often!) when we write code, it doesn't quite work the way we expect -- at least initially. Usually, this means we have made a mistake in our code, and we need to figure out where that mistake is. Your homework assignments will regularly include questions to practice identifying and understanding common errors.
+
+Consider the code below:
+
+```{r}
+set.seed(279)
+
+x <- 1:10
+y <- sample(x, 3, replace=F)
+x == y
+```
+
+When this code is run, you get a warning message. We want to find out *what* the message means, and *why* we are getting the warning.
+
+:::{.question}
+#### Question 10
+
+Search for the warning message online. What is causing this message to appear?
+:::
+
+:::{.question}
+#### Question 11
+
+Change the `sample` line of the code to 
+
+```r
+y <- sample(x, 2, replace=F)
+```
+
+Why does the warning message go away? Do you think it is still reasonable to compare `x` and `y` (`x == y`), even if you don't get a warning?
+:::
+
+
+

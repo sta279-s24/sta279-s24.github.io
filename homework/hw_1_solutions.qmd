@@ -1,0 +1,167 @@
+---
+title: "Homework 1 solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+### Practice with for loops
+
+#### Question 1
+
+```{r}
+x <- seq(from=0, to=1, by=0.1)
+cube_root_x <- rep(0, length(x))
+for(i in 1:length(x)){
+  cube_root_x[i] <- x[i]^(1/3)
+}
+cube_root_x
+```
+
+**Note:** the exponent needs to be in parentheses! E.g. `5^1/3` is not the same as `5^(1/3)`
+
+#### Question 2
+
+```{r}
+x <- seq(from=0, to=2, by=0.05)
+cube_root_x <- rep(0, length(x))
+for(i in 1:length(x)){
+  cube_root_x[i] <- x[i]^(1/3)
+}
+cube_root_x
+```
+
+#### Question 3
+
+```{r}
+x <- seq(from=0, to=1, by=0.1)
+cube_root_x <- x^(1/3)
+cube_root_x
+```
+
+
+#### Questions 4 and 5
+
+There are two different ways you could approach the problem here (the wording of the problem is slightly ambiguous). *I am fine with either approach*. 
+
+The simpler approach is to have the robots pull simultaneously, in which case the game is fair (each robot wins 50% of the time):
+
+```{r}
+# set a seed for reproducibility
+set.seed(321)
+
+nsim <- 1000 # number of games
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  # each game starts with the marker in the middle
+  marker <- 0
+  
+  # play until the marker crosses 0.5 or -0.5
+  while(abs(marker) < 0.5){
+    robotA <- runif(1, 0, 0.5)
+    robotB <- runif(1, 0, 0.5)
+    marker <- marker + robotA - robotB
+  }
+  
+  # check whether robot A wins
+  results[i] <- marker >= 0.5
+}
+
+# fraction of the time that robot A wins
+mean(results)
+```
+
+The slightly more complicated approach is to have the robots take *turns* pulling, and update the marker each time. Now there is a distinct advantage to robot A for pulling first:
+
+```{r}
+# set a seed for reproducibility
+set.seed(321)
+
+nsim <- 1000 # number of games
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  # each game starts with the marker in the middle
+  marker <- 0
+  
+  # first robot to pull is robot A
+  current_robot <- "A"
+  
+  # play until the marker crosses 0.5 or -0.5
+  while(abs(marker) < 0.5){
+    pull <- runif(1, 0, 0.5)
+    
+    # movement depends on whether current robot is A or B
+    marker <- ifelse(current_robot == "A", marker + pull, marker - pull)
+    
+    # switch robot for the next pull
+    current_robot <- ifelse(current_robot == "A", "B", "A")
+  }
+  results[i] <- marker >= 0.5
+}
+
+# fraction of the time that robot A wins
+mean(results)
+```
+
+In the first interpretation, the game is fair (and nothing needs to be done to make it more fair). In the second interpretation, the game is decidedly unfair, but could be made more fair by adjusting the starting position of the marker, or the strength with which robot B pulls.
+
+#### Question 6
+
+Uses for simulation studies include assessing the importance of assumptions, comparing different statistical methods, power calculations, and verifying the theoretical properties of a method (among others).
+
+#### Question 7
+
+* **Aims:** the goal of the simulation study
+* **Data generation:** how the data were simulated
+* **Estimand/target:** what we are estimating for each simulated dataset
+* **Methods:** the methods we use for model fitting, estimation, etc.
+* **Performance measures:** how we measure and compare the performance of our chosen methods
+
+#### Question 8
+
+* **Aims:** assess the importance of the normality assumption for simple linear regression models
+* **Data generation:** $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$, where
+  * $X_i \sim U(0, 1)$ (we could also use other distributions for $X_i$ here, but the choice of distribution doesn't really matter, and isn't what we are assessing)
+  * $\varepsilon_i$ has one of the following distributions (we want to compare performance for each of these distributions)
+    * $\varepsilon_i \sim N(0, 1)$
+    * $\varepsilon_i \sim Exp(1)$
+    * $\varepsilon_i \sim \chi^2_1$
+* **Estimand/target:** $\beta_1$ (the slope of the linear regression model)
+* **Methods:** Fit the linear model in R, calculate a 95% confidence interval for $\beta_1$
+* **Performance measures:** Actual coverage of the confidence intervals, for each distribution of $\varepsilon_i$
+
+Why do we do simulations like this? Well, think about what we might do with a linear regression model. A confidence interval is a pretty common use! If confidence intervals don't work when the normality assumption is violated, that's a problem. In particular:
+1. *If* $\varepsilon_i \sim N(0, \sigma^2)$ (the normality assumption is true), *then* confidence intervals for $\beta_1$ should have the desired coverage (95%)
+2. If coverage changes when $\varepsilon_i$ does *not* follow a normal distribution (e.g., if coverage is $< < 0.95$ when $\varepsilon_i \sim \chi^2_1$), then the normality assumption is important!
+3. If coverage is $\approx 0.95$ regardless of the distribution of $\varepsilon_i$, then the normality assumption is not very important (at least for the purpose of constructing confidence intervals)
+
+
+#### Question 9
+
+* **Aims:** Assess the importance of the constant variance assumption in simple linear regression models
+* **Data generation:** Data $(X_1, Y_1),...,(X_n, Y_n)$ will be generated according to the following model:
+  * $X_i \sim Uniform(0, 1)$
+  * $\varepsilon_i \sim N(0, \sigma_i^2)$
+  * $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$
+  * To assess the importance of the constant variance assumption, we will consider several different standard deviations for $\varepsilon_i$: $\sigma_i = 1$ (constant variance), $\sigma_i = X_i$, and $\sigma_i = X_i^2$ (the latter two incorporating a relationship between $\sigma_i$ and the explanatory variable $X_i$)
+* **Estimands:** We will estimate $\beta_1$ 
+* **Methods:** We will fit a linear regression model with the `lm` function in R, and calculate a 95% confidence interval for $\beta_1$
+* **Performance measures:** observed coverage of the confidence intervals in repeated simulations
+
+#### Question 10
+
+```{r}
+n <- 100
+beta0 <- 0.5
+beta1 <- 1
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, mean=0, sd=x)
+y <- beta0 + beta1*x + noise
+
+plot(x,y)
+```
+

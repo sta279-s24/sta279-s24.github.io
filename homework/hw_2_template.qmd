@@ -1,0 +1,19 @@
+---
+---
+---
+title: "Homework 2"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Your name"
+---
+
+### Probability simulation
+
+#### Question 1
+
+```{r}
+# code for question 1 goes here...
+```
+

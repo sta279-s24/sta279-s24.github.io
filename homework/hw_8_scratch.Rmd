@@ -1,0 +1,126 @@
+---
+title: "Untitled"
+author: "Your Name"
+date: "2023-10-25"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(mdsr)
+library(DBI)
+
+db <- dbConnect_scidb("airlines")
+
+query <- "
+  SHOW TABLES;
+"
+dbGetQuery(db, query)
+```
+
+```{sql connection=db}
+SELECT 
+  dest, SUM(1) as N
+FROM flights
+WHERE origin = 'ORD' AND year = 2010
+GROUP BY dest
+ORDER BY N DESC
+LIMIT 0, 5;
+```
+
+```{sql connection=db}
+SELECT 
+  dest, AVG(arr_delay) as mean_arr_delay
+FROM flights
+WHERE year = 2010
+GROUP BY dest
+ORDER BY mean_arr_delay DESC
+LIMIT 0, 5;
+```
+
+```{sql connection=db}
+SELECT 
+  name, AVG(arr_delay) as mean_arr_delay
+FROM flights
+JOIN airports ON flights.dest = airports.faa
+WHERE year = 2010
+GROUP BY dest
+ORDER BY mean_arr_delay DESC
+LIMIT 0, 5;
+```
+
+```{sql connection=db}
+SELECT 
+  cancelled
+FROM flights
+LIMIT 0, 5;
+```
+
+```{sql connection=db}
+SELECT 
+  SUM(cancelled) as N,
+  SUM(cancelled)/SUM(1) AS prop_cancelled
+FROM flights
+WHERE year = 2010 AND 
+  ((origin = 'JFK' AND dest = 'SFO') OR 
+  (origin = 'SFO' AND dest = 'JFK'))
+LIMIT 0, 5;
+```
+
+
+
+```{sql connection=db}
+SELECT origin, dest, AVG(arr_delay) 
+FROM flights 
+WHERE year = 2012 AND (origin = 'JFK' OR origin = 'EWR' OR origin = 'LGA') 
+GROUP BY origin, dest 
+LIMIT 0,10;
+```
+
+
+
+
+```{r}
+library(palmerpenguins)
+
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = species)) +
+  geom_point()
+
+dat <- penguins |>
+  select(flipper_length_mm, bill_length_mm) |>
+  drop_na() 
+
+k <- 3
+means <- dat |>
+  slice_sample(n = k)
+
+for(i in 1:20){
+  dists <- matrix(nrow = nrow(dat), ncol = k)
+
+  for(i in 1:k){
+    dists[,i] <- rowSums((sweep(as.matrix(dat), 2, as.matrix(means)[i,]))^2)
+  }
+  
+  groups <- apply(dists, 1, which.min)
+  means <- dat |>
+    mutate(group = groups) |>
+    group_by(group) |>
+    summarize_all(mean) |>
+    select(-group)
+}
+
+dat |>
+  mutate(group = as.factor(groups)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = group)) +
+  geom_point()
+
+dat |>
+  mutate(group = as.factor(blah$cluster)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = group)) +
+  geom_point()
+
+```
+
+
+

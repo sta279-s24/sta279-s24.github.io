@@ -1,0 +1,93 @@
+---
+title: "Homework 10 solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+1.
+
+```{r}
+Rcpp::cppFunction('NumericMatrix matrix_sumC(NumericMatrix A, NumericMatrix B){
+                  int nrow = A.rows();
+                  int ncol = A.cols();
+                  NumericMatrix C(nrow, ncol);
+                  
+                  for(int i = 0; i < nrow; ++i){
+                    for(int j = 0; j < ncol; ++j){
+                      C(i,j) = A(i,j) + B(i,j);
+                    }
+                  }
+                  
+                  return C;
+                  }')
+```
+
+```{r}
+a <- matrix(1:6, nrow=2)
+b <- matrix(5:10, nrow=2)
+a + b
+matrix_sumC(a, b)
+```
+
+2. 
+
+```{r}
+Rcpp::cppFunction('NumericMatrix matrix_transposeC(NumericMatrix A){
+                  int nrow = A.rows();
+                  int ncol = A.cols();
+                  NumericMatrix A_t(ncol, nrow);
+                  
+                  for(int i = 0; i < nrow; ++i){
+                    for(int j = 0; j < ncol; ++j){
+                      A_t(j,i) = A(i,j);
+                    }
+                  }
+                  
+                  return A_t;
+                  }')
+```
+
+```{r}
+a <- matrix(1:6, nrow=2)
+t(a)
+
+matrix_transposeC(a)
+```
+
+3.
+
+```{r}
+a <- matrix(rnorm(1000), nrow = 25)
+
+bench::mark(
+  t(a),
+  matrix_transposeC(a)
+)
+```
+
+4.
+
+```{r}
+Rcpp::cppFunction('double matrix_traceC(NumericMatrix A){
+                  int nrow = A.rows();
+                  double trace = 0;
+                  
+                  for(int i = 0; i < nrow; ++i){
+                    trace += A(i,i);
+                  }
+                  
+                  return trace;
+                  }')
+```
+
+```{r}
+a <- matrix(1:9, nrow=3)
+sum(diag(a))
+matrix_traceC(a)
+```
+
+
+

@@ -1,0 +1,407 @@
+---
+title: "Homework 7"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, October 27, 11:00am on Canvas
+
+**Instructions:** 
+
+* Download the [HW 7 template](https://sta279-f23.github.io/homework/hw_7_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Put your name in the file header
+* Click `Render`
+* Type all code and answers in the document (using `###` for section headings and `####` for question headings)
+* Render early and often to catch any errors!
+* When you are finished, submit the final rendered HTML to Canvas
+
+**Code guidelines:**
+
+* If a question requires code, and code is not provided, you will not receive full credit
+* You will be graded on the quality of your code. In addition to being correct, your code should also be easy to read
+  * No magic numbers
+  * Use descriptive names for your variables
+  * Set seeds where needed
+  * Comment code
+  * If a block of code is being called multiple times, put it in a function
+  
+**Resources:** In addition to the class notes and activities, I recommend reading the following resources:
+
+* [Chapter 4](https://mdsr-book.github.io/mdsr3e/04-dataI.html) and [Chapter 6](https://mdsr-book.github.io/mdsr3e/06-dataII.html) in *Modern Data Science with R*
+* [Chapter 4](https://r4ds.hadley.nz/data-transform) and [Chapter 6](https://r4ds.hadley.nz/data-tidy) in *R for Data Science* (2nd edition)
+
+
+# Reshaping data in Python
+
+The R code below creates a data frame called `df1`:
+
+```{r}
+df1 <- data.frame(
+  grp = c("A", "A", "B", "B"),
+  sex = c("F", "M", "F", "M"),
+  meanL = c(0.225, 0.47, 0.325, 0.547),
+  sdL = c(0.106, 0.325, 0.106, 0.308),
+  meanR = c(0.34, 0.57, 0.4, 0.647),
+  sdR = c(0.0849, 0.325, 0.0707, 0.274)
+)
+
+df1
+```
+
+Load the data into Python:
+
+```{python}
+import pandas as pd
+
+df1 = r.df1
+```
+
+
+:::{.question}
+#### Question 1
+
+Using `melt` and `pivot`, reshape `df1` to produce the following output:
+
+```{python, echo=F}
+(df1.melt(id_vars = ['grp', 'sex'], var_name = 'stat')
+    .pivot(columns = ['sex', 'stat'], values = 'value',
+           index = 'grp'))
+```
+:::
+
+## Practice pivoting
+
+The R code below creates a data frame called `df2`:
+
+```{r}
+df2 <- data.frame(id = rep(c(1, 2, 3), 2),
+                  group = rep(c("T", "C"), each=3),
+                  vals = c(4, 6, 8, 5, 6, 10))
+
+df2
+```
+
+Import the data into Python:
+
+```{python}
+df2 = r.df2
+```
+
+
+:::{.question}
+#### Question 2
+
+Use `pivot` and `assign` to reshape the data into the following (you may need to create an intermediate data frame, rather than doing all steps in a single chain):
+
+```{python, echo=F}
+df2_new = df2.pivot(index = 'id', columns = 'group', values = 'vals')
+df2_new = df2_new.assign(diff = df2_new['T'] - df2_new['C'])
+df2_new
+```
+
+:::
+
+
+## Analyzing simulation results
+
+Your friend ran simulations to compare three different methods for calculating 95% confidence intervals for $\beta_1$ in a linear regression model. Their data is store in the file `sim_results.csv`, which can be imported into Python as follows:
+
+```{python}
+sim_results = pd.read_csv("https://sta279-f23.github.io/homework/sim_results.csv")
+```
+
+
+The `sim_results` dataset is organized as follows:
+
+* The first column, `n`, records the sample size
+* For each method and sample size, your friend simulated 100 datasets and calculated a confidence interval. The results for method 1 are stored in columns `method1_1`, `method1_2`, ..., `method1_100` (with similar columns for methods 2 and 3). A 1 in a column indicates that the confidence interval captured $\beta_1$, while a 2 indicates the confidence interval did not capture $\beta_1$.
+
+Just like in the previous assignment, we want to plot coverage for each method as a function of sample size. The following questions will help guide you through one possible way of doing this in Python.
+
+:::{.question}
+#### Question 3
+
+Use the `melt` function to reshape the `sim_results` data into the following form:
+
+```{python, echo=F}
+sim_results.melt(id_vars = 'n', var_name = 'method', value_name = 'result')
+```
+
+:::
+
+
+:::{.question}
+#### Question 4
+
+Next, use `str.split` to split the `method` column from Question 3 into two columns (see the slides and class activities for examples):
+
+```{python, echo=F}
+sim_res_new = sim_results.melt(id_vars = 'n', var_name = 'method', value_name = 'result')
+sim_res_new[['method', 'iteration']] = sim_res_new['method'].str.split('_', expand=True)
+sim_res_new
+```
+
+:::
+
+
+:::{.question}
+#### Question 5
+
+Next, use `groupby` and `agg` to calculate coverage for each method, for each sample size:
+
+```{python, echo=F}
+import numpy as np
+
+(sim_res_new.groupby(by=['n', 'method'])
+            .agg(coverage = ('result', lambda x: np.mean(2 - x))))
+```
+
+*Hint:* In `agg`, you can pass user-defined functions. Consider a function that converts the results into 0s and 1s, and then takes the mean.
+
+:::
+
+### Plotting the results
+
+Finally, we want to plot the results! But before we do, we need to do just a bit more reformatting.
+
+Currently, your results should look like this:
+
+```{python, echo=F}
+sim_res_new = (sim_res_new.groupby(by=['n', 'method'])
+            .agg(coverage = ('result', lambda x: np.mean(2 - x))))
+sim_res_new
+```
+
+Let's suppose this new data frame is called `sim_res_new`, and we want to extract the sample sizes. Normally we would do `sim_res_new['n']`. But see what happens when we try that:
+
+```{python, eval=F}
+sim_res_new['n']
+```
+
+We get an error! Why? Because when we grouped and aggregated above, the columns that we grouped by became the *index* for our data frame. All pandas data frames have an index, though we haven't used it so far.
+
+For now, let's get rid of `n` and `method` as the index. One way is to add `as_index = False` to your `groupby` call. Another way is to add `.reset_index()` at the very end of your chain.
+
+
+
+:::{.question}
+#### Question 6
+
+Modify your code so the output now looks like this:
+
+```{python, echo=F}
+sim_res_new = sim_res_new.reset_index()
+sim_res_new
+```
+
+:::
+
+Finally, we can create a plot. We will use the `seaborn` and `matplotlib` libraries to create a line plot like in the previous homework.
+
+:::{.question}
+#### Question 7
+
+Use the following code to create the plot:
+
+```{python, eval=F}
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure()
+sns.lineplot(x="n", y="coverage", data=sim_res_new, hue="method", marker ='o')
+plt.show()
+```
+
+:::
+
+
+# A (very brief) intro to web scraping
+
+So far in this course, we have worked with data that we have generated ourselves (e.g. through simulations), or that other people have collected. But sometimes, that data isn't in a nice format for us to work with.
+
+Sadly, a lot of data in the world doesn't exist in an easily-downloaded CSV file. For example, suppose we want data on the outcome of basketball games in the NBA during the covid pandemic. We might use a site like BasketballReference.com:
+
+[https://www.basketball-reference.com/leagues/NBA_2021_games-december.html](https://www.basketball-reference.com/leagues/NBA_2021_games-december.html)
+
+There's a "Share and Export" button on the page. But if we want to download the data for multiple months, then it would be a pain to manually download each table and import it into R.
+
+Instead, we can download the data directly from the website! Websites are built with Hyper Text Markup Language (HTML), and we can extract information from the HTML directly. To do this, we will use the `rvest` package in R (which also loads the `xml2` package).
+
+## Reading the html file
+
+Run the following code in R to read the html file from the url:
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(rvest)
+
+december <- read_html("https://www.basketball-reference.com/leagues/NBA_2021_games-december.html")
+december
+```
+
+Looking at the output, it is hard to find what we're looking for. Fortunately, we know what we want: a table! We can use the `html_element` function to extract any tables from the file, and then convert it to a data frame with the `html_table` function:
+
+```{r}
+december |>
+  html_element("table") |>
+  html_table(header = TRUE, fill = TRUE)
+```
+
+Now, what if we wanted to extract a *different* month? No problem! Just change the url:
+
+```{r}
+read_html("https://www.basketball-reference.com/leagues/NBA_2021_games-january.html") |>
+  html_element("table") |>
+  html_table(header = TRUE, fill = TRUE)
+```
+
+## Iterating over multiple months
+
+Instead of doing each month by hand, let's use a `for` loop to iterate over multiple months. 
+
+
+:::{.question}
+#### Question 8
+
+Create a vector, `months`, containing the months from December to July, in lower case:
+
+```{r, echo=F}
+months <- tolower(lubridate::month(c(12, 1:7), label=T, abbr=F))
+```
+
+```{r}
+months
+```
+
+
+You can do this manually, but the `month` function in the `lubridate` package might be easier.
+
+:::
+
+
+:::{.question}
+#### Question 9
+
+Next, we want to make a vector containing all of the urls. This means we need to insert each month into the url in turn. We will use the `paste0` function in R:
+
+```{r}
+urls <- paste0("https://www.basketball-reference.com/leagues/NBA_2021_games-",
+               months, ".html")
+```
+
+Run the code to create the vector of urls.
+
+:::
+
+Now that we have our urls, let's iterate.
+
+
+:::{.question}
+#### Question 10
+
+Use a `for` loop to extract the results for each month from BasketballReference.com, and store each resulting dataframe in a list.
+
+For example, your output might look like this:
+
+```{r, echo=F}
+df_list <- list()
+
+for(i in 1:length(urls)){
+  df_list[[i]] <- read_html(urls[i]) |>
+    html_element("table") |>
+    html_table(header = TRUE, fill = TRUE)
+}
+```
+
+```{r}
+df_list[[1]]
+df_list[[2]]
+```
+
+:::
+
+
+:::{.question}
+#### Question 11
+
+Finally, let's combine all the data frames in our list into a single data frame:
+
+```{r, message=F, warning=F}
+library(data.table)
+
+nba <- rbindlist(df_list)
+```
+:::
+
+Now, looking at our output, we can see that there are *two* columns with the name `PTS`:
+
+```{r}
+colnames(nba)
+```
+
+We will need to rename the columns to prevent issues in R:
+
+```{r}
+colnames(nba) <- c("date", "start", "visitor", "visitor_pts", "home", "home_pts",
+                   "v1", "v2", "attend", "arena", "notes")
+```
+
+I have kept the names of a couple of the columns as `v1` and `v2` for now, since we will drop those columns anyway.
+
+Now that we have our data, let's start to analyze it. We would like to know whether having more fans in attendance gives the home team an advantage. However, there is another issue to fix:
+
+```{r}
+class(nba$attend)
+```
+
+Currently, attendance is a character! We need to make it a number before we can do statistics. This requires two steps: removing the commas from the attendances (R won't understand them), then converting the attendances to a numeric vector:
+
+```{r}
+nba <- nba |>
+  mutate(attend = as.numeric(gsub(",", "", attend)))
+```
+
+Finally, let's calculate some summary statistics and make some plots.
+
+:::{.question}
+#### Question 12
+
+Create a plot showing the relationship between attendance and the difference in scores between the home team and the visiting team (we may hypothesize that when the crowd is bigger, the home team will perform better).
+:::
+
+:::{.question}
+#### Question 13
+
+Create a plot showing how the fraction of games with 0 attendees changed over the course of the season.
+:::
+
+```{r, include=F}
+nba |>
+  mutate(diff = home_pts - visitor_pts,
+         attend = ifelse(attend == 0, "no fans", "some fans")) |>
+  ggplot(aes(x = attend, y = diff)) +
+  geom_boxplot() 
+
+nba |>
+  mutate(diff = home_pts - visitor_pts) |>
+  ggplot(aes(x = attend, y = diff)) +
+  geom_point() +
+  geom_smooth()
+
+nba |>
+  mutate(month = lubridate::month(lubridate::mdy(date), label=T)) |>
+  group_by(month) |>
+  summarize(frac_0 = mean(attend == 0, na.rm=T)) |>
+  ggplot(aes(x = month, y = frac_0)) +
+  geom_point() +
+  geom_line()
+```
+
+
+
+
+
+

@@ -1,0 +1,145 @@
+---
+title: "Lecture 2"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+## Agenda
+
+* HW 1 released on course website, due next Friday
+* Continuing intro to probability simulations
+* Time permitting: start HW 1 in class
+
+## Warm-up question
+
+-   A roulette wheel has 38 slots numbered 00, 0, and 1--36. Two are green, 18 are red, and 18 are black.
+-   If a gambler bets based on color, the return on a \$1 bet is \$2
+-   A gambler has \$50, and will continuously bet \$1 on red until they double their money (have \$100) or lose the money they came with
+-   What is the probability the gambler doubles their money?
+
+**Question:** Without calculating probabilities, how could you design an experiment to estimate this probability?
+
+## Designing an experiment
+
+## Step 1: representing the roulette wheel
+
+```{r, echo=T}
+wheel <- c(rep("green", 2), rep("black", 18), rep("red", 18))
+
+wheel
+```
+
+-   `rep` repeats a value a specified number of times
+-   `c()` combines vectors into a single vector
+
+## Step 2: spin the wheel!
+
+```{r, echo=T}
+spin <- sample(wheel, size = 1)
+
+spin
+```
+
+## Step 3: change in money
+
+```{r, echo=T}
+money <- 50
+spin <- sample(wheel, size = 1)
+
+if(spin == "red"){
+  money <- money + 1
+} else {
+  money <- money - 1
+}
+
+spin
+money
+```
+
+-   if the result was red, gain a dollar
+-   otherwise, lose a dollar
+
+## Step 3: change in money
+
+Another way of writing the conditional statement:
+
+```{r, echo=T}
+money <- 50
+spin <- sample(wheel, size = 1)
+
+money <- ifelse(spin == "red", money + 1, money - 1)
+
+spin
+money
+```
+
+## Step 4: keep spinning
+
+The gambler continues to bet until they have \$0 or \$100.
+
+**Question:** Is a `for` loop appropriate for iterating the betting process?
+
+## Step 4: keep spinning
+
+```{r, echo = T}
+money <- 50 # starting money
+
+while(money > 0 & money < 100){
+  spin <- sample(wheel, size = 1)
+  money <- ifelse(spin == "red", money + 1, money - 1)
+}
+
+money
+```
+
+-   `while` loop: repeat the process until the condition is true
+
+## Step 5: repeat the process
+
+```{r, echo = T, eval=F}
+set.seed(279)
+
+nsim <- 1000
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  money <- 50 # starting money
+
+  while(money > 0 & money < 100){
+    spin <- sample(wheel, size = 1)
+    money <- ifelse(spin == "red", money + 1, money - 1)
+  }
+  
+  results[i] <- ...
+}
+```
+
+-   What should I check at each iteration?
+
+## Step 5: repeat the process
+
+```{r, echo = T}
+set.seed(279)
+
+nsim <- 1000
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  money <- 50 # starting money
+
+  while(money > 0 & money < 100){
+    spin <- sample(wheel, size = 1)
+    money <- ifelse(spin == "red", money + 1, money - 1)
+  }
+  
+  results[i] <- money == 100
+}
+
+mean(results)
+```
+
+

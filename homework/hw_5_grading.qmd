@@ -1,0 +1,162 @@
+---
+title: "Homework 5 Solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+Total: 45 pts
+
+**General grading notes:** 
+
+* They will write code in many different ways. As long as it works, they can receive credit for the question. If it doesn't work, but they made a reasonable attempt (at least some of the code has the right idea) then they receive partial credit.
+* If code is written particularly inefficiently, you don't need to take off points, but you can leave a comment on how to write it more simply
+
+#### Naming (2 pts)
+
+Check that they used reasonable variable names on the assignment. If the names are generally terrible (e.g., `blah1` and `blah2` instead of `robotA` and `robotB`), they lose these 2 pts.
+
+
+#### Question 1 (4 pts)
+
+```{r, message=F, warning=F}
+library(nycflights13)
+library(tidyverse)
+library(mdsr)
+
+flights |>
+  group_by(origin) |>
+  summarize(N = n()) |>
+  arrange(desc(N))
+```
+
+**Grading:** 2 pts for grouping by origin, 2 pts for correctly summarizing (counting the number of rows with `n()`). Note that the `n()` function does *not* take any arguments.
+
+#### Question 2 (5 pts)
+
+```{r}
+flights |>
+  group_by(month) |>
+  summarize(prop_cancelled = mean(is.na(dep_time))) |>
+  arrange(desc(prop_cancelled))
+```
+
+**Grading:** 2 pts for grouping by month, 2 pts for correctly summarizing (calculating the fraction of delays using `is.na(dep_time)`), 1 pt for reporting the month with the highest proportion of delayed flights
+
+#### Question 3 (3 pts)
+
+Two ways of approaching this question: either using `head`, or using `slice_max`:
+
+```{r}
+flights |>
+  count(tailnum) |>
+  arrange(desc(n)) |>
+  head()
+```
+
+```{r}
+flights |>
+  count(tailnum) |>
+  slice_max(order_by = n, 
+            n = 5)
+```
+Answer: tail number N725MQ
+
+**Grading:** 2 pts for counting the number of rows for each plan, 1 pt for reporting the plane with the most flights
+
+#### Question 4 (7 pts)
+
+```{r}
+flights |>
+  filter(tailnum == "N725MQ") |>
+  mutate(week = week(time_hour)) |>
+  group_by(week) |>
+  summarize(count = n()) |>
+  ggplot(aes(x = week, y = count)) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  labs(x = "Week", y = "Number of trips")
+```
+
+**Grading:** 1 pt for filtering for the correct plane, 2 pts for calculating the week numbers, 2 pts for calculating the number of flights for each week, 2 pts for the plot
+
+#### Question 5 (5 pts)
+
+```{r}
+flights |>
+  group_by(carrier) |>
+  summarize(mean_delay = mean(arr_delay, na.rm=T)) |>
+  arrange(desc(mean_delay))
+```
+
+**Grading:** 1 pt for grouping by carrier, 2 pts for summarizing to calculate mean delay (could be either arrival or departure delay), 1 pt for handling missing values, 1 pt for reporting the carrier with the worst delays
+
+#### Question 6 (2 pts)
+
+We *cannot* disentangle bad carriers from bad airports (at least for some carriers), because there are several carriers which only fly from one airport:
+
+```{r}
+table(flights$origin, flights$carrier)
+```
+**Grading:** 2 pts for a reasonable interpretation
+
+#### Question 7 (5 pts)
+
+```{r}
+violations_summary <- Violations |>
+  drop_na(zipcode, score, boro) |>
+  filter(boro == "MANHATTAN") |>
+  group_by(zipcode) |>
+  summarize(med_score = median(score),
+            N = n()) |>
+  filter(N >= 50)
+```
+
+**Grading:** 1 pt for removing missing values, 1 pt for keeping only Manhattan, 1 pt for grouping by zipcode, 1 pt for calculating median score in each zipcode, 1 pt for only keeping zipcodes with at least 50 inspections
+
+#### Question 8 (2 pts)
+
+```{r}
+violations_summary |>
+  ggplot(aes(x = N, y = med_score)) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Number of inspections",
+       y = "Median inspection score")
+```
+
+**Grading:** 2 pts for using a scatterplot with the correct variables
+
+#### Question 9 (4 pts)
+
+```{python}
+import pandas as pd
+
+flights_py = r.flights
+
+flights_py.groupby(by = 'carrier').agg({'arr_delay': 'mean'})
+```
+
+**Grading:** 2 pts for grouping by carrier, 2 pts for calculating mean delay (either arrival or departure)
+
+#### Question 10 (6 pts)
+
+```{r}
+vio_py <- Violations |>
+  mutate(score = as.numeric(score))
+```
+
+
+```{python}
+vio_py = r.vio_py
+
+vio_py.loc[vio_py['boro'] == "MANHATTAN"].dropna(
+  subset = ['zipcode', 'score', 'boro']).groupby(by = 'zipcode').agg(
+    {'score': 'median', 'zipcode': 'count'}).query('zipcode >= 50')
+```
+
+**Grading:** 1 pt for convering score to numeric before exporting to Python, 1 pt for removing missing values, 1 pt for keeping only Manhattan, 1 pt for grouping by zipcode, 1 pt for calculating median score in each zipcode, 1 pt for only keeping zipcodes with at least 50 inspections
+

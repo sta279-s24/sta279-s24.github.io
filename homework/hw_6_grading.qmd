@@ -1,0 +1,179 @@
+---
+title: "Homework 6 Solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+Total: 34 pts
+
+**General grading notes:** 
+
+* They will write code in many different ways. As long as it works, they can receive credit for the question. If it doesn't work, but they made a reasonable attempt (at least some of the code has the right idea) then they receive partial credit.
+* If code is written particularly inefficiently, you don't need to take off points, but you can leave a comment on how to write it more simply
+
+#### Naming (2 pts)
+
+Check that they used reasonable variable names on the assignment. If the names are generally terrible (e.g., `blah1` and `blah2` instead of `robotA` and `robotB`), they lose these 2 pts.
+
+
+#### Question 1 (4 pts)
+
+```{r, message=F, warning=F}
+library(Lahman)
+library(tidyverse)
+
+Teams |>
+  filter(teamID == "CHN") |>
+  select(yearID, HR, HRA) |>
+  pivot_longer(-yearID,
+               names_to = "team",
+               values_to = "runs") |>
+  mutate(team = ifelse(team == "HR", "Cubs", "Opponent")) |>
+  ggplot(aes(x = yearID, y = runs, color = team)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Year", y = "Runs", color = "Team") +
+  theme_bw()
+```
+
+**Grading:** They don't have to use ggplot, but their output needs to look close to the plot on the assignment.
+
+* 1 pt for year on x-axis
+* 1 pt for runs on y-axis
+* 1 pt for separate lines for cubs and opponent
+* 1 pt for labeling (colors and axes)
+
+#### Question 2 (5 pts)
+
+```{r}
+df1 <- data.frame(
+  grp = c("A", "A", "B", "B"),
+  sex = c("F", "M", "F", "M"),
+  meanL = c(0.225, 0.47, 0.325, 0.547),
+  sdL = c(0.106, 0.325, 0.106, 0.308),
+  meanR = c(0.34, 0.57, 0.4, 0.647),
+  sdR = c(0.0849, 0.325, 0.0707, 0.274)
+)
+
+df1 |>
+  pivot_longer(-c(grp, sex),
+               names_to = "stat", values_to = "value") |>
+  pivot_wider(id_cols = grp,
+              names_from = c(sex, stat),
+              names_sep = ".",
+              values_from = value)
+```
+
+**Grading:**
+
+* 3 pts for the right dimensions (2 rows, 9 columns) and columns
+* 1 pt for the right column names (e.g., `F.meanL`, *not* `F_meanL` or `meanL.F`, etc.)
+* 1 pt for the correct ordering
+
+
+#### Question 3 (2 pts)
+
+```{r}
+df2 <- data.frame(id = rep(c(1, 2, 3), 2),
+                  group = rep(c("T", "C"), each=3),
+                  vals = c(4, 6, 8, 5, 6, 10))
+
+Treat <- filter(df2, group == "T")
+Control <- filter(df2, group == "C")
+all <- mutate(Treat, diff = Treat$vals - Control$vals)
+all
+```
+
+If the rows for the treatments and controls aren't in the same order, then `Treat$vals - Control$vals` won't be subtracting values for the same individuals. If there are missing values, then `Treat$vals` and `Control$vals` could have different lengths, which will cause issues.
+
+**Grading:** Answers may vary. 2 pts for a reasonable, correct answer that lists two possible issues.
+
+#### Question 4 (3 pts)
+
+```{r}
+df2 |>
+  group_by(id) |>
+  summarize(diff = vals[group == "T"] - vals[group == "C"])
+```
+
+**Grading:** 1 pt for correct output, 2 pts for using `group_by` and `summarize`
+
+
+#### Question 5 (3 pts)
+
+```{r}
+df2 |>
+  pivot_wider(id_cols = id,
+              names_from = group,
+              values_from = vals) |>
+  mutate(diff = T - C)
+```
+
+**Grading:** 1 pt for correct output, 2 pts for using `pivot_wider` and `mutate`
+
+#### Question 6 (8 pts)
+
+```{r}
+sim_results <- read.csv("https://sta279-f23.github.io/homework/sim_results.csv")
+
+sim_results |>
+  mutate(across(-n, function(x) {2 - x})) |>
+  rowwise() |>
+  mutate(method1 = mean(c_across(contains("method1"))),
+         method2 = mean(c_across(contains("method2"))),
+         method3 = mean(c_across(contains("method3")))) |>
+  select(n, method1, method2, method3) |>
+  pivot_longer(-n, 
+               names_to = "method",
+               values_to = "coverage") |>
+  ggplot(aes(x = n, y = coverage, color = method)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Sample size (n)",
+       y = "Coverage",
+       color = "Method") +
+  theme_classic()
+```
+
+**Grading:** This can be done in several different ways. What is most important is that they produce the correct output.
+
+* 4 pts for correctly calculating the coverage for each method, for each sample size
+* 1 pt for sample size on x-axis
+* 1 pt for coverage on y-axis
+* 1 pt for coloring by method (they don't have to use the same colors)
+* 1 pt for labels (methods and axes)
+
+#### Question 7 (7 pts)
+
+```{r}
+# fit a linear regression model and return estimated coefficients
+# X_mat: design matrix for the model
+# y: vector of observed responses
+my_lm <- function(X_mat, y){
+  return(solve(t(X_mat) %*% X_mat) %*% t(X_mat) %*% y)
+}
+
+# simulate some data
+set.seed(45)
+n <- 100
+x <- rnorm(n)
+noise <- rnorm(n)
+y <- 1 + x + noise
+
+# fit the regression model with the lm function
+lm(y ~ x)
+
+# compare the output with our function
+X_mat <- cbind(1, x)
+my_lm(X_mat, y)
+```
+
+**Grading:**
+
+* 2 pts for writing a function (lose these points if they don't put their code in a function)
+* 2 pts for taking the correct arguments: must be two arguments, the design matrix and the response vector
+* 3 pts for correctly calculating the estimated coefficients in the function
+

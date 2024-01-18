@@ -1,0 +1,18 @@
+---
+---
+---
+title: "Homework 3"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Your name"
+---
+
+
+#### Question 1
+
+```{r}
+# code for question 1 goes here...
+```
+

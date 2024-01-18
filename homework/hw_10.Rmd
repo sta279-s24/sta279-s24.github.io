@@ -1,0 +1,74 @@
+---
+title: "Homework 10"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, December 1, 11:00am on Canvas
+
+**Instructions:** 
+
+* Download the [HW 10 template](https://sta279-f23.github.io/homework/hw_8_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Put your name in the file header
+* Click `Render`
+* Type all code and answers in the document (using `###` for section headings and `####` for question headings)
+* Render early and often to catch any errors!
+* When you are finished, submit the final rendered HTML to Canvas
+  
+**Resources:** In addition to the class notes and activities, I recommend reading the following resources:
+
+* [Chapter 25](https://adv-r.hadley.nz/rcpp.html) in *Advanced R* (2nd edition)
+
+
+# Writing R code in C++ 
+
+Compared to R, C++ is often more efficient for operations that involve iteration (e.g. with for loops). In this assignment, you will practice writing functions in C++.
+
+## Matrix sums
+
+Let $A$ be an $n \times m$ matrix ($n$ rows and $m$ columns), and $B$ an $n \times m$ matrix. The sum $C = A + B$ is a matrix of size $n \times m$, with entries
+
+$C_{ij} = A_{ij} + B_{ij}$
+
+:::{.question}
+#### Question 1
+
+Write a function in C++ called `matrix_sumC` which takes in two `NumericMatrix` objects (of the same size), and returns their sum (another `NumericMatrix`).
+
+:::
+
+## Matrix transposes
+
+
+Let $A$ be an $n \times m$ matrix ($n$ rows and $m$ columns). The **transpose** $A^T$ is an $m \times n$ matrix with entries $(A^T)_{ij} = A_{ji}$ (i.e., we switch the rows and columns).
+
+
+:::{.question}
+#### Question 2
+
+Write a function in C++ called `matrix_transposeC` which takes in a `NumericMatrix` object, and returns its transpose (another `NumericMatrix`).
+
+:::
+
+:::{.question}
+#### Question 3
+
+Compare the speed of `matrix_transposeC` to the `t()` function in R.
+
+:::
+
+## Matrix trace
+
+Let $A$ be an $n \times n$ square matrix (same number of rows and columns). The **trace** of $A$ is given by $tr(A) = \sum_{i=1}^n A_{ii}$.
+
+:::{.question}
+#### Question 4
+
+Write a function in C++ called `matrix_traceC` which takes in a square `NumericMatrix` object, and returns its trace (a `double`).
+
+:::
+
+

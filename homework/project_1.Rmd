@@ -1,0 +1,555 @@
+---
+title: "Class Project"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Thursday, December 7, 11:00am on Canvas
+
+
+# Overview
+
+Statistics often involves fitting models, and statistical software is created to fit these models. In this project, you will write your own functions to fit linear and generalized linear models.
+
+I am not expecting you to be familiar with all of the methods described in this project, but you will need to implement them all. If you use computing in your future careers -- whether they are academic or in industry -- you will very likely need to learn and implement a method you are unfamiliar with.
+
+**Requirements:** 
+
+* You will write a function, `my_glm`, and any other helper functions needed, to fit linear, logistic, and Poisson regression models
+* You will submit your code, and examples of your function in action
+
+**Advice:**
+
+* Start small. For example, start with just the estimated coefficients for linear regression. Then add functionality for logistic and Poisson regression. Then add p-value and deviance calculations.
+* Check that your code works as you go. Do not wait until the end to test your code!
+
+**Rules:**
+
+* This project *must* be completed individually. You may not work with other students in any way, or share any code or help.
+* You are welcome to use the class resources and textbooks. You may also use the internet (Stack Exchange, Stack Overflow, etc.) for guidance on small pieces of your code. For example, you may look up R documentation on parsing formulas.
+* However, you may *not* search for existing implementations of any functions needed for this project. For example, you may not use any existing implementations (or their source code) of logistic regression, Fisher scoring, generalized linear models, etc.
+* You may not use Chat GPT or other AI tools for any part of this project. 
+
+Any violations of these rules will result in a 0 on the project.
+
+# Background: Linear and generalized linear models
+
+## Linear models
+
+In STA 112, you learned about *linear models*. For example,
+
+$$Y_i = \beta_0 + \beta_1 X_{i,1} + \beta_2 X_{i,2} + \cdots + \beta_k X_{i,k} + \varepsilon_i,$$
+
+where $\varepsilon_i \sim N(0, \sigma^2)$. Alternatively, we can write this model in two steps:
+
+$$Y_i \sim N(\mu_i, \sigma^2)$$
+$$\mu_i = \beta_0 + \beta_1 X_{i,1} + \beta_2 X_{i,2} + \cdots + \beta_k X_{i,k}$$
+
+The first step (the *random component* of the model) describes the distribution of $Y_i$. Here $Y_i$ is Normal, with mean $\mu_i$ and variance $\sigma^2$. The mean $\mu_i$ depends on the explanatory variables (the $X$s), and the second step (the *systematic component*) describes the relationship between $\mu_i$ and the explanatory variables. Here, $\mu_i$ is a *linear* function of the explanatory variables -- hence the term *linear model*!
+
+## Generalized linear models
+
+The linear model above assumes that each $Y_i$ comes from a Normal distribution. But this isn't always a good assumption! For example, if our outcome is binary ($Y_i = 0$ or $Y_i = 1$), then the Normal distribution is a terrible choice.
+
+*Generalized* linear models allow for different distributions of the response variable. There are many generalized linear models, for different types of response variable. In this project, we will consider the usual linear regression model, plus two generalized linear models: logistic regression (for binary response variables) and Poisson regression (for count variables, i.e. taking values 0, 1, 2, 3, etc.).
+
+### Logistic regression
+
+You have seen logistic regression already in STA 112. As a reminder, binary logistic regression is used when the response $Y_i$ is either 0 or 1. The full logistic regression model is:
+
+$$Y_i \sim Bernoulli(\mu_i)$$
+
+$$\log \left( \frac{\mu_i}{1 - \mu_i} \right) = \beta_0 + \beta_1 X_{i,1} + \beta_2 X_{i,2} + \cdots + \beta_k X_{i,k}$$
+
+Note that the mean of $Y_i$, $\mu_i$ (the probability that $Y_i = 1$), is no longer a linear function of the explanatory variables! Rather, we have used a logit (log-odds) *link function* to relate $\mu_i$ to the $X$s. This gives *logistic* regression its name.
+
+### Poisson regression
+
+If you haven't taken STA 214, you probably haven't seen Poisson regression. That's ok! No prior knowledge of Poisson regression is needed to complete this project.
+
+The Poisson regression model is often used when our response $Y_i$ is a *count* variable. That is, $Y_i$ takes non-negative integer values 0, 1, 2, 3, .... etc. One possible distribution for count variables is the *Poisson* distribution, which is used in the random component for Poisson models. The full Poisson regression model is:
+
+$$Y_i \sim Poisson(\mu_i)$$
+
+$$\log(\mu_i) = \beta_0 + \beta_1 X_{i,1} + \beta_2 X_{i,2} + \cdots + \beta_k X_{i,k}$$
+
+# Fitting linear and generalized linear models
+
+To explain how linear models and generalized linear models are fit, we need to introduce some new ideas and notation. Let
+
+$$Y = \begin{bmatrix} Y_1 \\ Y_2 \\ \vdots  \\ Y_n  \end{bmatrix}$$
+be the vector of observed responses, let 
+
+$$\beta = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_k \end{bmatrix}$$
+
+be the vector containing the regression coefficients, and let 
+
+$$X = \begin{bmatrix} 1 & X_{1,1} & X_{1,2} & \cdots & X_{1,k} \\ 1 & X_{2,1} & X_{2,2} & \cdots & X_{2,k} \\ \vdots & \vdots & \vdots & \cdots & \vdots  \\ 1 & X_{n,1} & X_{n,2} & \cdots & X_{n,k} \end{bmatrix} $$
+be the *design matrix*. Each row of $X$ represents one observation, and each column represents one variable (the first column, of all 1s, corresponds to the intercept $\beta_0$). 
+
+## Fitting linear regression
+
+The vector $\widehat{\beta}$ of estimates coefficients is given by
+
+$$\widehat{\beta} = (X^TX)^{-1} X^T Y$$
+
+## Fitting a generalized linear model
+
+Linear regression is nice because the estimated coefficients have a closed form. Unfortunately, there is no closed form solution for other generalized linear models. Instead, we use an iterative process called *Fisher scoring*:
+
+* **Step 1:** Initialize the coefficients. Let $\beta^{(0)}$ denote the vector of initial coefficients.
+* **Step 2:** Calculate the *score* $U(\beta^{(0)})$ and the *information* $I(\beta^{(0)})$ for the initial coefficients (see below).
+* **Step 3:** Update the estimated coefficients:
+
+$$\beta^{(1)} = \beta^{(0)} + (I(\beta^{(0)}))^{-1} U(\beta^{(0)})$$
+
+* **Step 4:** Continue the process. If $\beta^{(r)}$ is the estimated coefficients on iteration $r$, then the estimated coefficients on iteration $r + 1$ are
+
+$$\beta^{(r+1)} = \beta^{(r)} + (I(\beta^{(r)}))^{-1} U(\beta^{(r)})$$
+
+* **Step 5:** Stop when the algorithm converges (see below), or when a maximum number of iterations is reached.
+
+## Score and information
+
+The score and information for a generalized linear model are functions of the parameter vector $\beta$:
+
+* $U(\beta^{(r)}) = X^T(Y - \mu^{(r)})$
+* $I(\beta^{(r)}) = X^T W^{(r)} X$
+
+### For logistic regression:
+
+$$\mu^{(r)} = \begin{bmatrix} \mu_1^{(r)} \\ \vdots \\ \mu_n^{(r)} \end{bmatrix} = \begin{bmatrix} \frac{\exp\{\beta_0^{(r)} + \beta_1^{(r)} X_{1,1} + \cdots + \beta_k^{(r)} X_{1,k}\}}{1 + \exp\{\beta_0^{(r)} + \beta_1^{(r)} X_{1,1} + \cdots + \beta_k^{(r)} X_{1,k}\}} \\ \vdots \\ \frac{\exp\{\beta_0^{(r)} + \beta_1^{(r)} X_{1,1} + \cdots + \beta_k^{(r)} X_{1,k}\}}{1 + \exp\{\beta_0^{(r)} + \beta_1^{(r)} X_{n,1} + \cdots + \beta_k^{(r)} X_{n,k}\}} \end{bmatrix} = \begin{bmatrix} \frac{\exp\{X_1^T \beta^{(r)}\}}{1 + \exp\{X_1^T \beta^{(r)}\}} \\ \vdots \\ \frac{\exp\{X_n^T \beta^{(r)}\}}{1 + \exp\{X_n^T \beta^{(r)}\}} \end{bmatrix} = \frac{\exp\{ X \beta^{(r)}\}}{1 + \exp\{ X \beta^{(r)}\}}$$
+
+That is, $\mu^{(r)}$ is the vector of estimated means at iteration $r$. 
+
+$X_i^T$ is the $i$th row of the design matrix $X$.
+
+On the right-hand side of the equation, $X \beta^{(r)}$ is a vector, and $\exp\{X \beta^{(r)}\}$ represents exponentiating each entry in that vector.
+
+$$W^{(r)} = \begin{bmatrix} \mu_1^{(r)}(1 - \mu_1^{(r)}) & 0 & 0 & \cdots & 0 \\ 0 & \mu_2^{(r)}(1 - \mu_2^{(r)}) & 0 & \cdots & 0 \\ \vdots & \vdots & \ddots & \cdots & \vdots \\ 0 & 0 & 0 & \cdots & \mu_n^{(r)}(1 - \mu_n^{(r)}) \end{bmatrix}$$
+
+That is, $W^{(r)}$ is the diagnoal matrix with entries $\mu_i^{(r)}(1 - \mu_i^{(r)})$.
+
+
+### For Poisson regression:
+
+$$\mu^{(r)} = \begin{bmatrix} \mu_1^{(r)} \\ \vdots \\ \mu_n^{(r)} \end{bmatrix} = \begin{bmatrix} \exp\{\beta_0^{(r)} + \beta_1^{(r)} X_{1,1} + \cdots + \beta_k^{(r)} X_{1,k}\} \\ \vdots \\ \exp\{\beta_0^{(r)} + \beta_1^{(r)} X_{n,1} + \cdots + \beta_k^{(r)} X_{n,k}\} \end{bmatrix} = \begin{bmatrix} \exp\{X_1^T \beta^{(r)}\} \\ \vdots \\ \exp\{X_n^T \beta^{(r)}\} \end{bmatrix} = \exp\{ X \beta^{(r)} \}$$
+
+That is, $\mu^{(r)}$ is the vector of estimated means at iteration $r$.
+
+$$W^{(r)} = \begin{bmatrix} \mu_1^{(r)} & 0 & 0 & \cdots & 0 \\ 0 & \mu_2^{(r)} & 0 & \cdots & 0 \\ \vdots & \vdots & \ddots & \cdots & \vdots \\ 0 & 0 & 0 & \cdots & \mu_n^{(r)} \end{bmatrix}$$
+
+That is, $W^{(r)}$ is the diagnoal matrix with entries $\mu_i^{(r)}$.
+
+## Initialization
+
+Note that for linear regression, no initialization is required (because we don't need to use Fisher scoring, because there is a closed-form solution for $\widehat{\beta}$).
+
+### For logistic regression
+
+Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize logistic regression is to make 
+
+$$\beta^{(0)} = \left( \log \left( \frac{\bar{Y}}{1 - \bar{Y}} \right), 0, 0, ..., 0 \right)^T$$
+That is, the initial value of the intercept is $\log \left( \frac{\bar{Y}}{1 - \bar{Y}} \right)$, and the initial value of all other coefficients is 0.
+
+### For Poisson regression
+
+Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize Poisson regression is to make 
+
+$$\beta^{(0)} = \left( \log (\bar{Y}), 0, 0, ..., 0 \right)^T$$
+That is, the initial value of the intercept is $\log (\bar{Y})$, and the initial value of all other coefficients is 0.
+
+
+## Convergence
+
+There is no convergence to worry about for linear regression (because there is a closed form solution for the coefficients). When Fisher scoring is required, however, we need to define a convergence criterion that specifies when to stop the scoring algorithm.
+
+Convergence is usually defined in terms of the *residual deviance* of the fitted model. Think of residual deviance as the equivalent of the residual sum of squares from linear regression. Formally, deviance is twice the difference in the log-likelihood between a saturated model and the fitted model.
+
+It is ok if you don't know what that means! The deviances are defined below for you. You can also find advice on calculating the deviance in R in the "Implementation in R" section below.
+
+**Convergence:** For the purposes of this project, say that the Fisher scoring algorithm has converged when the change in deviance between iterations is $< 0.001$.
+
+### For linear regression
+
+For linear regression (with a Normal response), the residual deviance is given by
+
+$$\sum \limits_{i=1}^n (Y_i - \widehat{\mu}_i)^2$$
+
+where $\widehat{\mu}_i = \widehat{\beta}_0 + \widehat{\beta}_1 X_{i,1} + \cdots + \widehat{\beta}_k X_{i, k}$.
+
+### For logistic regression
+
+For logistic regression with a binary response, the residual deviance is given by
+
+$$-2 \sum \limits_{i=1}^n \left(Y_i \log(\widehat{\mu}_i) + (1 - Y_i) \log(1 - \widehat{\mu}_i) \right)$$
+
+where $\widehat{\mu}_i = \dfrac{\exp\{\widehat{\beta}_0 + \widehat{\beta}_1 X_{i,1} + \cdots + \widehat{\beta}_k X_{i, k}\}}{1 + \exp\{\widehat{\beta}_0 + \widehat{\beta}_1 X_{i,1} + \cdots + \widehat{\beta}_k X_{i, k}\}}$.
+
+### For Poisson regression
+
+For Poisson regression, the residual deviance is given by
+
+$$2 \sum \limits_{i=1}^n \left(Y_i \log\left( \frac{Y_i}{\widehat{\mu}_i}\right) - (Y_i - \widehat{\mu}_i)  \right)$$
+
+where we define $0 \log(0) = 0$, and $\widehat{\mu}_i = \exp\{\widehat{\beta}_0 + \widehat{\beta}_1 X_{i,1} + \cdots + \widehat{\beta}_k X_{i, k}\}$.
+
+## Hypothesis testing
+
+For each coefficient $\beta_j$, we can test the hypotheses $H_0: \beta_j = 0$ vs. $H_A: \beta_j \neq 0$. 
+
+### Linear regression
+
+For a linear regression model, the test statistic is
+
+$$T = \frac{\widehat{\beta}_j}{SE(\widehat{\beta}_j)}$$
+
+where $SE(\widehat{\beta}_j) = \sqrt{\widehat{\sigma}^2 (X^T X)^{-1}_{jj}}$ (the square root of the $j$th diagonal entry of $\widehat{\sigma}^2 (X^T X)^{-1}$). Here
+
+$$\widehat{\sigma}^2 = \frac{1}{n - (k + 1)} \sum \limits_{i=1}^n (Y_i - \widehat{Y}_i)^2$$
+
+The p-value is then calculated using a $t_{n-(k+1)}$ distribution.
+
+### Logistic and Poisson regression
+
+For a logistic or Poisson regression model, the test statistic is
+
+$$Z = \frac{\widehat{\beta}_j}{SE(\widehat{\beta}_j)}$$
+
+where $SE(\widehat{\beta}_j) = \sqrt{(X^T W X)^{-1}_{jj}}$ (the square root of the $j$th diagonal entry of the inverse Fisher information matrix).
+
+The p-value is then calculated using a standard normal distribution.
+
+# Hints on implementation in R
+
+## Matrices and matrix algebra
+
+* $X^T$ is the *transpose* of $X$. In R: `t(X)`
+* Matrix multiplication in R is done with `%*%`. For example, $X^T y$ would be `t(X) %*% y`
+* Matrix inverses are found with `solve`. For example, $(X^T X)^{-1}$ would be `solve(t(X) %*% X)`
+* Diagonal matrices can be created with the `diag` function. For example, `diag(c(1, 2, 3))` creates a diagonal matrix with the entries 1, 2, 3 on the diagonal:
+
+```{r}
+diag(c(1, 2, 3))
+```
+
+* Make sure to follow the ordering specified in the definitions above. Matrix operations are not commutative in general! E.g. `t(X) %*% X` is *not* the same as `X %*% t(X)`
+* If you get an error that says `non-conformable arguments`, you have made a mistake with your matrix algebra, such as creating matrices of the wrong size, or multiplying in the incorrect order
+
+## Calculating deviances
+
+Suppose you have a vector `y` in R, which contains the observed responses $Y_1,...,Y_n$. And suppose the vector `mu_hat` in R contains the estimated means $\widehat{\mu}_1,...,\widehat{\mu}_n$. Then, the deviance for each model can be calculated in R as follows:
+
+* **Linear regression:** `sum((y - mu_hat)^2)`
+* **Logistic regression:** `-2*sum(dbinom(y, 1, mu_hat, log=T))`
+* **Poisson regression:** `2*(sum(dpois(y, y, log=T)) - sum(dpois(y, mu_hat, log=T)))`
+
+## Calculating p-values
+
+The `pnorm` and `pt` functions will be useful.
+
+# Requirements and examples
+
+## Code requirements
+
+For this project, you must write at least one function in R:
+
+* `my_glm`: a function for fitting linear, logistic, and Poisson GLMs
+
+You may write other helper functions too, but the choice of helper functions is up to you. You may find it helpful to write separate functions for the score, the Fisher information, and the Fisher scoring algorithm.
+
+These functions must satisfy the following requirements:
+
+`my_glm`:
+
+* Inputs: there are two options (Option 2 is more advanced, and will earn you a higher grade)
+  * Option 1: 
+    * `X`: design matrix 
+    * `y`: vector of responses 
+    * `family`: a string, either `"gaussian"` for linear regression, `"binomial"` for logistic regression, or `"poisson"` for Poisson regression
+    * `max_iter`: the maximum number of iterations for Fisher scoring; the default should be 50
+  * Option 2: 
+    * `formula`: a formula that describes the model, like you would use in `lm`. E.g. `y ~ x`, or `y ~ x1 + x2`, etc. (If you choose the formula option, you do *not* need to support categorical explanatory variables, transformations, or interactions; you may receive bonus points if you do)
+    * `family`: a string, either `"gaussian"` for linear regression, `"binomial"` for logistic regression, or `"poisson"` for Poisson regression
+    * `data`: a data frame containing the variables in the model, with the same names as used in the formula
+    * `max_iter`: the maximum number of iterations for Fisher scoring; the default should be 50
+* Outputs: a list containing the following named components:
+  * `coefficients`: a matrix or data frame containing four columns: the estimated coefficients, standard errors for the estimated coefficients, test statistics ($Z$ or $T$ statistics), and p-values for the hypothesis test $H_0: \beta_j = 0$ vs. $H_A: \beta_j \neq 0$. See below for examples.
+  * `iterations`: the number of iterations of the Fisher scoring algorithm used to estimate the coefficients (if linear regression, `iterations = 1`)
+  * `family`: the type of GLM (`"gaussian"` for linear regression, `"binomial"` for logistic regression, or `"poisson"` for Poisson regression)
+  * `deviance`: the residual deviance for the fitted model
+* You may not use any existing implementations of GLM functions
+* Your function cannot be specific to one data set, and cannot be specific to only a fixed number of explanatory variables
+
+## Examples 
+
+Below are examples of the functions in action. You should implement the same functionality in your code. You can use the same simulated data to verify that your code works.
+
+### Linear regression, Option 1
+
+```{r, include=F}
+U <- function(X, y, beta, family){
+  if(family == "binomial"){
+    mu <- c(exp(X %*% beta)/(1 + exp(X %*% beta)))
+  } else {
+    mu <- c(exp(X %*% beta))
+  }
+  return(t(X) %*% (y - mu))
+}
+
+I <- function(X, beta, family){
+  if(family == "binomial"){
+    mu <- c(exp(X %*% beta)/(1 + exp(X %*% beta)))
+    W <- diag(mu*(1 - mu))
+  } else {
+    mu <- c(exp(X %*% beta))
+    W <- diag(mu)
+  }
+  return(t(X) %*% W %*% X)
+}
+
+deviance <- function(X, y, beta, family){
+  if(family == "binomial"){
+    mu <- exp(X %*% beta)/(1 + exp(X %*% beta))
+    deviance <- -2*sum(dbinom(y, 1, mu, log=T))
+  } else if(family == "gaussian") {
+    mu <- X %*% beta
+    deviance <- sum((y - mu)^2)
+  } else {
+    mu <- exp(X %*% beta)
+    deviance <- 2*(sum(dpois(y, y, log=T)) - sum(dpois(y, mu, log=T)))
+  }
+  
+  return(deviance)
+}
+
+fisher_scoring <- function(X, y, family, max_iter = 100){
+  init_mean <- mean(y)
+  if(family == "binomial"){
+    beta <- c(log(init_mean/(1 - init_mean)), rep(0, ncol(X) - 1))
+  } else {
+    beta <- c(log(init_mean), rep(0, ncol(X) - 1))
+  }
+  
+  iter <- 0
+  cur_dev <- deviance(X, y, beta, family)
+  dev_diff <- 1
+  while(iter < max_iter & dev_diff > 0.001){
+    beta <- beta + solve(I(X, beta, family)) %*% U(X, y, beta, family)
+    new_dev <- deviance(X, y, beta, family)
+    dev_diff <- abs(new_dev - cur_dev)
+    cur_dev <- new_dev
+    iter <- iter + 1
+  }
+  
+  return(list("Iterations" = iter, "coefficients" = beta))
+}
+
+my_glm_1 <- function(X, y, family, max_iter = 50){
+  if(family == "gaussian"){
+    n <- nrow(X)
+    p <- ncol(X)
+    beta <- solve(t(X) %*% X) %*% t(X) %*% y
+    iter <- 1
+    se <- sqrt(diag(sum((y - X %*% beta)^2)/(n - p) * solve(t(X) %*% X)))
+    coefs <- data.frame(beta = beta,
+                      se = se,
+                      t_score = beta/se,
+                      p_value = 2*pt(abs(beta/se), n-p,
+                                        lower.tail = F))
+  } else {
+    output <- fisher_scoring(X, y, family, max_iter)
+    beta <- output$coefficients
+    iter <- output$Iterations
+    se <- sqrt(diag(solve(I(X, beta, family))))
+    coefs <- data.frame(beta = beta,
+                      se = se,
+                      z_score = beta/se,
+                      p_value = 2*pnorm(abs(beta/se),
+                                        lower.tail = F))
+  }
+  
+  row.names(coefs)[1] <- "(Intercept)"
+  return(list("coefficients" = coefs, 
+              "iterations" = iter,
+              "family" = family,
+              "deviance" = deviance(X, y, beta, family)))
+}
+
+my_glm_2 <- function(formula, family, data, max_iter = 50){
+  y <- data[[deparse(formula[[2]])]]
+  X <- cbind(1, as.matrix(data[all.vars(formula[[3]])]))
+  return(my_glm_1(X, y, family, max_iter))
+}
+```
+
+```{r}
+# Simulate some data
+set.seed(279)
+n <- 100
+x1 <- runif(n)
+x2 <- rnorm(n)
+y <- rnorm(n, 1 + x1 + x2, 2)
+
+# create the design matrix
+X <- cbind(1, x1, x2)
+
+# fit the model
+m1 <- my_glm_1(X, y, "gaussian")
+
+# model output
+m1$coefficients
+m1$iterations
+m1$family
+m1$deviance
+```
+
+### Linear regression, Option 2
+
+```{r}
+# Simulate some data
+set.seed(279)
+n <- 100
+x1 <- runif(n)
+x2 <- rnorm(n)
+y <- rnorm(n, 1 + x1 + x2, 2)
+
+# create the data
+df <- data.frame(y, x1, x2)
+
+# fit the model
+m1 <- my_glm_2(y ~ x1 + x2, family = "gaussian", data = df)
+
+# model output
+m1$coefficients
+m1$iterations
+m1$family
+m1$deviance
+```
+
+## Linear regression, Option 2 with real data
+
+```{r, message=F, warning=F}
+library(palmerpenguins)
+library(tidyverse)
+
+df <- penguins |>
+  drop_na()
+
+m1 <- my_glm_2(body_mass_g ~ flipper_length_mm + bill_length_mm, 
+               family = "gaussian", data = df)
+
+m1$coefficients
+m1$iterations
+m1$family
+m1$deviance
+```
+
+
+### Logistic regression, Option 1
+
+```{r}
+# simulate some data
+set.seed(123)
+n <- 200
+x <- rnorm(n)
+p <- exp(1 + x)/(1 + exp(1 + x))
+y <- rbinom(n, 1, p)
+
+# create the design matrix
+X <- cbind(1, x)
+
+# fit the model
+m1 <- my_glm_1(X, y, "binomial")
+
+# model output
+m1$coefficients
+m1$iterations
+m1$family
+m1$deviance
+```
+
+### Logistic regression, Option 2 with real data
+
+```{r, message=F, warning=F}
+df <- penguins |>
+  drop_na() |>
+  mutate(sex = ifelse(sex == "female", 1, 0))
+
+m1 <- my_glm_2(sex ~ flipper_length_mm + bill_length_mm, 
+               family = "binomial", data = df)
+
+m1$coefficients
+m1$iterations
+m1$family
+m1$deviance
+```
+
+
+### Poisson regression, Option 1
+
+```{r}
+# simulate some data
+set.seed(214)
+n <- 300
+x1 <- rbinom(n, 1, 0.5)
+x2 <- runif(n)
+x3 <- runif(n)
+y <- rpois(n, exp(0.5 - x1 + x2 - 0.5*x3))
+
+# create the design matrix
+X <- cbind(1, x1, x2, x3)
+
+# fit the model
+m1 <- my_glm_1(X, y, "poisson")
+
+# model output
+m1$coefficients
+m1$iterations
+m1$family
+m1$deviance
+```
+
+# Submission requirements
+
+You will submit two files:
+
+* `yourname_project1.R`: an R script (*not* an R Markdown or Quarto document) containing your `my_glm` function, and any additional helper functions (e.g. Fisher scoring, etc.)
+* `yourname_project1_examples.html`: a knitted Quarto or R Markdown document showing examples of your glm function in action with linear, logistic, and Poisson regression
+
+# Grading
+
+There are minimal requirements for each grade range:
+
+* To receive a grade in the **C** range (C- to C+):
+  * Your code must run (if your code does not run, you cannot pass the project)
+  * You must correctly implement linear, logistic, and Poisson regression with Option 1, and return the estimated coefficients (if your estimated coefficients are incorrect, you cannot pass the project)
+* To receive a grade in the **B** range (B- to B+):
+  * Your code must run (if your code does not run, you cannot pass the project)
+  * You must correctly implement linear, logistic, and Poisson regression with Option 1
+  * You must return all required output, and it must be correct: the coefficients, the number of scoring iterations, the family, and the deviance
+  * You must demonstrate that your code works with examples of linear, logistic, and Poisson regression
+* To receive a grade in the **A** range (A- or A):
+  * Your code must run (if your code does not run, you cannot pass the project)
+  * You must correctly implement linear, logistic, and Poisson regression with Option 2
+  * You must return all required output, and it must be correct: the coefficients, the number of scoring iterations, the family, and the deviance
+  * You must demonstrate that your code works with examples of linear, logistic, and Poisson regression
+  
+Within each grade range, scores will also involve code readability, clarity, and commenting.
+
+# Summary: project checklist
+
+* `yourname_project1.R`
+  * Needs to contain at least one function (`my_glm`) and any additional helper functions
+  * Check that `my_glm` takes the correct inputs and returns the correct outputs
+  * Needs to support linear, logistic, and Poisson regression
+* `yourname_project1_examples.html`
+  * Examples of fitting linear, logistic, and Poisson models
+
+
+
+
+

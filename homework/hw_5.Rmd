@@ -1,0 +1,245 @@
+---
+title: "Homework 5"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, October 6, 11:00am on Canvas
+
+**Instructions:** 
+
+* Download the [HW 5 template](https://sta279-f23.github.io/homework/hw_5_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Put your name in the file header
+* Click `Render`
+* Type all code and answers in the document (using `###` for section headings and `####` for question headings)
+* Render early and often to catch any errors!
+* When you are finished, submit the final rendered HTML to Canvas
+
+**Code guidelines:**
+
+* If a question requires code, and code is not provided, you will not receive full credit
+* You will be graded on the quality of your code. In addition to being correct, your code should also be easy to read
+  * No magic numbers
+  * Use descriptive names for your variables
+  * Set seeds where needed
+  * Comment code
+  * If a block of code is being called multiple times, put it in a function
+  
+**Resources:** In addition to the class notes and activities, I recommend reading the following resources:
+
+* [Chapter 4](https://mdsr-book.github.io/mdsr3e/04-dataI.html) in *Modern Data Science with R*
+* [Chapter 4](https://r4ds.hadley.nz/data-transform) in *R for Data Science* (2nd edition)
+
+## Data wrangling in R
+
+### NY Flights data
+
+Let's begin with the `flights` data from the `nycflights13` package.
+
+Suppose we want to know how many flights departed from each of the three NY airports (EWR, LGA, and JFK) in 2013. The `count` function allows us to count the number of rows, and to specify a variable to count by. Adding `sort = TRUE` will order the results from largest to smalles. For example:
+
+```{r, message=F, warning=F}
+library(nycflights13)
+library(tidyverse)
+
+flights |>
+  count(origin, sort = TRUE)
+```
+
+We can see that 120835 departed from EWR in 2013.
+
+
+:::{.question}
+#### Question 1
+
+Reproduce the output from the `count` function, but use the `group_by`, `summarize`, and `arrange` functions instead.
+:::
+
+:::{.question}
+#### Question 2
+
+The `dep_time` variable in the `flights` data records the actual departure time for each flight. However, there are several rows with missing departure times. Let's assume that these correspond to flights which were *cancelled*.
+
+Which month had the highest proportion of cancelled flights?
+
+*Hint:* the `is.na()` function will return `TRUE` if missing, and `FALSE` otherwise. For example:
+
+```{r}
+is.na(c(1, 2, NA, 3))
+```
+
+:::
+
+:::{.question}
+#### Question 3
+
+Which plane (specified by the `tailnum` variable) traveled the most times from New York City airports in 2013?
+:::
+
+:::{.question}
+#### Question 4
+
+For the plane identified in question 3, plot the number of trips per week over the year.
+
+To create this plot, you will need to determine the week of the year for each flight. The `week` function in the `lubridate` package may be helpful here...
+:::
+
+:::{.question}
+#### Question 5
+
+Which carrier has the worst average delays?
+:::
+
+:::{.question}
+#### Question 6
+
+For the results in question 5, can you disentangle the effects of bad airports vs. bad carriers? Why or why not?
+
+*Hint*: Look at `table(flights$origin, flights$carrier)`
+:::
+
+
+### NY Health Inspections
+
+The `Violations` data from the `mdsr` package contains information on 480621 health inspections conducted on restaurants in New York City. 
+
+:::{.question}
+#### Question 7
+
+Use the `Violations` data to create a new data frame called `violations_summary`, which contains the median inspection score by zip code for zip codes in Manhattan with 50 or more inspections.
+
+*Hint*: You will probably want to remove rows with missing observations for zip code, borough, or inspection score. The `drop_na` function can be useful here. Below is some starter code, you will need to complete the rest:
+
+```{r, eval=F}
+violations_summary <- Violations |>
+  drop_na(zipcode, score, boro) |>
+  ...
+```
+
+:::
+
+
+:::{.question}
+#### Question 8
+
+Plot the number of median score vs. the number of inspections, using the `violations_summary` data you created in question 7.
+:::
+
+
+## Beginning data wrangling in Python
+
+In the first part of this assignment, you practiced data wrangling in R, using some key `dplyr` functions. The remainder of this homework will walk you through the first steps of data wrangling in Python. Many of the ideas are similar, we just need to learn some different syntax.
+
+### Importing R objects into Python
+
+To begin, let's import the `flights` data into R. In your Quarto file for this assignment, you have been using R chunks so far. Create a new *Python* chunk, and copy the following code into the Python chunk:
+
+```{python}
+import pandas as pd
+
+flights_py = r.flights
+```
+
+This tells Python to load the `pandas` module (abbreviated `pd`), which we will use for data wrangling in Python (similar to the `dplyr` package in R). Then, we import the `flights` data from R into Python, with `r.flights`, and call it `flights_py`.
+
+### Pandas DataFrames and Series
+
+Before we begin manipulating this data in Python, let's take a look at what type of object it is:
+
+```{python}
+type(flights_py)
+```
+
+You can see that `flights_py` has been imported as a pandas DataFrame! Recall that R has two main ways of storing rectangular data: matrices and data frames. The equivalent of a matrix in Python is a 2-d NumPy array. The equivalent of an R data frame is a pandas data frame.
+
+Let's take a look at some of the attributes of this data in Python:
+
+```{python}
+flights_py.shape
+
+flights_py.columns
+```
+
+We can see that `flights_py` has 336776 and 19 columns, just like the `flights` data frame in R. The column names are also the same, and in the same order (just as we would hope).
+
+**Note:** In Python (and many object-oriented language), the `.` notation ("dot notation") is used to access attributes and methods of an object. Here, `flights_py` is an *object* (in particular, a pandas DataFrame). For example, *all* DataFrames in pandas have a `.shape` attribute, which stores information about their numbers of rows and columns.
+
+We can access column in Python by name:
+
+```{python}
+flights_py['origin']
+
+type(flights_py['origin'])
+```
+
+Each column in a pandas DataFrame is a *Series*; basically a one-dimensional DataFrame (similar to a vector in R).
+
+### Basic data manipulation with pandas
+
+Pandas offers many functions which are similar to functions in `dplyr`. For example, if I want to group the flights by month, and calculate the mean departure delay in each month, I will use the `groupby` and `agg` (short for *aggregate*) functions:
+
+```{python}
+flights_py.groupby(by = 'month').agg({'dep_delay': 'mean'})
+```
+
+Let's break this code down:
+
+* First, notice that these functions are methods that belong to pandas DataFrames, so we access them with dot notation. `flights_py.groupby(by = 'month')` means "group the flights by month"
+* Second, notice that instead of piping (`|>`) from one step to the next, we chain the dot notation functions together. This is a similar idea to the pipe, just slightly different syntax. This chaining works because the output of `flights_py.groupby(...)` is itself a pandas DataFrame, and therefore has an `agg` method
+* Also notice that when I refer to columns, I always include quotes around the name
+* `agg` applies summary functions to certain columns. Here we are calculating the mean of the `dep_delay` column. If we didn't specify the `dep_delay` column, we would calculate the mean of all the numeric columns in the data
+* By default, missing values were ignored when calculating the mean
+
+Now, what if I want to calculate the proportion of cancelled flights for each month? Well, the proportion of missing values is not a built-in function (whereas the mean *is* built-in), so we have to write it ourselves:
+
+```{python}
+def prop_na(x):
+  return sum(pd.isna(x))/len(x)
+
+flights_py.groupby(by = 'month').agg(
+  {'dep_delay': prop_na}).sort_values(by = 'dep_delay', ascending = False)
+```
+
+### Questions
+
+
+:::{.question}
+#### Question 9
+
+Using pandas, calculate the mean arrival delay for each carrier in the NY flights data.
+:::
+
+Now, let's look at the `Violations` data in Python. Before we do, though, we need to make a small change. The `score` column of the `Violations` data is an integer variable with some missing values. If we try to import that into Python, the way that R codes missing values will cause a problem. Instead, we'll convert the `score` column to a numeric variable first:
+
+In R:
+```{r, eval=F}
+my_violations <- Violations |>
+  mutate(score = as.numeric(score))
+```
+
+In Python:
+
+```{python, eval=F}
+vio_py = r.my_violations
+```
+
+
+:::{.question}
+#### Question 10
+
+Using pandas, calculate the median inspection score by zip code for zip codes in Manhattan with 50 or more inspections.
+
+*Hints:* The following functions for pandas DataFrames will be useful:
+
+* `loc`
+* `dropna`
+* `groupby`
+* `agg`
+:::
+
+
+
+
