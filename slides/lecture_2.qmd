@@ -13,6 +13,10 @@ editor_options:
 * HW 1 released on course website, due next Friday
 * Continuing intro to probability simulations
 * Time permitting: start HW 1 in class
+* Office hours (Manchester 329):
+  * 3 - 4pm Monday
+  * 1 - 2pm Thursday
+* TA study session (Manchester 121): 7-8pm Thursday
 
 ## Warm-up question
 
