@@ -1,0 +1,62 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instruction:** Work with a neighbor to answer the following questions, then we will discuss the activity as a class. To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_3_template.qmd) file.
+
+## Simulation: the normality assumption in linear regression
+
+In a previous class, we started a simulation to assess how important the normality assumption is in the simple linear regression model
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+That is, how important is the assumption that $\varepsilon_i \sim N(0, \sigma^2)$? 
+
+So far, we have written the following code to simulate data for which the normality assumption is satisfied:
+
+```{r, eval=F}
+nsim <- 1000
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=1)
+  y <- beta0 + beta1*x + noise
+
+  lm_mod <- lm(y ~ x)
+  ci <- confint(lm_mod, "x", level = 0.95)
+  
+  results[i] <- ci[1] < 1 & ci[2] > 1
+}
+mean(results)
+```
+
+In particular, the line `noise <- rnorm(n, mean=0, sd=1)` ensures the errors come from a normal distribution. Running this code, the coverage of our confidence intervals is approximately 95% (as expected).
+
+Now, we want to know how important it is that the errors $\varepsilon_i$ be normal. To address that question, we need to see what happens when $\varepsilon_i$ comes from a *different* distribution! We can simulate from many different distributions in R, including the following:
+
+* $t$ distribution, using `rt(...)`
+* exponential distribution, using `rexp(...)`
+* $\chi^2$ distribution, using `rchisq(...)`
+* gamma distribution, using `rgamma(...)`
+* uniform distribution, using `runif(...)`
+
+
+### Questions
+
+1. Experiment with different distributions for the noise term $\varepsilon_i$ in the code above. How does the confidence interval coverage change?
+
+2. Does confidence interval coverage depend on the sample size $n$?
+
+
+
+
