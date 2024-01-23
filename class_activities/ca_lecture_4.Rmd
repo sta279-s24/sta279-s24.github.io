@@ -1,0 +1,85 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_4_template.qmd) file.
+
+# Simulation: the constant variance assumption in linear regression
+
+Consider again the simple linear regression model:
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+Common assumptions about this model include the normality assumption (the $\varepsilon_i$ follow a normal distribution), and the constant variance assumption (the $\varepsilon_i$ have constant variance). Previously, we have used simulations to assess the importance of the normality assumption. In this class activity, we will assess the importance of the constant variance assumption.
+
+## Simulating data for which the constant variance assumption *holds*
+
+When writing simulations, it is easiest to start small, and build up. Let's begin by simulating a single dataset for which the constant variance assumption holds.
+
+The following code simulates data from the simple linear regression model, with $\beta_0 = 0.5$ and $\beta_1 = 1$. Since we only want to assess the constant variance assumption, we are using a Normal distribution for the $\varepsilon_i$ (otherwise, we would be breaking multiple assumptions at once).
+
+```r
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, mean=0, sd=1)
+y <- beta0 + beta1*x + noise
+```
+
+In this code, `noise <- rnorm(n, mean=0, sd=1)`. This means that we sample $n$ observations from a $N(0, 1)$ distribution; since `sd=1`, the standard deviation is the *same* for each $\varepsilon_i$ (i.e., for each entry in `noise`).
+
+1. Run the code above, and make of plot of $Y$ vs. $X$; by looking at the spread of the points, verify that the constant variance assumption does hold.
+
+2. Using code from last time, fit a linear regression model, and calculate a 95% confidence interval for $\beta_1$. Does the confidence interval contain the true $\beta_1$?
+
+3. Use a `for` loop to repeat the process (generating a dataset, fitting a model, calculating a CI, checking if it contains $\beta_1$) $n_{sim} = 1000$ times. What fraction of your confidence intervals contained $\beta_1$? (It should be close to 0.95!)
+
+## Breaking the constant variance assumption
+
+Now we want to break the constant variance assumption! Right now, the standard deviation of each $\varepsilon_i$ is 1: $SD(\varepsilon_i) = 1$ for all $i = 1,...,n$. To break this assumption, we should let the standard deviation depend on the explanatory variable $X_i$. For example, we could have $SD(\varepsilon_i) = X_i$, or $SD(\varepsilon_i) = X_i^2$.
+
+This means that we need a way to simulate data with different standard deviations!
+
+To do so, we will use the `rnorm` function again. It turns out that the `rnorm` function is *vectorized*: that is, if we provide a vector input to the `mean` or `sd` arguments, it will apply the function to each entry of the vector.
+
+What does this mean in practice? Consider the code below:
+
+```{r}
+y <- rnorm(100, mean=0, sd = 1:100)
+plot(y)
+```
+
+Look how the variability of `y` changes in the plot. This is because each entry of `y` comes from a different normal distribution! When we write `sd = 1:100`, we are making the standard deviation change for each entry of `y`. In this case, `y[1]` will be sampled from a normal distribution with `sd = 1`; `y[2]` will be sampled from a normal distribution with `sd = 2`; `y[100]` will be sampled from a normal distribution with `sd = 100`; etc. 
+
+4. Modify the following code so that the standard deviation for the noise term is given by `x` (i.e., $SD(\varepsilon_i) = X_i$):
+
+```r
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, mean=0, sd=...)
+y <- beta0 + beta1*x + noise
+```
+
+5. Plot `y` vs. `x`, and verify that the variance of $Y$ changes with $X$.
+
+6. Adapting your code from before, estimating the true coverage of your 95% confidence intervals when $SD(\varepsilon_i) = X_i$.
+
+7. Now re-do question 6, but this time try $SD(\varepsilon_i) = X_i^2$. What is the resulting coverage?
+
+
+## Changing the sample size
+
+So far, we have used a sample size of $n = 100$. What if we change the sample size?
+
+8. Repeat questions 3, 6, and 7 with a sample size of $n = 10$. How do your results change?

@@ -1,0 +1,17 @@
+---
+---
+---
+title: "Class activity"
+format: html
+editor: visual
+author: "Your name"
+---
+
+## The constant variance assumption in linear regression
+
+1. (Answer to question 1 goes here...)
+
+```{r}
+
+```
+

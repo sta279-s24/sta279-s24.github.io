@@ -1,0 +1,57 @@
+---
+title: "Lecture 4: Continuing statistical simulations"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+## Last time
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+**Question:** How important is it that $\varepsilon_i \sim N(0, \sigma^2)$? Does it matter if the errors are *not* normal?
+
+## ADEMP: A useful framework for simulation studies
+
+-   **Aims:** Why are we doing the study?
+-   **Data generation:** How are the data simulated?
+-   **Estimand/target:** What are we estimating for each simulated dataset?
+-   **Methods:** What methods are we using for model fitting, estimation, etc?
+-   **Performance measures:** How do we measure performance of our chosen methods?
+
+## ADEMP
+
+For the normal errors simulation study:
+
+-   **Aims:**
+-   **Data generation:**
+-   **Estimand/target:**
+-   **Methods:**
+-   **Performance measures:**
+
+## Another question
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+**Question:** How important is it that $\varepsilon_i$ have constant variance?
+
+With a neighbor, discuss the ADEMP steps you might use to answer this question (some of them will be similar to the normal simulation!). Then we will discuss together as a group.
+
+## ADEMP steps
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+**Question:** How important is it that $\varepsilon_i$ have constant variance?
+
+
+## Class activity
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+How important is the constant variance assumption?
+
+<https://sta279-s24.github.io/class_activities/ca_lecture_4.html>
+
