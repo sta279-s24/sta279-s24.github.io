@@ -113,7 +113,9 @@ Consider a tug-of-war competition for robots. In each match up, two robots take 
 * Robot A pulls the rope – use `runif(n=1,min=0,max=0.50)` to simulate the magnitude of the pull. Adding the simulated value to the marker position gives the new
 position of the marker.
 * Robot B pulls the rope in the opposite direction – use `runif(n=1,min=0,max=0.50)` to simulate the magnitude of the pull. Adding the simulated value to the marker position gives the new position of the marker.
-* The two robots continue taking turns until the marker moves past -0.50 or 0.50. *Note*: you should check whether the marker has passed-0.50 or 0.50 after *each* robot takes their turn!
+* The two robots continue taking turns until the marker moves past -0.50 or 0.50. 
+
+*Note*: For this question, you can interpret the problem in two different way: either the robots pull simultaneously, or you check whether the marker has passed-0.50 or 0.50 after *each* robot takes their turn. I am ok with either of these two interpretations on this assignment.
 
 :::{.question}
 #### Question 6
