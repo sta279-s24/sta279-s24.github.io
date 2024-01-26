@@ -7,8 +7,6 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-### Practice with for loops
-
 #### Question 1
 
 ```{r}
@@ -41,9 +39,27 @@ cube_root_x <- x^(1/3)
 cube_root_x
 ```
 
+#### Question 4
 
-#### Questions 4 and 5
+```{r}
+n <- 1000
+normal_sample <- rep(NA, n)
+for(i in 1:n){
+  normal_sample[i] <- rnorm(n=1, mean=0, sd=1)
+}
+hist(normal_sample)
+```
 
+#### Question 5
+
+```{r}
+normal_sample <- rnorm(1000)
+hist(normal_sample)
+```
+
+
+
+#### Questions 6 and 7
 There are two different ways you could approach the problem here (the wording of the problem is slightly ambiguous). *I am fine with either approach*. 
 
 The simpler approach is to have the robots pull simultaneously, in which case the game is fair (each robot wins 50% of the time):
@@ -109,11 +125,11 @@ mean(results)
 
 In the first interpretation, the game is fair (and nothing needs to be done to make it more fair). In the second interpretation, the game is decidedly unfair, but could be made more fair by adjusting the starting position of the marker, or the strength with which robot B pulls.
 
-#### Question 6
+#### Question 8
 
 Uses for simulation studies include assessing the importance of assumptions, comparing different statistical methods, power calculations, and verifying the theoretical properties of a method (among others).
 
-#### Question 7
+#### Question 9
 
 * **Aims:** the goal of the simulation study
 * **Data generation:** how the data were simulated
@@ -121,47 +137,16 @@ Uses for simulation studies include assessing the importance of assumptions, com
 * **Methods:** the methods we use for model fitting, estimation, etc.
 * **Performance measures:** how we measure and compare the performance of our chosen methods
 
-#### Question 8
-
-* **Aims:** assess the importance of the normality assumption for simple linear regression models
-* **Data generation:** $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$, where
-  * $X_i \sim U(0, 1)$ (we could also use other distributions for $X_i$ here, but the choice of distribution doesn't really matter, and isn't what we are assessing)
-  * $\varepsilon_i$ has one of the following distributions (we want to compare performance for each of these distributions)
-    * $\varepsilon_i \sim N(0, 1)$
-    * $\varepsilon_i \sim Exp(1)$
-    * $\varepsilon_i \sim \chi^2_1$
-* **Estimand/target:** $\beta_1$ (the slope of the linear regression model)
-* **Methods:** Fit the linear model in R, calculate a 95% confidence interval for $\beta_1$
-* **Performance measures:** Actual coverage of the confidence intervals, for each distribution of $\varepsilon_i$
-
-Why do we do simulations like this? Well, think about what we might do with a linear regression model. A confidence interval is a pretty common use! If confidence intervals don't work when the normality assumption is violated, that's a problem. In particular:
-1. *If* $\varepsilon_i \sim N(0, \sigma^2)$ (the normality assumption is true), *then* confidence intervals for $\beta_1$ should have the desired coverage (95%)
-2. If coverage changes when $\varepsilon_i$ does *not* follow a normal distribution (e.g., if coverage is $< < 0.95$ when $\varepsilon_i \sim \chi^2_1$), then the normality assumption is important!
-3. If coverage is $\approx 0.95$ regardless of the distribution of $\varepsilon_i$, then the normality assumption is not very important (at least for the purpose of constructing confidence intervals)
-
-
-#### Question 9
-
-* **Aims:** Assess the importance of the constant variance assumption in simple linear regression models
-* **Data generation:** Data $(X_1, Y_1),...,(X_n, Y_n)$ will be generated according to the following model:
-  * $X_i \sim Uniform(0, 1)$
-  * $\varepsilon_i \sim N(0, \sigma_i^2)$
-  * $Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$
-  * To assess the importance of the constant variance assumption, we will consider several different standard deviations for $\varepsilon_i$: $\sigma_i = 1$ (constant variance), $\sigma_i = X_i$, and $\sigma_i = X_i^2$ (the latter two incorporating a relationship between $\sigma_i$ and the explanatory variable $X_i$)
-* **Estimands:** We will estimate $\beta_1$ 
-* **Methods:** We will fit a linear regression model with the `lm` function in R, and calculate a 95% confidence interval for $\beta_1$
-* **Performance measures:** observed coverage of the confidence intervals in repeated simulations
-
 #### Question 10
 
-```{r}
-n <- 100
-beta0 <- 0.5
-beta1 <- 1
-x <- runif(n, min=0, max=1)
-noise <- rnorm(n, mean=0, sd=x)
-y <- beta0 + beta1*x + noise
+The warning arises because we are trying to compare two vectors of different lengths, *and the length of the longer vector is not a multiple of the length of the shorter vector*. 
 
-plot(x,y)
-```
+R can be counter-intuitive with how it compares vectors:
+
+* If `x` and `y` have the same length, `x == y` will compare the corresponding elements
+* If `x` and `y` have different lengths, then R will (try) to repeat the shorter vector until it has the same length as the longer vector. Thus, when the lengths don't divide, R gives us a warning
+
+#### Question 11
+
+The warning goes away because 10 is now a multiple of 2. But, the comparison doesn't make a huge amount of sense.
 

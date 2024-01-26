@@ -1,0 +1,184 @@
+---
+title: "Class activity solutions, January 24"
+format: html
+editor: source
+author: Ciaran Evans
+editor_options: 
+  chunk_output_type: console
+---
+
+### Statistical simulations
+
+1. 
+
+```{r}
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, mean=0, sd=1)
+y <- beta0 + beta1*x + noise
+
+plot(x,y)
+```
+
+We can see that the variability of $Y$ appears constant across the range of $X$.
+
+2. 
+
+```{r}
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, mean=0, sd=1)
+y <- beta0 + beta1*x + noise
+
+lm_mod <- lm(y ~ x)
+ci <- confint(lm_mod, "x", level = 0.95)
+
+ci[1] < 1 & ci[2] > 1
+```
+
+3.
+
+```{r}
+nsim <- 1000
+results <- rep(NA, nsim)
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=1)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  ci <- confint(lm_mod, "x", level = 0.95)
+  
+  results[i] <- ci[1] < 1 & ci[2] > 1
+}
+mean(results)
+```
+
+Indeed, about 95% of the intervals contain the true $\beta_1$.
+
+4.
+
+```{r}
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, mean=0, sd=x)
+y <- beta0 + beta1*x + noise
+```
+
+5.
+
+```{r}
+plot(x, y)
+```
+
+The variance of $Y$ increases as we increase $X$
+
+6. 
+
+```{r}
+nsim <- 1000
+results <- rep(NA, nsim)
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=x)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  ci <- confint(lm_mod, "x", level = 0.95)
+  
+  results[i] <- ci[1] < 1 & ci[2] > 1
+}
+mean(results)
+```
+
+Slightly less than 95% of the intervals contain $\beta_1$, but coverage is still pretty close to 95%.
+
+7.
+
+```{r}
+nsim <- 1000
+results <- rep(NA, nsim)
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=x^2)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  ci <- confint(lm_mod, "x", level = 0.95)
+  
+  results[i] <- ci[1] < 1 & ci[2] > 1
+}
+mean(results)
+```
+
+Coverage has decreased further as we break the constant variance assumption more.
+
+8.
+
+When the constant variance assumption is met, coverage is still approximately 95% for $n = 10$:
+
+```{r}
+nsim <- 1000
+results <- rep(NA, nsim)
+n <- 10 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=1)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  ci <- confint(lm_mod, "x", level = 0.95)
+  
+  results[i] <- ci[1] < 1 & ci[2] > 1
+}
+mean(results)
+```
+
+
+However, coverage is slightly lower when the constant variance assumption is not satisfied:
+
+```{r}
+nsim <- 1000
+results <- rep(NA, nsim)
+n <- 10 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=x^2)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  ci <- confint(lm_mod, "x", level = 0.95)
+  
+  results[i] <- ci[1] < 1 & ci[2] > 1
+}
+mean(results)
+```
+
+

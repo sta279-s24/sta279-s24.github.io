@@ -7,11 +7,11 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday, September 15, 11:00am on Canvas
+**Due:** Friday, February 2, 2:00pm on Canvas
 
 **Instructions:** 
 
-* Download the [HW 2 template](https://sta279-f23.github.io/homework/hw_2_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Download the [HW 2 template](https://sta279-s24.github.io/homework/hw_2_template.qmd), and open the template (a Quarto document) in RStudio. 
 * Put your name in the file header
 * Click `Render`
 * Type all code and answers in the document (using `###` for section headings and `####` for question headings)
@@ -26,9 +26,8 @@ link-citations: yes
   * Use descriptive names for your variables
   * Set seeds where needed
   * Comment code
-  * If a block of code is being called multiple times, put it in a function
   
-**Resources:** Homework 2 will give you practice with loops, `if` statements, simulation, and functions. In addition to the class notes and activities, I recommend reading the following resources:
+**Resources:** Homework 2 will give you practice with loops, `if` statements, and simulation. In addition to the class notes and activities, I recommend reading the following resources:
 
 * [Chapter 3.1 -- 3.2](https://adv-r.hadley.nz/vectors-chap.html) (an introduction to vectors) in *Advanced R*
 * [Chapter 5](https://adv-r.hadley.nz/control-flow.html) (loops and choices) in *Advanced R*
@@ -79,118 +78,71 @@ Conduct a simulation where the lead player colors the slips and adds them to the
 Conduct a simulation where the lead player colors the slips and adds them to the boxes at random. The other players randomly choose which boxes to open. Suppose a player that doesn’t see their own slip randomly guesses either red or blue. What proportion of the time do the $a$ players win?
 :::
 
+### Statistical simulation: looking at p-values
 
-### Practice with functions
+In class, we have discussed using statistical simulations to answer questions about statistical models. For example, we have asked whether the normality and constant variance assumptions really matter when fitting linear regression models.
 
-The Huber loss function is defined as 
+To answer these questions, we need a *performance metric* (the "P" in the ADEMP steps). A performance metric tells us how well our methods are performing, so we can compare performance across different simulation scenarios.
 
-$$\psi(x) = \begin{cases} x^2 & \text{if } |x| \leq 1 \\ 2|x| - 1 & \text{if } |x| > 1  \end{cases}$$
+One common method to measure performance, for a statistical model like a linear regression, is with the observed coverage of confidence intervals. If I create 95% confidence intervals, but their observed coverage is much less than 95%, then something is wrong!
 
-This function is quadratic on the interval $[-1,1]$, and linear outside of this interval. It transitions from quadratic to linear "smoothly", and it is often used in place of the usual squared error loss for robust estimation. 
+An alternative, though related, method is to look at p-values from hypothesis tests. For example, consider the linear regression model
 
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+We might test the hypotheses $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$. This gives us a p-value, and we may choose to reject if the p-value is $< \alpha$ (common values of $\alpha$ include 0.05 and 0.01). If the null hypothesis $H_0$ is *true*, we would expect to *incorrectly* reject $H_0$ $\alpha \cdot 100%$ of the time. For example, if $\beta_1 = 0$, and we reject when $p < 0.05$, then we would expect to incorrectly reject $H_0$ 5% of the time. This is called the **type I error** rate.
+
+In the following questions, we will use the type I error rate as an alternative performance measure for statistical simulations.
+
+The code below simulates data from the linear regression model with all assumptions satisfied, and $\beta_1 = 0$. We then calculate the p-value for the test $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$.
+
+```r
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 0 # slope
+
+x <- runif(n, min=0, max=1)
+noise <- rnorm(n, mean=0, sd=1)
+y <- beta0 + beta1*x + noise
+
+lm_mod <- lm(y ~ x)
+p_value <- summary(lm_mod)$coefficients[2,4]
+```
+
+(Remember that the type I error rate is the probability of rejecting $H_0$, given that $H_0$ is true!)
 
 :::{.question}
 #### Question 4
 
-Write a function `huber()` that takes as an input a number $x$, and returns the Huber value $\psi(x)$. Here is a code skeleton to get you started:
-
-```r
-huber <- function(x){
-
-}
-```
-
-*Hint:* The `ifelse` function from class will be helpful!
+Repeat the code above many times. What fraction of times is the p-value less than 0.05? (i.e., what is our type I error rate when $\alpha = 0.05$?)
 :::
 
 
 :::{.question}
 #### Question 5
 
-HW 1 introduced the idea of *vectorization*. The `ifelse` function is vectorized, so if you used the `ifelse` function in Question 4, your `huber` function should also be vectorized.
-
-Check that the function is vectorized: e.g., `huber(c(0.5, 1, 2))` should return `0.25 1.00 3.00`
+Now break the normality assumption (you can adapt code from class). Does the type I error rate change?
 :::
 
-The Huber function can be modified so that the transition from quadratic to linear happens at an arbitrary cutoff value $a$, as in:
 
-$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2|x| - 1 & \text{if } |x| > a  \end{cases}$$
+#### Power
+
+The type I error rate measures hypothesis testing performance when $H_0$ is true. What about when $H_0$ is *false*? Then we can use **power**.
+
+The **power** of a test is the probability of rejecting $H_0$, when $H_0$ is *false*. 
 
 :::{.question}
 #### Question 6
 
-Starting with your solution code to Question 4, update your `huber()` function so that it takes two arguments: $x$, a number at which to evaluate the loss, and $a$ a number representing the cutoff value. It should now return $\psi_a(x)$, as defined above. Make $a = 1$ the *default* in your `huber` function.
+Re-run your code from question 4, but this time change the true slope to $\beta_1 = 0.2$. What fraction of times is the p-value less than 0.05? (i.e., what is our *power* to reject $H_0$?)
 :::
 
-
-### Continuing simulation study
-
-
-In this part of the assignment, we will continue working on the simulation from HW 1, to assess the importance of the constant variance assumption in simple linear regression models.
-
-For this assignment, you will simulate data from the following model:
-
-$$Y_i = 0.5 + X_i + \varepsilon_i,$$
-where $X_i \sim Uniform(0, 1)$ and $\varepsilon_i \sim N(0, \sigma^2(X_i))$. You will use $n_{sim} = 10000$ simulations, and you will assess performance using observed coverage of 95\% confidence intervals for $\beta_1 = 1$. You will simulate data under three different scenarios:
-
-* $\sigma(X_i) = 1$ (constant variance satisfied)
-* $\sigma(X_i) = X_i$
-* $\sigma(X_i) = X_i^2$
-
-
+Power depends on the actual value of $\beta_1$; if we change $\beta_1$, the ability to reject $H_0$ should also change.
 
 :::{.question}
 #### Question 7
 
-Adapting code from class, simulate $n = 50$ observations $(X_1, Y_1),...,(X_{50}, Y_{50})$ from the model above, with $\sigma(X_i) = 1$. Calculate a 95\% confidence interval for $\beta_1$, and check whether the confidence interval does indeed capture $\beta_1 = 1$.
+Re-run your code from question 6, with different values of $\beta_1$. How does power change when you change $\beta_1$?
 :::
-
-:::{.question}
-#### Question 8
-
-Repeat Question 7 `nsim = 10000` times. What fraction of your 95\% confidence intervals actually contained $\beta_1 = 1$?
-:::
-
-:::{.question}
-#### Question 9
-
-Repeat Question 8, but this time use $\sigma(X_i) = X_i$ (see code from HW 1). Now what fraction of the 95\% confidence intervals actually contained $\beta_1= 1$?
-:::
-
-:::{.question}
-#### Question 10
-
-Repeat Question 8, but this time use $\sigma(X_i) = X_i^2$. Now what fraction of the 95\% confidence intervals actually contained $\beta_1= 1$?
-:::
-
-
-:::{.question}
-#### Question 11
-
-Repeat Questions 8-10, but this time use a sample size of $n = 10$. Does your coverage change?
-:::
-
-:::{.question}
-#### Question 12
-
-Repeat Questions 8-10, but this time use a sample size of $n = 1000$. Does your coverage change?
-:::
-
-:::{.question}
-#### Question 13
-
-Fill in the following table to display your simulation results:
-
-|n (sample size) | $\sigma(X_i) = 1$ | $\sigma(X_i) = X_i$ | $\sigma(X_i) = X_i^2$|
-| --- | --- | --- | --- |
-| 10 | | | |
-| 50 | | | |
-| 1000 | | | |
-
-(For each entry in the table, report the observed confidence interval coverage in your simulations). See the [Quarto table documentation](https://quarto.org/docs/authoring/tables.html) for help on formatting tables.
-:::
-
-
-
 
 

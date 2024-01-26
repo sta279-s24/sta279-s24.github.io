@@ -8,9 +8,10 @@ January 22
 
 January 24
 : Statistical simulations
-  : [slides (html)](https://sta279-s24.github.io/slides/lecture_4.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_4.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_4.html)
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_4.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_4.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_4.html), [Class Activity solutions](https://sta279-s24.github.io/class_activities/ca_lecture_4_solutions.html)
 
 January 26
 : Lab day
 
 : **Homework 2 released**{: .label .label-yellow }
+  : [HW 2](https://sta279-s24.github.io/homework/hw2.html)
