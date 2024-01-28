@@ -319,4 +319,4 @@ my_power()
 
 ## Class activity
 
-[https://sta279-f23.github.io/class_activities/ca_lecture_5.html](https://sta279-f23.github.io/class_activities/ca_lecture_5.html)
+[https://sta279-s24.github.io/class_activities/ca_lecture_5.html](https://sta279-s24.github.io/class_activities/ca_lecture_5.html)
