@@ -1,0 +1,79 @@
+---
+title: "Class activity solutions"
+format: html
+editor: source
+author: "Ciaran Evans"
+---
+
+## Writing a function to calculate the mean
+
+The *mean* of numbers $x_1,...,x_n$ is their average:
+
+$$\frac{x_1 + x_2 + \cdots + x_n}{n}$$ In R, we can calculate the mean with the `mean` function. For example:
+
+```{r}
+mean(c(1,2,3))
+```
+
+1.  Write your own mean function, called `my_mean`, that calculates the mean of a vector. The input to your function should be a vector, and the output should be the mean of the values in that vector. You may *not* use the built-in `mean` function in R, but you *may* use the `sum` and `length` functions.
+
+```{r}
+my_mean <- function(x){
+  return(sum(x)/length(x))
+}
+```
+
+2.  Check that your function works by comparing the output with R's `mean` function for several different input vectors.
+
+```{r}
+my_mean(1:10)
+mean(1:10)
+
+unif_samp <- runif(100)
+my_mean(unif_samp)
+mean(unif_samp)
+```
+
+## Weighted means
+
+A *weighted* mean is similar to the usual average, but now we add a *weight* to each value. The observations with greater weights contribute more to the weighted mean.
+
+The weighted mean of $x_1,...,x_n$ with weights $w_1,...,w_n$ is
+
+$$\frac{w_1 x_1 + w_2 x_2 + \cdots + w_n x_n}{w_1 + w_2 + \cdots + w_n}$$ The usual arithmetic mean is a special case of the weighted mean with $w_1 = w_2 = \cdots = w_n = 1$.
+
+3.  Modify your `my_mean` function from Exercise 1 so that it now takes **two** inputs -- a vector of values `x`, and a vector of weights `w` -- and returns the *weighted* mean of `x` with weights `w`. *Hint*: If `x` and `w` are two vectors of the same length, then `x*w` is a vector created by multiplying each entry of `x` with the corresponding entry of `w`.
+
+```{r}
+my_mean <- function(x, w){
+  return(sum(x*w)/sum(w))
+}
+```
+
+4.  When we calculate a mean, we usually don't need weights. Modify your `my_mean` function from Exercise 3 so that the *default* weights are all 1.
+
+```{r}
+# making the default weights all 1
+my_mean <- function(x, w = rep(1, length(x))){
+  return(sum(x*w)/sum(w))
+}
+```
+
+5.  Check that your function from Exercise 4 works:
+
+```{r}
+# should be 2
+my_mean(x = c(1, 2, 3))
+
+# should be 2
+my_mean(x = c(1, 2, 3), w = c(1, 1, 1))
+
+# should be 1.5
+my_mean(x = c(1, 2, 3), w = c(1, 1, 0))
+```
+
+**Note:** You need to make `w` a vector of the same length as `x`! The following code will run, but is *wrong*:
+
+```{r}
+my_mean(x = c(1, 2, 3), w = 1)
+```
