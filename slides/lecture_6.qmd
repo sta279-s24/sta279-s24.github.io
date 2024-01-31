@@ -1,0 +1,326 @@
+---
+title: "Lecture 6"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+## HW 2, Question 2
+
+* There are $a$ boxes, and slips of paper with the numbers $1,...,a$. The slips of paper are randomly added to the boxes.
+* Each player $i = 1,...,a$ is going to try to find their slip of paper (the one with their number)
+* Each player randomly selects $a/2$ boxes to open
+* What is the probability that *all* players find their slip of paper when opening the boxes?
+
+## Tips on where to start
+
+* There are $a$ boxes, and slips of paper with the numbers $1,...,a$. The slips of paper are randomly added to the boxes.
+* Each player $i = 1,...,a$ is going to try to find their slip of paper (the one with their number)
+* Each player randomly selects $a/2$ boxes to open
+* What is the probability that *all* players find their slip of paper when opening the boxes?
+
+## Function arguments
+
+How could I change this function to allow the noise term to come from a different distribution?
+
+```{r, echo=T, eval=F}
+assess_coverage <- function(n, nsim, beta0, beta1){
+  results <- rep(NA, nsim)
+
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- rchisq(n, 1)
+    y <- beta0 + beta1*x + noise
+
+    lm_mod <- lm(y ~ x)
+    ci <- confint(lm_mod, "x", level = 0.95)
+  
+    results[i] <- ci[1] < beta1 & ci[2] > beta1
+  }
+  return(mean(results))
+}
+```
+
+
+## Function arguments
+
+We can also pass functions as arguments!
+
+```{r, echo=T}
+assess_coverage <- function(n, nsim, beta0, beta1, noise_dist){
+  results <- rep(NA, nsim)
+
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- noise_dist(n)
+    y <- beta0 + beta1*x + noise
+
+    lm_mod <- lm(y ~ x)
+    ci <- confint(lm_mod, "x", level = 0.95)
+    results[i] <- ci[1] < beta1 & ci[2] > beta1
+  }
+  return(mean(results))
+}
+```
+
+```{r, echo=T}
+assess_coverage(n = 100, nsim = 1000, beta0 = 0.5, beta1 = 1,
+                noise_dist = rexp)
+```
+
+## Function arguments
+
+What must be true about the `noise_dist` function here?
+
+```{r, echo=T}
+assess_coverage <- function(n, nsim, beta0, beta1, noise_dist){
+  results <- rep(NA, nsim)
+
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- noise_dist(n)
+    y <- beta0 + beta1*x + noise
+
+    lm_mod <- lm(y ~ x)
+    ci <- confint(lm_mod, "x", level = 0.95)
+    results[i] <- ci[1] < beta1 & ci[2] > beta1
+  }
+  return(mean(results))
+}
+```
+
+## Function arguments
+
+
+```{r, echo=T}
+assess_coverage <- function(n, nsim, beta0, beta1, noise_dist){
+  results <- rep(NA, nsim)
+
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- noise_dist(n)
+    y <- beta0 + beta1*x + noise
+
+    lm_mod <- lm(y ~ x)
+    ci <- confint(lm_mod, "x", level = 0.95)
+    results[i] <- ci[1] < beta1 & ci[2] > beta1
+  }
+  return(mean(results))
+}
+```
+
+```{r, echo=T, error=T}
+assess_coverage(n = 100, nsim = 1000, beta0 = 0.5, beta1 = 1,
+                noise_dist = rchisq)
+```
+
+## Function defaults
+
+```{r, echo=T, eval=F}
+?rexp
+```
+
+**Description**
+
+Density, distribution function, quantile function and random generation for the exponential distribution with rate `rate` (i.e., mean `1/rate`).
+
+**Usage**
+
+`rexp(n, rate = 1)`
+
+* The *default* value of `rate` is 1!
+
+## Function defaults
+
+`rexp(n, rate = 1)`
+
+The *default* value of `rate` is 1!
+
+Same results:
+```{r, echo=T}
+set.seed(93)
+rexp(n=1)
+
+set.seed(93)
+rexp(n=1, rate=1)
+```
+
+Different result:
+```{r, echo=T}
+set.seed(93)
+rexp(n=1, rate=2)
+```
+
+
+## Function defaults
+
+```{r, echo=T, eval=F}
+?rchisq
+```
+
+**Usage**
+
+`rchisq(n, df, ncp = 0)`
+
+* There is no default for `df` in the `rchisq` function!
+
+```{r, echo=T, error=T}
+assess_coverage(n = 100, nsim = 1000, beta0 = 0.5, beta1 = 1,
+                noise_dist = rchisq)
+```
+
+* How can we use a $\chi^2_1$ for `noise_dist`?
+
+## Writing a new function
+
+```{r, echo=T}
+set.seed(73)
+
+chisq_1 <- function(m){
+  return(rchisq(m, df=1))
+}
+assess_coverage(n = 100, nsim = 1000, beta0 = 0.5, beta1 = 1,
+                noise_dist = chisq_1)
+```
+
+## Function scoping
+
+What value will the following code return?
+
+```{r, echo=T, eval=F}
+g01 <- function(x = 10) {
+  return(x)
+}
+
+g01()
+```
+
+## Function scoping
+
+What value will the following code return?
+
+```{r, echo=T}
+g01 <- function(x = 10) {
+  return(x)
+}
+
+g01()
+```
+
+What if I try to look at `x`?
+
+```{r, echo=T, eval=F}
+x
+```
+
+## Function scoping
+
+What value will the following code return?
+
+```{r, echo=T}
+g01 <- function(x = 10) {
+  return(x)
+}
+
+g01()
+```
+
+What if I try to look at `x`?
+
+```{r, echo=T, error = T}
+x
+```
+
+* Variables created within functions don't exist outside the function!
+
+## Function scoping
+
+Variables created within functions don't exist outside the function!
+
+```{r, echo=T, error=T}
+g01 <- function() {
+  x <- 10
+  return(x)
+}
+
+g01()
+x
+```
+
+## Function scoping
+
+What will the following code return?
+
+```{r, echo=T, eval=F}
+x <- 10
+
+g01 <- function(){
+  return(x)
+}
+
+g01()
+```
+
+## Function scoping
+
+```{r, echo=T}
+x <- 10
+
+g01 <- function(){
+  return(x)
+}
+
+g01()
+x
+```
+
+* If a variable is not defined in a function, R looks outside the function (the *global environment*)
+
+
+## Name masking
+
+What value will the following code return?
+
+```{r, echo=T, eval=F}
+x <- 10
+g01 <- function() {
+  x <- 20
+  return(x)
+}
+
+g01()
+x
+```
+
+## Name masking
+
+What value will the following code return?
+
+```{r, echo=T}
+x <- 10
+g01 <- function() {
+  x <- 20
+  return(x)
+}
+
+g01()
+x
+```
+
+* Names defined inside a function *mask* names defined outside a function
+* Variables created within a function don't exist outside
+
+## Summary
+
+* Variables created within a function don't exist outside
+* If a variable is not defined in a function, R looks outside the function
+* Names defined inside a function *mask* names defined outside a function
+
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_6.html](https://sta279-s24.github.io/class_activities/ca_lecture_6.html)
+
