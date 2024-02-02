@@ -1,0 +1,95 @@
+---
+title: "Lecture 7"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+## Recap: function scoping
+
+* Variables created within a function don't exist outside
+* If a variable is not defined in a function, R looks outside the function
+* Names defined inside a function *mask* names defined outside a function
+
+## What will happen?
+
+```{r, eval=F, echo=T}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+g02(x)
+x + 1
+```
+
+## What will happen?
+
+```{r, echo=T}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+g02(x)
+x + 1
+```
+
+## What will happen?
+
+```{r, eval=F, echo=T}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+x <- g02(x)
+x + 1
+```
+
+## What will happen?
+
+```{r, echo=T}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+x <- g02(x)
+x + 1
+```
+
+## What will happen?
+
+```{r, eval=F, echo=T}
+g02 <- function(y){
+  y <- y - 1
+  return(y)
+}
+
+g02(g02(20))
+```
+
+## What will happen?
+
+```{r, echo=T}
+g02 <- function(y){
+  y <- y - 1
+  return(y)
+}
+
+g02(g02(20))
+```
+
+

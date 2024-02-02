@@ -140,7 +140,7 @@ for(i in 1:length(a_values)){
   game_results <- rep(NA, ngames)
   
   for(j in 1:ngames){
-    game_results[j] <- play_game(a_values[i])
+    game_results[j] <- play_game_q3(a_values[i])
   }
   a_probs[i] <- mean(game_results)
 }
@@ -151,111 +151,99 @@ plot(a_values, a_probs)
 #### Question 4
 
 ```{r}
-huber <- function(x){
-  return(ifelse(abs(x) <= 1, x^2, 2*abs(x) - 1))
+set.seed(711)
+nsim <- 1000
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 0 # slope
+
+pvals <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=1)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  pvals[i] <- summary(lm_mod)$coefficients[2,4]
 }
+
+mean(pvals < 0.05)
 ```
+
+Indeed, we reject the null about 5% of the time.
 
 #### Question 5
 
 ```{r}
-huber(c(0.5, 1, 2))
+set.seed(711)
+nsim <- 1000
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 0 # slope
+
+pvals <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rchisq(n, df=1)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  pvals[i] <- summary(lm_mod)$coefficients[2,4]
+}
+
+mean(pvals < 0.05)
 ```
+
+The type I error rate is still around 5%.
 
 #### Question 6
 
-There is a typo in this question. The original question reads
-
-$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2|x| - 1 & \text{if } |x| > a  \end{cases}$$
-
-Here is the code for that (incorrect) version:
-
 ```{r}
-huber <- function(x, a=1){
-  return(ifelse(abs(x) <= a, x^2, 2*abs(x) - 1))
-}
-```
+set.seed(711)
+nsim <- 1000
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 0.2 # slope
 
-The *correct* definition of $\psi_a(x)$ should be
+pvals <- rep(NA, nsim)
 
-$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2a|x| - a^2 & \text{if } |x| > a  \end{cases}$$
-
-Here is code for the correct version:
-
-```{r}
-huber <- function(x, a=1){
-  return(ifelse(abs(x) <= a, x^2, 2*a*abs(x) - a^2))
-}
-```
-
-(For this homework assignment, either is ok).
-
-#### Questions 7 - 13
-
-A clean way to write the code for these questions is to write a function (`assess_coverage`) which takes both the sample size `n` and the standard deviation function `noise_sd`. Then, use a nested `for` loop to iterate over both the sample sizes and the standard deviations.
-
-First, let's write the function to calculate confidence interval coverage:
-
-```{r}
-# inputs: 
-#   n: sample size
-#   nsim: number of simulations
-#   beta0: intercept
-#   beta1: slope
-#   level: confidence level (default 0.95, for a 95% CI)
-#   noise_sd: a function that takes in a vector x, and returns
-#             the standard deviation for each observation as a function of x
-#
-# output: confidence interval coverage
-assess_coverage <- function(n, nsim, beta0, beta1, level = 0.95, noise_sd){
-  results <- rep(NA, nsim)
-
-  for(i in 1:nsim){
-    # simulate the data
-    x <- runif(n, min=0, max=1)
-    noise <- rnorm(n, sd = noise_sd(x))
-    y <- beta0 + beta1*x + noise
-    
-    # caclulate a CI and check if it contains beta1
-    lm_mod <- lm(y ~ x)
-    ci <- confint(lm_mod, "x", level = level)
-    results[i] <- ci[1] < beta1 & ci[2] > beta1
-  }
-  return(mean(results))
-}
-```
-
-Here, the argument `noise_sd` is a function that returns $\sigma(X_i)$. For $\sigma(X_i) = 1$, `noise_sd(x)` should return 1. For $\sigma(X_i) = X_i$, `noise_sd(x)` should return `x`. Etc.
-
-Next, we need to iterate over the different sample sizes and standard deviations. You are not required to use `for` loops here (it is acceptable for you to run the simulation separately for each configuration in questions 8 -- 12, and manually enter the results into a table). In these solutions, though, I will show you how you could write the code more efficiently.
-
-We will use nested `for` loops to iterate over both the sample sizes and standard deviations. (Remember to use different indices for the two loops!) I will also use an object called a *matrix* to store the results. A matrix has two indices (for the rows and columns); e.g. `results[1,2]` is the first row, second column. We will see more matrices later in the course.
-
-```{r}
-n_values <- c(10, 50, 1000)
-sd_functions <- list(function(x){return(1)},
-                     function(x){return(x)},
-                     function(x){return(x^2)})
-
-results <- matrix(NA, nrow=length(n_values), ncol = length(sd_functions))
-for(i in 1:length(n_values)){
-  for(j in 1:length(sd_functions)){
-    results[i,j] <- assess_coverage(n_values[i], nsim=1000, 
-                                    beta0 = 0.5, beta1 = 1, 
-                                    noise_sd = sd_functions[[j]])
-  }
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=1)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  pvals[i] <- summary(lm_mod)$coefficients[2,4]
 }
 
-results
+mean(pvals < 0.05)
 ```
 
-Finally, we want to make the results table look nice! I will use the `kable` function from the `knitr` package here, which converts R output into Markdown for use in documents. I am adding the sample sizes as the initial column, then adding column names.
+Our power with $\beta_1 = 0.2$ is about 8%.
+
+#### Question 7
 
 ```{r}
-knitr::kable(cbind(n_values, results),
-             col.names = c("n", "$\\sigma(X_i) = 1$", 
-                           "$\\sigma(X_i) = X_i$", 
-                           "$\\sigma(X_i) = X_i^2$"))
+set.seed(711)
+nsim <- 1000
+n <- 100 # sample size
+beta0 <- 0.5 # intercept
+beta1 <- 1 # slope
+
+pvals <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  x <- runif(n, min=0, max=1)
+  noise <- rnorm(n, mean=0, sd=1)
+  y <- beta0 + beta1*x + noise
+  
+  lm_mod <- lm(y ~ x)
+  pvals[i] <- summary(lm_mod)$coefficients[2,4]
+}
+
+mean(pvals < 0.05)
 ```
 
-
+As $\beta_1$ moves further away from 0, the power to reject $H_0$ increases.

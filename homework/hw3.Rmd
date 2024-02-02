@@ -7,11 +7,11 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday, September 22, 11:00am on Canvas
+**Due:** Friday, February 9, 2:00pm on Canvas
 
 **Instructions:** 
 
-* Download the [HW 3 template](https://sta279-f23.github.io/homework/hw_3_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Download the [HW 3 template](https://sta279-s24.github.io/homework/hw_3_template.qmd), and open the template (a Quarto document) in RStudio. 
 * Put your name in the file header
 * Click `Render`
 * Type all code and answers in the document (using `###` for section headings and `####` for question headings)
@@ -33,8 +33,49 @@ link-citations: yes
 * [Chapter 5](https://adv-r.hadley.nz/control-flow.html) (loops and choices) in *Advanced R*
 * [Appendix C.2](https://mdsr-book.github.io/mdsr3e/C-algorithmic.html#simple-example) in *Modern Data Science with R*
 * [Chapter 19.1 -- 19.5.2](https://r4ds.had.co.nz/functions.html) (functions and conditions) in *R for Data Science* (1st edition)
-* [Chapter 20](https://r4ds.had.co.nz/vectors.html) (vectors and lists) in *R for Data Science* (1st edition)
-* [Vectors and lists](https://jennybc.github.io/purrr-tutorial/bk00_vectors-and-lists.html) in the `purrr` tutorial
+
+
+### Practice with functions
+
+The Huber loss function is defined as 
+
+$$\psi(x) = \begin{cases} x^2 & \text{if } |x| \leq 1 \\ 2|x| - 1 & \text{if } |x| > 1  \end{cases}$$
+
+This function is quadratic on the interval $[-1,1]$, and linear outside of this interval. It transitions from quadratic to linear "smoothly", and it is often used in place of the usual squared error loss for robust estimation. 
+
+
+:::{.question}
+#### Question 1
+
+Write a function `huber()` that takes as an input a number $x$, and returns the Huber value $\psi(x)$. Here is a code skeleton to get you started:
+
+```r
+huber <- function(x){
+
+}
+```
+
+*Hint:* The `ifelse` function from class will be helpful!
+:::
+
+
+:::{.question}
+#### Question 2
+
+HW 1 introduced the idea of *vectorization*. The `ifelse` function is vectorized, so if you used the `ifelse` function in Question 4, your `huber` function should also be vectorized.
+
+Check that the function is vectorized: e.g., `huber(c(0.5, 1, 2))` should return `0.25 1.00 3.00`
+:::
+
+The Huber function can be modified so that the transition from quadratic to linear happens at an arbitrary cutoff value $a$, as in:
+
+$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2a|x| - a^2 & \text{if } |x| > a  \end{cases}$$
+
+:::{.question}
+#### Question 3
+
+Starting with your solution code to Question 2, update your `huber()` function so that it takes two arguments: $x$, a number at which to evaluate the loss, and $a$ a number representing the cutoff value. It should now return $\psi_a(x)$, as defined above. Make $a = 1$ the *default* in your `huber` function.
+:::
 
 ### More practice with functions
 
@@ -73,195 +114,60 @@ However, it does not work for vectors of length greater than 1:
 relu(c(1, -1))
 ```
 
-The issue here is that `if(x > 0)` in the `if...else...` statement is not vectorized. That is, R is expecting a single true or false, not a vector. As in HW 2, to vectorize this function we can use the `ifelse` function (which IS vectorized).
+The issue here is that `if(x > 0)` in the `if...else...` statement is not vectorized. That is, R is expecting a single true or false, not a vector. To vectorize this function we can use the `ifelse` function (which IS vectorized).
 
 :::{.question}
-#### Question 1
+#### Question 4
 
 Re-write the `relu` function above, using the `ifelse` function, so that `relu` can be applied to vectors.
 :::
 
 :::{.question}
-#### Question 2
-
-Adapt your `relu` function from Question 1 to create a new function, `leaky_relu`, which takes TWO inputs, $x$ and $a$, and returns $f_a(x)$ as defined above. Make $a = 0$ the default value.
-:::
-
-### Practice with lists
-
-In class, we learned about lists as a hierarchical structure for storing data. In these questions, we will practice more with lists and list indexing.
-
-:::{.question}
-#### Question 3
-
-Create a list, `x`, such that:
-
-* `x[[2]][[1]]` stores the function `rnorm`. So,
-`x[[2]][[1]](3)` should sample 3 numbers from a $N(0, 1)$ distribution.
-* `x[[1]]` stores the function `rexp`. So, `x[[1]](3)` should sample 3 numbers from an Exponential distribution with rate 1.
-* `x[[3]][[1]]` stores an *anonymous* function which samples from a $\chi^2_2$ distribution. So, `x[[3]][[1]](3)` should sample 3 numbers from a $\chi^2_2$ distribution.
-:::
-
-
-
-### Logistic regression
-
-As you learned in STA 112, *linear* regression is used with quantitative responses, whereas *logistic* regression is used for binary responses ($Y_i = 0$ or $1$). In particular, if $\pi_i = P(Y_i = 1)$, then a simple logistic regression model (with explanatory variable $X_i$) is
-$$\log \left( \frac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 X_i$$
-
-As an example, consider a dataset of 3402 pitches thrown by MLB pitcher Clayton Kershaw in the 2013 season. The data is contained in the `Kershaw` data set, in the `Stat2Data` R package. We will focus on two specific variables for each pitch: 
-
-* `Result`: a negative result (a ball or a hit), or a positive result (a strike or an out)
-* `EndSpeed`: the speed at which the ball crossed home plate (in mph)
-
-Our goal is to investigate the relationship between pitch speed and result. We can fit a logistic regression model, with `EndSpeed` as the explanatory variable and `Result` as the response:
-
-```{r, message=F, warning=F}
-library(tidyverse)
-library(Stat2Data)
-data("Kershaw")
-
-log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
-summary(log_reg)
-```
-
-Here, `log_reg` is the resulting logistic regression model in R. What type of object is `log_reg`?
-
-:::{.question}
-#### Question 4
-
-Use the `typeof` function to determine what type of object `log_reg` is.
-:::
-
-:::{.question}
 #### Question 5
 
-Use the `length` function to determine how many components are in the top level of `log_reg`. (There's a lot!)
+Adapt your `relu` function from Question 4 to create a new function, `leaky_relu`, which takes TWO inputs, $x$ and $a$, and returns $f_a(x)$ as defined above. Make $a = 0$ the default value.
 :::
+
+
+### More power simulations
+
+On the previous homework, you work on simulating data to assess power in linear regression models. For the simple linear regression model
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+we consider testing $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$.
+
+*Power* is the probability we reject $H_0$, and it depends on the true value of $\beta_1$:
+
+$$Power(\beta_1) = P(\text{reject } H_0 | \beta_1 \text{ is true slope})$$
+Last time, you wrote code to calculate the power for a given value of $\beta_1$. This time, you will turn your code into a function.
+
 
 :::{.question}
 #### Question 6
 
-Let's look at the first component: use `log_reg[[1]]` to see what it contains. What is stored here?
+Use your code from HW 2 to write function called `test_power`, with the following requirements:
+
+Inputs:
+
+* `n`: the number of observations from the linear regression model
+* `nsim`: the number of simulations used to estimate the power
+* `beta0`: the true intercept for the linear regression model
+* `beta1`: the true slope for the linear regression model
+* `alpha`: the p-value threshold for rejecting $H_0: \beta_1 = 0$
+
+Output: an estimate of $Power(\beta_1)$
 :::
-
-How were we meant to know that the first component of `log_reg` contained the coefficients? We probably wouldn't! Fortunately, R offers the option to *name* the components of a list, which makes it easier to access them without remembering all their indices. To get the coefficients, for example, we can run the following:
-
-```{r}
-log_reg[["coefficients"]]
-```
-
-Another way of accessing named entries in a list is with the `$`:
-
-```{r}
-log_reg$coefficients
-```
-
-We can see all the names for a list with the `names` function:
-
-```{r}
-names(log_reg)
-```
-
-This makes it easy to see what information the list contains!
 
 :::{.question}
 #### Question 7
 
-How would you extract the AIC for your logistic regression model, *without* using the `summary` function? Write the code here.
+Use your function from question 6 to calculate the power for different values of $\beta_1$ (0, -0.5, 0.5, -1, and 1) when $n = 100$ and $\alpha = 0.05$ (you may specify your own choice of `beta0` and `nsim`). How does power change as $\beta_1$ changes? Explain why this makes sense.
 :::
-
-### Logistic regression diagnostics
-
-So far, so good! But, how do we assess the assumptions for this logistic regression model? The usual residual plots (like we would make for linear regression) are not helpful:
-
-```{r}
-data.frame(fitted = log_reg$fitted.values,
-           residuals = log_reg$y - log_reg$fitted.values) |>
-  ggplot(aes(x = fitted, y = residuals)) +
-  geom_abline(slope = 0, intercept = 0, color = "blue") +
-  geom_point() +
-  labs(x = "Fitted values", y = "Residuals") +
-  theme_bw()
-```
-
-Instead of the raw residuals $Y_i - \widehat{\pi}_i$, it is common in logistic regression to use a type of residual called *randomized quantile residuals*. For logistic regression, a randomized quantile residual is defined as follows:
-
-$$r_{Q}(Y_i, \widehat{\pi}_i) = \Phi^{-1}(u) \hspace{1cm} u \sim \begin{cases}
-Uniform(1 - \widehat{\pi}_i, 1) & Y_i = 1 \\
-Uniform(0, 1 - \widehat{\pi}_i) & Y_i = 0,
-\end{cases}$$
-
-In other words:
-
-* If $Y_i = 1$, draw a random number $u$ from a $Uniform(1 - \widehat{\pi}_i, 1)$ distribution
-  * Else ($Y_i = 0$), draw a random number $u$ from a $Uniform(0, 1 - \widehat{\pi}_i)$ distribution
-* Then return $\Phi^{-1}(u)$, where $\Phi^{-1}$ is the quantile function for a standard normal distribution
-
-How do we do this? Some hints:
-
-* `log_reg$fitted.values` will return a vector of $\widehat{\pi}_i$'s for the observed data
-* `log_reg$y` will return a vector of $Y_i$'s for the observed data
-* `runif(...)` will sample from a uniform distribution
-* `ifelse` can be used to handle conditional statements
-* In R, $\Phi^{-1}(u)$ would be calculated with `qnorm(u)`
-
 
 :::{.question}
 #### Question 8
 
-Using these hints, write a function `quant_resid` that calculates randomized quantile residuals for a logistic regression model. Your function should take as input a logistic regression model (output of a call to `glm` in R), and return a vector of randomized quantile residuals (one residual for each observation in the data).
-
-You may use a `for` loop, or use vectorized functions in R. You may *not* use any existing quantile residual functions from R packages.
+Use your function from question 6 to calculate the power for different values of $n$ (10, 50, 100, 500) when $\alpha = 0.05$ and $\beta_1 = 0.5$ (you may specify your own choice of `beta0` and `nsim`). How does power change as $n$ changes? Explain why this makes sense.
 :::
 
-### Quantile residuals, continued: plotting
-
-Above, you wrote a function `quant_resid` to generate randomized quantile residuals for a logistic regression model. Next, you will use your `quant_resid` function to write a new function, which produces a quantile residual *plot* for a logistic regression model.
-
-:::{.question}
-#### Question 9
-
-Write a function, `quant_resid_plot`, which takes as input a fitted logistic regression model (the output from `glm` in R), and produces a quantile residual plot. 
-
-* The quantile residuals should be plotted on the y-axis
-* The fitted values (predicted probabilities) from the logistic regression model should be plotted on the x-axis
-* You should add a horizontal line at $y = 0$
-* The axes should be labeled appropriately
-* You may use either base R or `ggplot` for making the plot
-
-Here is sample output for the `Kershaw` data (note: these are *randomized* quantile residuals, so it is ok if your plot looks *slightly* different):
-
-```{r, echo=F, message=F, warning=F}
-quant_resid <- function(mod){
-  yhat <- log_reg$fitted.values
-  y <- log_reg$y
-  u <- ifelse(y == 1, runif(length(y), 1-yhat, 1),
-              runif(length(y), 0, 1-yhat))
-  return(qnorm(u))
-}
-
-quant_resid_plot <- function(mod){
-  data.frame(fitted = mod$fitted.values,
-           residuals = quant_resid(mod)) |>
-  ggplot(aes(x = fitted, y = residuals)) +
-  geom_abline(slope = 0, intercept = 0, color = "blue") +
-  geom_point() +
-  labs(x = "Fitted values", y = "Residuals") +
-  theme_bw()
-}
-```
-
-```{r, message=F, warning=F}
-library(tidyverse)
-library(Stat2Data)
-data("Kershaw")
-
-log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
-
-quant_resid_plot(log_reg)
-```
-:::
-
-Interpreting the quantile residual plot is similar to interpreting residual plots for linear regression. If the logistic regression assumptions are satisfied, then the quantile residuals should be randomly scattered around the horizontal line at 0, with no clear pattern.
 
