@@ -1,0 +1,59 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** Work with a neighbor to answer the following questions, then we will discuss the activity as a class. To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_8_template.qmd) file.
+
+## Practice with indexing lists
+
+1. Each of the following lists contains the vector `c(2, 7, 9)`. Determine the correct list indexing syntax to extract that vector from the list (your code should return just the vector, *not* a list containing the vector).
+
+```{r, eval=F}
+x1 <- list(c(2, 7, 9))
+x2 <- list(list(c(2, 7, 9)))
+x3 <- list(c(2, 7, 9), list("a", "b"))
+x4 <- list(c("a", "b"), list(list(c(2, 7, 9))))
+```
+
+2. Create a list `x5` such that the vector `c(2, 7, 9)` can be extracted with `x5[[3]][[2]][[1]]`.
+
+## Iterating over functions
+
+Here is the `assess_coverage` function we previously wrote in class:
+
+```{r}
+assess_coverage <- function(n, nsim, beta0, beta1, noise_dist){
+  results <- rep(NA, nsim)
+
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- noise_dist(n)
+    y <- beta0 + beta1*x + noise
+
+    lm_mod <- lm(y ~ x)
+    ci <- confint(lm_mod, "x", level = 0.95)
+    results[i] <- ci[1] < beta1 & ci[2] > beta1
+  }
+  return(mean(results))
+}
+```
+
+And here is the list of functions we created in the slides:
+
+```{r}
+chisq_1 <- function(m){
+  return(rchisq(m, df=1))
+}
+
+dist_funs <- list(rexp, rnorm, chisq_1)
+```
+
+3. Using a `for` loop, assess coverage for each function in the list `dist_funs`. Store the resulting coverages in a vector. Use a sample size `n=100`, a number of simulations `nsim = 1000`, and `beta0 = 0`, `beta1 = 1`.
+
+

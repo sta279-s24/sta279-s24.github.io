@@ -1,0 +1,230 @@
+---
+title: "Lecture 8: Lists"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+assess_coverage <- function(n, nsim, beta0, beta1, noise_dist){
+  results <- rep(NA, nsim)
+
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- noise_dist(n)
+    y <- beta0 + beta1*x + noise
+
+    lm_mod <- lm(y ~ x)
+    ci <- confint(lm_mod, "x", level = 0.95)
+    results[i] <- ci[1] < beta1 & ci[2] > beta1
+  }
+  return(mean(results))
+}
+```
+
+## Iterating over functions
+
+So far:
+
+```{r, echo=T}
+set.seed(45)
+
+# Simulate from a N(0,1)
+assess_coverage(n = 100, nsim = 1000, beta0 = 0.5, beta1 = 1,
+                noise_dist = rnorm)
+
+# Simulate from Exp(1)
+assess_coverage(n = 100, nsim = 1000, beta0 = 0.5, beta1 = 1,
+                noise_dist = rexp)
+```
+
+What if I want to simulate from *many* distributions?
+
+## Idea
+
+## Vectors revisited
+
+Vectors can contain numbers, booleans, characters, etc:
+
+```{r, echo=T}
+x <- c(0, 1, 2)
+x
+typeof(x)
+
+x <- c("a", "b", "c")
+x
+typeof(x)
+```
+
+The `typeof` function tells what *type* of object we have
+
+## Vectors of multiple types?
+
+```{r, echo=T, error=T}
+x <- c(0, 1, "a")
+x
+x[1] + 1
+```
+
+Basic vectors (called *atomic* vectors) only contain one type.
+
+## Lists
+
+```{r, echo=T}
+x <- list(c(0, 1), "a")
+x
+```
+
+## Lists
+
+```{r, echo=T}
+x <- list(c(0, 1), "a")
+x
+
+x[[1]]
+
+x[[1]][1]
+```
+
+
+## Lists
+
+```{r, echo=T}
+x <- list(c(0, 1), "a")
+x
+
+x[[1]]
+
+x[[1]][1]
+
+typeof(x[[1]])
+
+x[[2]]
+
+typeof(x[[2]])
+```
+
+## Visualizing list structure
+
+```{r, echo=T}
+x1 <- list(c(1, 2), c(3, 4))
+x1
+x2 <- list(list(1, 2), list(3, 4))
+x2
+```
+
+## Indexing lists
+
+```{r, echo=T}
+x <- list(c(1, 2), c(3, 4))
+
+x[1]
+typeof(x[1])
+
+x[[1]]
+typeof(x[[1]])
+```
+
+* `x[1]` returns a *list* which contains the first component of `x`
+* `x[[1]]` returns the object stored in the first component
+
+## Indexing lists
+
+```{r, echo=T, eval=F}
+x <- list(list(1, 2), list(3, 4))
+x[1]
+```
+
+**Question:** What will `x[1]` return?
+
+## Indexing lists
+
+```{r, echo=T}
+x <- list(list(1, 2), list(3, 4))
+x[1]
+```
+
+## Indexing lists
+
+```{r, echo=T, eval=F}
+x <- list(list(1, 2), list(3, 4))
+x[[1]]
+```
+
+**Question:** What will `x[[1]]` return?
+
+## Indexing lists
+
+```{r, echo=T}
+x <- list(list(1, 2), list(3, 4))
+x[[1]]
+```
+
+**Question:** How do I get just the 3?
+
+## Indexing lists
+
+```{r, echo=T}
+x <- list(list(1, 2), list(3, 4))
+x[[2]][[1]]
+```
+
+## Vectors of functions?
+
+Can we make a vector of *functions*?
+
+```{r, echo=T}
+chisq_1 <- function(m){
+  return(rchisq(m, df=1))
+}
+
+x <- c(rexp, rnorm, chisq_1)
+x
+```
+
+## Lists of functions
+
+```{r, echo=T, error=T}
+x <- list(rexp, rnorm, chisq_1)
+x[1]
+x[1](10)
+```
+
+**Question:** Why does this cause an error?
+
+## Lists of functions
+
+```{r, echo=T}
+
+x <- list(rexp, rnorm, chisq_1)
+x[[1]]
+x[[1]](10)
+```
+
+
+```{r, echo=F, eval=F}
+set.seed(45)
+
+noise_dists <- list(rnorm, rexp, chisq_1)
+ci_coverage <- rep(NA, length(noise_dists))
+
+for(i in 1:length(noise_dists)){
+  ci_coverage[i] <- assess_coverage(n = 100, nsim = 1000, 
+                                    beta0 = 0.5, beta1 = 1, 
+                                    noise_dist = noise_dists[[i]])
+}
+
+ci_coverage
+```
+
+## Class activity
+
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_8.html](https://sta279-s24.github.io/class_activities/ca_lecture_8.html)
+
+
+
+
