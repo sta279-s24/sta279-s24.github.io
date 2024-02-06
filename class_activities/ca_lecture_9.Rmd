@@ -1,0 +1,149 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** Work with a neighbor to answer the following questions. To get started, download the [class activity template](https://sta279-f23.github.io/class_activities/ca_lecture_8_template.qmd) file.
+
+In this activity, you will practice using `dplyr` functions for data manipulation.
+
+## Data
+
+You will work with the `flights` data from the `nycflights13` package. Run the following code in your console to learn more about the `flights` dataset:
+
+```{r, eval=F}
+library(nycflights13)
+?flights
+```
+
+(You may need to install the `nycflights13` package first). You will also need to load the `tidyverse` package.
+
+## Questions
+
+Flights departing late will probably arrive late. We can look at the relationship between departure delay and arrival delay with a scatterplot:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=6, fig.height=4}
+library(tidyverse)
+library(nycflights13)
+
+flights %>%
+  drop_na() %>%
+  sample_n(5000) %>%
+  ggplot(aes(x = dep_delay,
+             y = arr_delay)) +
+  geom_point(size = 1.5) +
+  labs(x = "Departure delay (minutes)",
+       y = "Arrival delay (minutes)") +
+  theme_bw() +
+  theme(text = element_text(size=20))
+```
+
+One way to summarize the relationship between two quantitative variables is with the *correlation*, which measures the strength of the linear relationship between the two variables. Correlation is a number between -1 and 1; a correlation close to -1 indicates a strong negative relationship, while a correlation close to 1 indicates a strong positive relationship, and a correlation of 0 indicates no relationship.
+
+1. In R, we calculate correlation with the *cor* function. Fill in the code below to calculate the correlation between departure delay and arrival delay (`use = "complete.obs"` means "Ignore the rows with NAs in either of the two variables"):
+
+```r
+flights |>
+  summarize(delay_cor = cor(..., ..., use = "complete.obs"))
+```
+
+<SCRIPT>
+function ShowAndHide(divid) {
+    var x = document.getElementById(divid);
+    if (x.style.display == 'none') {
+        x.style.display = 'block';
+    } else {
+        x.style.display = 'none';
+    }
+}
+</SCRIPT>
+
+<BUTTON ONCLICK="ShowAndHide('q1_solution')">Solution</BUTTON>
+
+<DIV ID="q1_solution" STYLE="display:none">
+```r
+flights |>
+  summarize(delay_cor = cor(dep_delay, arr_delay, use = "complete.obs"))
+```
+</DIV>
+
+2. Does the correlation between departure delay and arrival delay depend on which airport the flight departs from? We can use the `group_by` function to group the data before calculating correlation. Fill in the code below to calculate the correlation for each airport (EWR, JFK, and LGA).
+
+```r
+flights |>
+  group_by(...) |>
+  summarize(delay_cor = cor(..., ..., use = "complete.obs"))
+```
+
+<BUTTON ONCLICK="ShowAndHide('q2_solution')">Solution</BUTTON>
+
+<DIV ID="q2_solution" STYLE="display:none">
+```r
+flights |>
+  group_by(origin) |>
+  summarize(delay_cor = cor(dep_delay, arr_delay, use = "complete.obs"))
+```
+</DIV>
+
+3. How does the amount of time gained vary across airlines? Fill in the following code to calculate the average time gained and the standard deviation of time gained for each airline.
+
+```r
+flights |>
+  mutate(time_gained = ...) |>
+  group_by(...) |>
+  summarize(avg_time_gained = ...,
+            sd_time_gained = ...)
+```
+
+<BUTTON ONCLICK="ShowAndHide('q4_solution')">Solution</BUTTON>
+
+<DIV ID="q4_solution" STYLE="display:none">
+```r
+flights |>
+  mutate(time_gained = dep_delay - arr_delay) |>
+  group_by(carrier) |>
+  summarize(avg_time_gained = mean(time_gained, na.rm=T),
+            sd_time_gained = sd(time_gained, na.rm=T))
+```
+</DIV>
+
+4. Now let's look more at the different airlines. Which airport is the most common departure airport for American Airlines (AA) flights? Fill in the following code (you may need to look up documentation for the `count` function!).
+
+```r
+flights |>
+  filter(... == "AA") |>
+  count(...)
+```
+
+<BUTTON ONCLICK="ShowAndHide('q5_solution')">Solution</BUTTON>
+
+<DIV ID="q5_solution" STYLE="display:none">
+```r
+flights |>
+  filter(carrier == "AA") |>
+  count(origin)
+```
+</DIV>
+
+5. Occasionally, flights actually depart early. How many American Airlines flights departed early?
+
+```r
+flights |>
+  filter(carrier ..., dep_delay ...) |>
+  count()
+```
+
+<BUTTON ONCLICK="ShowAndHide('q6_solution')">Solution</BUTTON>
+
+<DIV ID="q6_solution" STYLE="display:none">
+```r
+flights |>
+  filter(carrier == "AA", dep_delay < 0) |>
+  count()
+```
+</DIV>

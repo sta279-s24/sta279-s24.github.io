@@ -1,0 +1,309 @@
+---
+title: "Lecture 9: Rectangular data in R"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Content so far
+
+* Simulation
+* Iteration
+* Vectors and lists
+* Functions
+
+**What's missing:** actual data sets!
+
+## Learning goals
+
+* Review/refresh data manipulation from STA 112
+* Explore different data objects in R and Python
+* Work with more challenging data, requiring more difficult manipulation
+* Combine information from multiple datasets
+* Learn tools for different data types (strings, factors, dates and times)
+
+## Next steps
+
+* Today: overview of matrices and data frames in R; basic data wrangling in R
+* Next week: Introduction to Python
+* After that: data wrangling with both R and Python
+
+## Rectangular data 
+
+```{r, message=F, warning=F}
+library(dplyr)
+starwars
+```
+
+## Rectangular data in R
+
+In R, there are two main ways of storing rectangular data:
+
+* matrices
+* data frames
+
+## Matrices
+
+A *matrix* generalizes a vector to *two* dimensions:
+
+```{r}
+x <- matrix(c(1, 2, 3, 4, 5, 6), nrow=2)
+x
+```
+
+* Each row is a vector
+* Each column is a vector
+
+## Indexing matrices
+
+```{r}
+x <- matrix(c(1, 2, 3, 4, 5, 6), nrow=2)
+x
+x[1,]
+x[,1]
+x[1,2]
+```
+
+* Use single square brackets `[ ]` to index
+* The first coordinate is the row, the second coordinate is the column
+
+## Uses and limitations of matrices
+
+* Correspond to the matrices we know and love from linear algebra
+* Usually the right way to store 2-d data for doing math (like matrix multiplication)
+* Like vectors, contain only one type of data
+
+```{r}
+x <- matrix(c(1, 2, 3, 'a', 5, 6), nrow=2)
+x
+```
+
+## Data frames
+
+```{r}
+example_df <- data.frame(x = c(1, 2, 3),
+                         y = c('a', 'b', 'c'))
+example_df
+```
+
+## Aside: what *are* data frames?
+
+```{r}
+example_df <- data.frame(x = c(1, 2, 3),
+                         y = c('a', 'b', 'c'))
+typeof(example_df)
+```
+
+* Matrices are like a 2-d vector
+* Data frames are a special type of list! With some requirements:
+  * Each component is a vector
+  * Each component has the same length
+  
+## Indexing data frames
+
+`[ ]` can work for indexing data frames, just like matrices:
+
+```{r}
+example_df <- data.frame(x = c(1, 2, 3),
+                         y = c('a', 'b', 'c'))
+example_df
+example_df[2, 1]
+```
+
+## Indexing data frames
+
+Like lists, `[[ ]]` and `$` can also be used:
+
+```{r}
+example_df <- data.frame(x = c(1, 2, 3),
+                         y = c('a', 'b', 'c'))
+example_df
+
+example_df$x
+example_df[["x"]]
+```
+
+
+## What do you do with a data frame?
+
+
+## Data manipulation
+
+```{r}
+glimpse(starwars)
+```
+
+What manipulation might I want to do with the `starwars` data?
+
+## `dplyr`: Tools for data wrangling
+
+:::: {.columns}
+
+::: {.column width="50%"}
+<img src="dplyr_logo.png" width = "200px">
+:::
+
+::: {.column width="50%"}
+* part of the tidyverse
+* provides a "grammar of data manipulation": useful verbs (functions) for manipulating data
+* we will cover the key `dplyr` functions
+:::
+
+::::
+
+
+## Verbs for data wrangling
+
+* `select()`: take a subset of the columns (i.e., features, variables)
+* `filter()`: take a subset of the rows (i.e., observations)
+* `mutate()`: add or modify existing columns
+* `arrange()`: sort the rows
+* `summarize()`: aggregate the data across rows (e.g., group it according to some criteria)
+
+## Creating a subset of the rows
+
+**Question:** Suppose I only want the droids in the `starwars` data. How would I choose only those rows?
+
+## Creating a subset of the rows
+
+**Question:** Suppose I only want the droids in the `starwars` data. How would I choose only those rows?
+
+```{r}
+filter(starwars, species == "Droid")
+```
+
+## Creating a subset of the rows
+
+```{r, eval=F}
+starwars |>
+  filter(species == "Droid")
+```
+
+```{r, echo=F}
+starwars |>
+  filter(species == "Droid") |>
+  head(2)
+```
+
+
+* `|>` is called the *pipe*. It means "take `<this>`, THEN do `<that>`"
+* `filter` keeps only the rows which satisfy a specific condition
+
+## Calculating summary statistics
+
+**Question:** What is the average height for droids in the dataset?
+
+## Calculating summary statistics
+
+**Question:** What is the average height for droids in the dataset?
+
+```{r}
+starwars |>
+  filter(species == "Droid") |>
+  summarize(mean_height = mean(height))
+```
+
+* pipes (`|>`) can be chained together
+* `summarize` calculates summary statistics
+* Why am I getting `NA`?
+
+## Handling missing values
+
+```{r, echo=F}
+starwars |>
+  filter(species == "Droid")
+```
+
+```{r}
+starwars |>
+  filter(species == "Droid") |>
+  summarize(mean_height = mean(height, na.rm=T))
+```
+
+## Calculating summary statistics
+
+**Question:** What if I want the average height for *humans*?
+
+```{r, eval=F}
+starwars |>
+  filter(species == "Droid") |>
+  summarize(mean_height = mean(height, na.rm=T))
+```
+
+
+## Calculating summary statistics
+
+**Question:** What if I want the average height for *humans*?
+
+```{r}
+starwars |>
+  filter(species == "Human") |>
+  summarize(mean_height = mean(height, na.rm=T))
+```
+
+## Calculating summary statistics
+
+**Question:** What is the average body mass for *each* species?
+
+## Calculating summary statistics
+
+**Question:** What is the average body mass for *each* species?
+
+```{r}
+starwars |>
+  group_by(species) |>
+  summarize(mean_height = mean(height, na.rm=T))
+```
+
+## Creating new variables
+
+**Question:** What is the distribution of the ratio of body mass to height?
+
+## Creating new variables
+
+**Question:** What is the distribution of the ratio of body mass to height?
+
+```{r, eval=F}
+starwars |>
+  mutate(body_ratio = mass/height)
+```
+
+## Creating new variables
+
+```{r}
+starwars |>
+  mutate(body_ratio = mass/height) |>
+  group_by(species) |>
+  summarize(mean_ratio = mean(body_ratio, na.rm=T),
+            sd_ratio = sd(body_ratio, na.rm=T))
+```
+
+## Creating new variables
+
+```{r}
+starwars |>
+  mutate(body_ratio = mass/height) |>
+  group_by(species) |>
+  summarize(mean_ratio = mean(body_ratio, na.rm=T),
+            sd_ratio = sd(body_ratio, na.rm=T),
+            N = n())
+```
+
+## Summary so far
+
+* `filter`: choose certain rows
+* `summarize`: calculate summary statistics
+* `group_by`: group rows together
+* `mutate`: create new columns
+
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_9.html](https://sta279-f23.github.io/class_activities/ca_lecture_9.html)
+
+
