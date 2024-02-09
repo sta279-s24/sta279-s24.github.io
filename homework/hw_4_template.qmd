@@ -12,7 +12,7 @@ author: "Your name"
 
 #### Question 1
 
-```{python}
+```{r}
 
 ```
 
