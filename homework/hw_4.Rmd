@@ -7,11 +7,11 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday, September 29, 11:00am on Canvas
+**Due:** Friday, February 16, 2:00pm on Canvas
 
 **Instructions:** 
 
-* Download the [HW 4 template](https://sta279-f23.github.io/homework/hw_4_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Download the [HW 4 template](https://sta279-s24.github.io/homework/hw_4_template.qmd), and open the template (a Quarto document) in RStudio. 
 * Put your name in the file header
 * Click `Render`
 * Type all code and answers in the document (using `###` for section headings and `####` for question headings)
@@ -30,209 +30,185 @@ link-citations: yes
   
 **Resources:** In addition to the class notes and activities, I recommend reading the following resources:
 
-* [Chapter 4](https://wesmckinney.com/book/numpy-basics) (NumPy basics) in *Python for Data Analysis* (3rd edition)
-* [Appendix C.2](https://mdsr-book.github.io/mdsr3e/C-algorithmic.html#simple-example) in *Modern Data Science with R*
+* [Chapter 4](https://mdsr-book.github.io/mdsr3e/04-dataI.html) in *Modern Data Science with R*
+* [Chapter 4](https://r4ds.hadley.nz/data-transform) in *R for Data Science* (2nd edition)
 
+## Data wrangling in R
 
-### Iteration in Python (3 ways)
+### NY Flights data
 
-In HW 1, you modified code that calculated $\sqrt{x}$ for each $x = 0, 0.1, 0.2,...,1$. The `for` loop version of the code was
+Let's begin with the `flights` data from the `nycflights13` package.
 
-```r
-x <- seq(from=0, to=1, by=0.1)
-sqrt_x <- rep(0, length(x))
-for(i in 1:length(x)){
-  sqrt_x[i] <- sqrt(x[i])
-}
-sqrt_x
+Suppose we want to know how many flights departed from each of the three NY airports (EWR, LGA, and JFK) in 2013. The `count` function allows us to count the number of rows, and to specify a variable to count by. Adding `sort = TRUE` will order the results from largest to smalles. For example:
+
+```{r, message=F, warning=F}
+library(nycflights13)
+library(tidyverse)
+
+flights |>
+  count(origin, sort = TRUE)
 ```
 
-and the vectorized version of the code was
+We can see that 120835 departed from EWR in 2013.
 
-```r
-x <- seq(from=0, to=1, by=0.1)
-sqrt_x <- sqrt(x)
-```
-
-To help us learn some Python, let's see how to replicate this code in Python. Like R, Python is a modular language (we can get lots of extra functionality by loading extra libraries). Some of the most common modules (particularly for statistics, data science, and machine learning) are `numpy`, `scipy`, `pandas`, and `scikit-learn`.
-
-Here we will reproduce the above R code in Python, with help from the `numpy` module. Run the following Python code (e.g.: in your Quarto document, create a Python chunk, copy the code, run the Python chunk):
-
-```{python, eval=F}
-import numpy as np
-
-# create x
-x = np.linspace(0, 1, 11)
-
-# for loop version
-# create sqrt_x for output
-sqrt_x = np.zeros(11)
-for i in range(11):
-  sqrt_x[i] = np.sqrt(x[i])
-
-sqrt_x
-
-# "vectorized" version
-sqrt_x = np.sqrt(x)
-sqrt_x
-
-# list comprehension version
-sqrt_x = [np.sqrt(a) for a in x]
-sqrt_x
-```
-
-Some notes:
-
-* We have loaded the `numpy` module, and called it `np` for short. Now when we want to use the `numpy` module in our code, we will reference `np`
-* `linspace`, `zeros`, and `sqrt` are functions in the `numpy` library, so we call them using `np.linspace`, `np.zeros`, and `np.sqrt`
-* `np.linspace` works pretty similarly to the `seq` function in R. We specify the range (0 to 1) and the number of steps (11); the result is 0, 0.1, ..., 0.9, 1
-* `np.zeros(11)` is equivalent to `rep(0, 11)` in R
-* `for i in range(11)` is essentially equivalent to `for(i in 1:11)` in R. The only difference is that Python is 0-indexed, so `range(11)` is really 0, 1, 2, ..., 10
-* In R, the basic object is a vector. The closest object to R's vector is possibly a NumPy array. This allows operations like "vectorized" functions, matrix multiplication, etc. 
-* A list comprehension is another way of iterating in Python (and in some sense is the most "Pythonic" approach). The code `[np.sqrt(a) for a in x]` means "create a list, where each entry of the list is the square root of the corresponding entry in `x`".
-* You will notice that, for both the `for` loop version and the "vectorized" versions of the code, `sqrt_x` is a numpy `array`. However, the list comprehension version produces (as we would expect!) a list instead
 
 :::{.question}
 #### Question 1
 
-Modify the Python code above to calculate $x^2$ instead of $\sqrt{x}$. (In Python, `x**2` is the equivalent of `x^2` in R). Use the 3 iteration methods discussed above (for loop, vectorization, list comprehension).
-
-*Notes*:
-
-* You may use ChatGPT to check your work, but I expect you to make an honest effort to write the code yourself.
+Reproduce the output from the `count` function, but use the `group_by`, `summarize`, and `arrange` functions instead.
 :::
 
 :::{.question}
 #### Question 2
 
-Modify the code from Question 2 so that instead of considering $x = 0, 0.1, 0.2, ..., 0.9, 1$ (i.e. the numbers between 0 and 1, in increments of 0.1), we consider $x = 0, 0.05, 0.10, 0.15, ..., 1.95, 2$ (the numbers between 0 and 2, in increments of 0.05).
+The `dep_time` variable in the `flights` data records the actual departure time for each flight. However, there are several rows with missing departure times. Let's assume that these correspond to flights which were *cancelled*.
 
-*Notes*:
+Which month had the highest proportion of cancelled flights?
 
-* You may use ChatGPT to check your work, but I expect you to make an honest effort to write the code yourself.
+*Hint:* the `is.na()` function will return `TRUE` if missing, and `FALSE` otherwise. For example:
+
+```{r}
+is.na(c(1, 2, NA, 3))
+```
+
 :::
-
-### Some simulations in Python
-
-In the following questions, you will practice working in Python by re-implementing some of questions from previous assignments in Python. The following table shows you corresponding Python code for several R operations.
-
-| R code | (approximate) Python equivalent |
-| --- | --- |
-| `length` | `len` |
-| `dim(x)` | `x.shape` |
-| `seq` | `np.linspace` or `np.arange` |
-| `rep(0, n)` | `np.zeros(n)` |
-| `runif(n, a, b)` | `np.random.uniform(a, b, n)` |
-| `mean(x)` | `np.mean(x)` |
-| `for(i in 1:n)` | `for i in range(n):` |
-| `ifelse(...)` | `np.where(...)` |
-| `x[i]` | `x[i]` (but remember python is 0-indexed) |
-| `if(...){`<br> <br>`} else {` <br> <br> `}` | `if ... :` <br> <br> `else:` |
-| `rnorm(n, mean=0, sd=0.5)` | `np.random.normal(loc=0, scale=0.5, n)` |
-| `set.seed(...)` | `np.random.seed(...)` |
-| `sample(...)` | `np.random.choice(...)` |
 
 :::{.question}
 #### Question 3
 
-Re-do Question 4 from HW 1 in Python. Confirm that you get a similar result.
-
-*Notes*:
-
-* You may use ChatGPT to check your work, but I expect you to make an honest effort to write the code yourself.
+Which plane (specified by the `tailnum` variable) traveled the most times from New York City airports in 2013?
 :::
 
 :::{.question}
 #### Question 4
 
-Re-do Question 1 from HW 2 in Python. Confirm that you get a similar result.
+For the plane identified in question 3, plot the number of trips per week over the year.
 
-*Hints:* 
-
-* R is pretty flexible with `int` (an integer) vs. `float` (a floating point number). E.g., `c(1, 2, 3)[1.5]` will return something in R. The same is not true in Python; your indices must be integers in Python
-* The `np.arange` function may be useful. For example, to generate an array of seats numbered 0 to 99, use `seats = np.arange(0, 100, 1)`
-* Remember that Python is 0-index; if `seats` has length 100, then `seats[0]` is the first entry, and `seats[99]` is the last entry
-
-*Notes*:
-
-* You may use ChatGPT to check your work, but I expect you to make an honest effort to write the code yourself.
+To create this plot, you will need to determine the week of the year for each flight. The `week` function in the `lubridate` package may be helpful here...
 :::
-
-### Functions in Python
-
-Here's a simple example of a function in R which takes two numbers and adds them together (this is literally what `+` does, so the function is pointless, but bear with me for the purposes of demonstration):
-
-```r
-my_sum <- function(a, b){
-  return(a + b)
-}
-```
-
-Here is the corresponding function definition in Python:
-
-```python
-def my_sum(a, b):
-  return a + b
-```
-
-Let's practice writing a short function in Python by re-writing the Huber loss function from HW 2.
 
 :::{.question}
 #### Question 5
 
-Re-do Question 6 from HW 2 in Python. Here is a code skeleton to get you started:
-
-```python
-def huber(x, a):
-
-```
-
-*Notes*:
-
-* You may use ChatGPT to check your work, but I expect you to make an honest effort to write the code yourself.
+Which carrier has the worst average delays?
 :::
-
-### Probability simulation: the Monty Hall problem
-
-Suppose you are on a game show, with three closed doors. Behind two of the doors is a goat, and behind one of the doors is a car. You randomly select one of the three doors. The host then opens one of the remaining doors to reveal a goat, and gives you the option of sticking with your original choice, or switching to the other unopened door. For contestants who choose to switch doors, what is the probability of winning the car?
 
 :::{.question}
 #### Question 6
 
-Write a simulation, in Python, to estimate the probability of winning the car by switching doors. 
+For the results in question 5, can you disentangle the effects of bad airports vs. bad carriers? Why or why not?
 
-*Notes*:
-* You may NOT use ChatGPT, or search for existing Monty Hall simulation code.
-* You *may* read about the Monty Hall problem and the mathematical solution (e.g. on Wikipedia). The correct answer is that switching gives a 2/3 chance of winning the car.
+*Hint*: Look at `table(flights$origin, flights$carrier)`
 :::
 
 
-### Reproducibility
+### NY Health Inspections
 
-When we do research, we want our work to be *reproducible*: other researchers should be able to reproduce our results, given the same data. Unfortunately, published research is not always reproducible. In this part of the assignment, you will read about why reproducibility is important, and some good practices for making your own work more reproducible.
-
-To begin, read the following articles at the links provided:
-
-* Peng, R. D. (2011). [Reproducible research in computational science](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3383002/). *Science*, 334(6060), 1226-1227.
-* Broman, K., Cetinkaya-Rundel, M., Nussbaum, A., Paciorek, C., Peng, R., Turek, D., & Wickham, H. (2017). [Recommendations to funding agencies for supporting reproducible research](https://www.amstat.org/docs/default-source/amstat-documents/pol-reproducibleresearchrecommendations.pdf). American Statistical Association.
-
-Then answer the following questions.
+The `Violations` data from the `mdsr` package contains information on 480621 health inspections conducted on restaurants in New York City. 
 
 :::{.question}
 #### Question 7
 
-Briefly summarize why reproducibility is important in computational research.
+Use the `Violations` data to create a new data frame called `violations_summary`, which contains the median inspection score by zip code for zip codes in Manhattan with 50 or more inspections.
+
+*Hint*: You will probably want to remove rows with missing observations for zip code, borough, or inspection score. The `drop_na` function can be useful here. Below is some starter code, you will need to complete the rest:
+
+```{r, eval=F}
+violations_summary <- Violations |>
+  drop_na(zipcode, score, boro) |>
+  ...
+```
+
 :::
+
 
 :::{.question}
 #### Question 8
 
-What steps can a researcher take to make their work more reproducible?
+Plot the number of median score vs. the number of inspections, using the `violations_summary` data you created in question 7.
 :::
+
+
+## Practice with lists
+
+In class, we learned about lists as a hierarchical structure for storing data. In these questions, we will practice more with lists and list indexing.
 
 :::{.question}
 #### Question 9
 
-The articles here focus mostly on reproducibility in academic research, particularly published academic research. Suppose you are performing statistical analysis for a private company instead. Why might reproducibility (perhaps by another statistician in your company) still be important?
+Create a list, `x`, such that:
+
+* `x[[2]][[1]]` stores the function `rnorm`. So,
+`x[[2]][[1]](3)` should sample 3 numbers from a $N(0, 1)$ distribution.
+* `x[[1]]` stores the function `rexp`. So, `x[[1]](3)` should sample 3 numbers from an Exponential distribution with rate 1.
+* `x[[3]][[1]]` stores a function which samples from a $\chi^2_2$ distribution. So, `x[[3]][[1]](3)` should sample 3 numbers from a $\chi^2_2$ distribution.
+:::
+
+
+### Logistic regression
+
+As you learned in STA 112, *linear* regression is used with quantitative responses, whereas *logistic* regression is used for binary responses ($Y_i = 0$ or $1$). In particular, if $\pi_i = P(Y_i = 1)$, then a simple logistic regression model (with explanatory variable $X_i$) is
+$$\log \left( \frac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 X_i$$
+
+As an example, consider a dataset of 3402 pitches thrown by MLB pitcher Clayton Kershaw in the 2013 season. The data is contained in the `Kershaw` data set, in the `Stat2Data` R package. We will focus on two specific variables for each pitch: 
+
+* `Result`: a negative result (a ball or a hit), or a positive result (a strike or an out)
+* `EndSpeed`: the speed at which the ball crossed home plate (in mph)
+
+Our goal is to investigate the relationship between pitch speed and result. We can fit a logistic regression model, with `EndSpeed` as the explanatory variable and `Result` as the response:
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(Stat2Data)
+data("Kershaw")
+
+log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
+summary(log_reg)
+```
+
+Here, `log_reg` is the resulting logistic regression model in R. What type of object is `log_reg`?
+
+:::{.question}
+#### Question 10
+
+Use the `typeof` function to determine what type of object `log_reg` is.
+:::
+
+:::{.question}
+#### Question 11
+
+Use the `length` function to determine how many components are in the top level of `log_reg`. (There's a lot!)
+:::
+
+:::{.question}
+#### Question 12
+
+Let's look at the first component: use `log_reg[[1]]` to see what it contains. What is stored here?
+:::
+
+How were we meant to know that the first component of `log_reg` contained the coefficients? We probably wouldn't! Fortunately, R offers the option to *name* the components of a list, which makes it easier to access them without remembering all their indices. To get the coefficients, for example, we can run the following:
+
+```{r}
+log_reg[["coefficients"]]
+```
+
+Another way of accessing named entries in a list is with the `$`:
+
+```{r}
+log_reg$coefficients
+```
+
+We can see all the names for a list with the `names` function:
+
+```{r}
+names(log_reg)
+```
+
+This makes it easy to see what information the list contains!
+
+:::{.question}
+#### Question 13
+
+How would you extract the AIC for your logistic regression model, *without* using the `summary` function? Write the code here.
 :::
 

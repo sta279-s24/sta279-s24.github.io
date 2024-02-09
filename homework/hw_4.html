@@ -1645,7 +1645,10 @@ margin-left: 0 !important;
           <li class="divider"></li>
         </ul>
         <nav role="navigation" id="toc">
-          
+          <ul>
+          <li><a href="#data-wrangling-in-r" id="toc-data-wrangling-in-r">Data wrangling in R</a></li>
+          <li><a href="#practice-with-lists" id="toc-practice-with-lists">Practice with lists</a></li>
+          </ul>
         </nav>
         <ul class="authors">
           <li class="divider"></li>
@@ -1669,10 +1672,10 @@ margin-left: 0 !important;
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<p><strong>Due:</strong> Friday, September 29, 11:00am on Canvas</p>
+<p><strong>Due:</strong> Friday, February 16, 2:00pm on Canvas</p>
 <p><strong>Instructions:</strong></p>
 <ul>
-<li>Download the <a href="https://sta279-f23.github.io/homework/hw_4_template.qmd">HW 4
+<li>Download the <a href="https://sta279-s24.github.io/homework/hw_4_template.qmd">HW 4
 template</a>, and open the template (a Quarto document) in RStudio.</li>
 <li>Put your name in the file header</li>
 <li>Click <code>Render</code></li>
@@ -1699,296 +1702,220 @@ function</li>
 <p><strong>Resources:</strong> In addition to the class notes and
 activities, I recommend reading the following resources:</p>
 <ul>
-<li><a href="https://wesmckinney.com/book/numpy-basics">Chapter 4</a>
-(NumPy basics) in <em>Python for Data Analysis</em> (3rd edition)</li>
-<li><a href="https://mdsr-book.github.io/mdsr3e/C-algorithmic.html#simple-example">Appendix
-C.2</a> in <em>Modern Data Science with R</em></li>
+<li><a href="https://mdsr-book.github.io/mdsr3e/04-dataI.html">Chapter
+4</a> in <em>Modern Data Science with R</em></li>
+<li><a href="https://r4ds.hadley.nz/data-transform">Chapter 4</a> in
+<em>R for Data Science</em> (2nd edition)</li>
 </ul>
-<div id="iteration-in-python-3-ways" class="section level3">
-<h3>Iteration in Python (3 ways)</h3>
-<p>In HW 1, you modified code that calculated <span class="math inline">\(\sqrt{x}\)</span> for each <span class="math inline">\(x = 0, 0.1, 0.2,...,1\)</span>. The
-<code>for</code> loop version of the code was</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from=</span><span class="dv">0</span>, <span class="at">to=</span><span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.1</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>sqrt_x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(x))</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x)){</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  sqrt_x[i] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(x[i])</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>}</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>sqrt_x</span></code></pre></div>
-<p>and the vectorized version of the code was</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from=</span><span class="dv">0</span>, <span class="at">to=</span><span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.1</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>sqrt_x <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(x)</span></code></pre></div>
-<p>To help us learn some Python, let’s see how to replicate this code in
-Python. Like R, Python is a modular language (we can get lots of extra
-functionality by loading extra libraries). Some of the most common
-modules (particularly for statistics, data science, and machine
-learning) are <code>numpy</code>, <code>scipy</code>,
-<code>pandas</code>, and <code>scikit-learn</code>.</p>
-<p>Here we will reproduce the above R code in Python, with help from the
-<code>numpy</code> module. Run the following Python code (e.g.: in your
-Quarto document, create a Python chunk, copy the code, run the Python
-chunk):</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># create x</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">11</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># for loop version</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># create sqrt_x for output</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>sqrt_x <span class="op">=</span> np.zeros(<span class="dv">11</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">11</span>):</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  sqrt_x[i] <span class="op">=</span> np.sqrt(x[i])</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>sqrt_x</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co"># &quot;vectorized&quot; version</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>sqrt_x <span class="op">=</span> np.sqrt(x)</span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>sqrt_x</span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co"># list comprehension version</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>sqrt_x <span class="op">=</span> [np.sqrt(a) <span class="cf">for</span> a <span class="kw">in</span> x]</span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>sqrt_x</span></code></pre></div>
-<p>Some notes:</p>
-<ul>
-<li>We have loaded the <code>numpy</code> module, and called it
-<code>np</code> for short. Now when we want to use the
-<code>numpy</code> module in our code, we will reference
-<code>np</code></li>
-<li><code>linspace</code>, <code>zeros</code>, and <code>sqrt</code> are
-functions in the <code>numpy</code> library, so we call them using
-<code>np.linspace</code>, <code>np.zeros</code>, and
-<code>np.sqrt</code></li>
-<li><code>np.linspace</code> works pretty similarly to the
-<code>seq</code> function in R. We specify the range (0 to 1) and the
-number of steps (11); the result is 0, 0.1, …, 0.9, 1</li>
-<li><code>np.zeros(11)</code> is equivalent to <code>rep(0, 11)</code>
-in R</li>
-<li><code>for i in range(11)</code> is essentially equivalent to
-<code>for(i in 1:11)</code> in R. The only difference is that Python is
-0-indexed, so <code>range(11)</code> is really 0, 1, 2, …, 10</li>
-<li>In R, the basic object is a vector. The closest object to R’s vector
-is possibly a NumPy array. This allows operations like “vectorized”
-functions, matrix multiplication, etc.</li>
-<li>A list comprehension is another way of iterating in Python (and in
-some sense is the most “Pythonic” approach). The code
-<code>[np.sqrt(a) for a in x]</code> means “create a list, where each
-entry of the list is the square root of the corresponding entry in
-<code>x</code>”.</li>
-<li>You will notice that, for both the <code>for</code> loop version and
-the “vectorized” versions of the code, <code>sqrt_x</code> is a numpy
-<code>array</code>. However, the list comprehension version produces (as
-we would expect!) a list instead</li>
-</ul>
+<div id="data-wrangling-in-r" class="section level2">
+<h2>Data wrangling in R</h2>
+<div id="ny-flights-data" class="section level3">
+<h3>NY Flights data</h3>
+<p>Let’s begin with the <code>flights</code> data from the
+<code>nycflights13</code> package.</p>
+<p>Suppose we want to know how many flights departed from each of the
+three NY airports (EWR, LGA, and JFK) in 2013. The <code>count</code>
+function allows us to count the number of rows, and to specify a
+variable to count by. Adding <code>sort = TRUE</code> will order the
+results from largest to smalles. For example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(nycflights13)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>flights <span class="sc">|&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">count</span>(origin, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 3 × 2
+##   origin      n
+##   &lt;chr&gt;   &lt;int&gt;
+## 1 EWR    120835
+## 2 JFK    111279
+## 3 LGA    104662</code></pre>
+<p>We can see that 120835 departed from EWR in 2013.</p>
 <div id="question-1" class="section level4 question">
 <h4>Question 1</h4>
-<p>Modify the Python code above to calculate <span class="math inline">\(x^2\)</span> instead of <span class="math inline">\(\sqrt{x}\)</span>. (In Python, <code>x**2</code>
-is the equivalent of <code>x^2</code> in R). Use the 3 iteration methods
-discussed above (for loop, vectorization, list comprehension).</p>
-<p><em>Notes</em>:</p>
-<ul>
-<li>You may use ChatGPT to check your work, but I expect you to make an
-honest effort to write the code yourself.</li>
-</ul>
+<p>Reproduce the output from the <code>count</code> function, but use
+the <code>group_by</code>, <code>summarize</code>, and
+<code>arrange</code> functions instead.</p>
 </div>
 <div id="question-2" class="section level4 question">
 <h4>Question 2</h4>
-<p>Modify the code from Question 2 so that instead of considering <span class="math inline">\(x = 0, 0.1, 0.2, ..., 0.9, 1\)</span> (i.e. the
-numbers between 0 and 1, in increments of 0.1), we consider <span class="math inline">\(x = 0, 0.05, 0.10, 0.15, ..., 1.95, 2\)</span>
-(the numbers between 0 and 2, in increments of 0.05).</p>
-<p><em>Notes</em>:</p>
-<ul>
-<li>You may use ChatGPT to check your work, but I expect you to make an
-honest effort to write the code yourself.</li>
-</ul>
+<p>The <code>dep_time</code> variable in the <code>flights</code> data
+records the actual departure time for each flight. However, there are
+several rows with missing departure times. Let’s assume that these
+correspond to flights which were <em>cancelled</em>.</p>
+<p>Which month had the highest proportion of cancelled flights?</p>
+<p><em>Hint:</em> the <code>is.na()</code> function will return
+<code>TRUE</code> if missing, and <code>FALSE</code> otherwise. For
+example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">is.na</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">3</span>))</span></code></pre></div>
+<pre><code>## [1] FALSE FALSE  TRUE FALSE</code></pre>
 </div>
-</div>
-<div id="some-simulations-in-python" class="section level3">
-<h3>Some simulations in Python</h3>
-<p>In the following questions, you will practice working in Python by
-re-implementing some of questions from previous assignments in Python.
-The following table shows you corresponding Python code for several R
-operations.</p>
-<table>
-<colgroup>
-<col width="50%" />
-<col width="50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>R code</th>
-<th>(approximate) Python equivalent</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>length</code></td>
-<td><code>len</code></td>
-</tr>
-<tr class="even">
-<td><code>dim(x)</code></td>
-<td><code>x.shape</code></td>
-</tr>
-<tr class="odd">
-<td><code>seq</code></td>
-<td><code>np.linspace</code> or <code>np.arange</code></td>
-</tr>
-<tr class="even">
-<td><code>rep(0, n)</code></td>
-<td><code>np.zeros(n)</code></td>
-</tr>
-<tr class="odd">
-<td><code>runif(n, a, b)</code></td>
-<td><code>np.random.uniform(a, b, n)</code></td>
-</tr>
-<tr class="even">
-<td><code>mean(x)</code></td>
-<td><code>np.mean(x)</code></td>
-</tr>
-<tr class="odd">
-<td><code>for(i in 1:n)</code></td>
-<td><code>for i in range(n):</code></td>
-</tr>
-<tr class="even">
-<td><code>ifelse(...)</code></td>
-<td><code>np.where(...)</code></td>
-</tr>
-<tr class="odd">
-<td><code>x[i]</code></td>
-<td><code>x[i]</code> (but remember python is 0-indexed)</td>
-</tr>
-<tr class="even">
-<td><code>if(...){</code><br> <br><code>} else {</code> <br> <br>
-<code>}</code></td>
-<td><code>if ... :</code> <br> <br> <code>else:</code></td>
-</tr>
-<tr class="odd">
-<td><code>rnorm(n, mean=0, sd=0.5)</code></td>
-<td><code>np.random.normal(loc=0, scale=0.5, n)</code></td>
-</tr>
-<tr class="even">
-<td><code>set.seed(...)</code></td>
-<td><code>np.random.seed(...)</code></td>
-</tr>
-<tr class="odd">
-<td><code>sample(...)</code></td>
-<td><code>np.random.choice(...)</code></td>
-</tr>
-</tbody>
-</table>
 <div id="question-3" class="section level4 question">
 <h4>Question 3</h4>
-<p>Re-do Question 4 from HW 1 in Python. Confirm that you get a similar
-result.</p>
-<p><em>Notes</em>:</p>
-<ul>
-<li>You may use ChatGPT to check your work, but I expect you to make an
-honest effort to write the code yourself.</li>
-</ul>
+<p>Which plane (specified by the <code>tailnum</code> variable) traveled
+the most times from New York City airports in 2013?</p>
 </div>
 <div id="question-4" class="section level4 question">
 <h4>Question 4</h4>
-<p>Re-do Question 1 from HW 2 in Python. Confirm that you get a similar
-result.</p>
-<p><em>Hints:</em></p>
-<ul>
-<li>R is pretty flexible with <code>int</code> (an integer)
-vs. <code>float</code> (a floating point number). E.g.,
-<code>c(1, 2, 3)[1.5]</code> will return something in R. The same is not
-true in Python; your indices must be integers in Python</li>
-<li>The <code>np.arange</code> function may be useful. For example, to
-generate an array of seats numbered 0 to 99, use
-<code>seats = np.arange(0, 100, 1)</code></li>
-<li>Remember that Python is 0-index; if <code>seats</code> has length
-100, then <code>seats[0]</code> is the first entry, and
-<code>seats[99]</code> is the last entry</li>
-</ul>
-<p><em>Notes</em>:</p>
-<ul>
-<li>You may use ChatGPT to check your work, but I expect you to make an
-honest effort to write the code yourself.</li>
-</ul>
+<p>For the plane identified in question 3, plot the number of trips per
+week over the year.</p>
+<p>To create this plot, you will need to determine the week of the year
+for each flight. The <code>week</code> function in the
+<code>lubridate</code> package may be helpful here…</p>
 </div>
-</div>
-<div id="functions-in-python" class="section level3">
-<h3>Functions in Python</h3>
-<p>Here’s a simple example of a function in R which takes two numbers
-and adds them together (this is literally what <code>+</code> does, so
-the function is pointless, but bear with me for the purposes of
-demonstration):</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>my_sum <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b){</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">return</span>(a <span class="sc">+</span> b)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>}</span></code></pre></div>
-<p>Here is the corresponding function definition in Python:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="kw">def</span> my_sum(a, b):</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="cf">return</span> a <span class="op">+</span> b</span></code></pre></div>
-<p>Let’s practice writing a short function in Python by re-writing the
-Huber loss function from HW 2.</p>
 <div id="question-5" class="section level4 question">
 <h4>Question 5</h4>
-<p>Re-do Question 6 from HW 2 in Python. Here is a code skeleton to get
-you started:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="kw">def</span> huber(x, a):</span></code></pre></div>
-<p><em>Notes</em>:</p>
-<ul>
-<li>You may use ChatGPT to check your work, but I expect you to make an
-honest effort to write the code yourself.</li>
-</ul>
+<p>Which carrier has the worst average delays?</p>
 </div>
-</div>
-<div id="probability-simulation-the-monty-hall-problem" class="section level3">
-<h3>Probability simulation: the Monty Hall problem</h3>
-<p>Suppose you are on a game show, with three closed doors. Behind two
-of the doors is a goat, and behind one of the doors is a car. You
-randomly select one of the three doors. The host then opens one of the
-remaining doors to reveal a goat, and gives you the option of sticking
-with your original choice, or switching to the other unopened door. For
-contestants who choose to switch doors, what is the probability of
-winning the car?</p>
 <div id="question-6" class="section level4 question">
 <h4>Question 6</h4>
-<p>Write a simulation, in Python, to estimate the probability of winning
-the car by switching doors.</p>
-<p><em>Notes</em>: * You may NOT use ChatGPT, or search for existing
-Monty Hall simulation code. * You <em>may</em> read about the Monty Hall
-problem and the mathematical solution (e.g. on Wikipedia). The correct
-answer is that switching gives a 2/3 chance of winning the car.</p>
+<p>For the results in question 5, can you disentangle the effects of bad
+airports vs. bad carriers? Why or why not?</p>
+<p><em>Hint</em>: Look at
+<code>table(flights$origin, flights$carrier)</code></p>
 </div>
 </div>
-<div id="reproducibility" class="section level3">
-<h3>Reproducibility</h3>
-<p>When we do research, we want our work to be <em>reproducible</em>:
-other researchers should be able to reproduce our results, given the
-same data. Unfortunately, published research is not always reproducible.
-In this part of the assignment, you will read about why reproducibility
-is important, and some good practices for making your own work more
-reproducible.</p>
-<p>To begin, read the following articles at the links provided:</p>
-<ul>
-<li>Peng, R. D. (2011). <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3383002/">Reproducible
-research in computational science</a>. <em>Science</em>, 334(6060),
-1226-1227.</li>
-<li>Broman, K., Cetinkaya-Rundel, M., Nussbaum, A., Paciorek, C., Peng,
-R., Turek, D., &amp; Wickham, H. (2017). <a href="https://www.amstat.org/docs/default-source/amstat-documents/pol-reproducibleresearchrecommendations.pdf">Recommendations
-to funding agencies for supporting reproducible research</a>. American
-Statistical Association.</li>
-</ul>
-<p>Then answer the following questions.</p>
+<div id="ny-health-inspections" class="section level3">
+<h3>NY Health Inspections</h3>
+<p>The <code>Violations</code> data from the <code>mdsr</code> package
+contains information on 480621 health inspections conducted on
+restaurants in New York City.</p>
 <div id="question-7" class="section level4 question">
 <h4>Question 7</h4>
-<p>Briefly summarize why reproducibility is important in computational
-research.</p>
+<p>Use the <code>Violations</code> data to create a new data frame
+called <code>violations_summary</code>, which contains the median
+inspection score by zip code for zip codes in Manhattan with 50 or more
+inspections.</p>
+<p><em>Hint</em>: You will probably want to remove rows with missing
+observations for zip code, borough, or inspection score. The
+<code>drop_na</code> function can be useful here. Below is some starter
+code, you will need to complete the rest:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>violations_summary <span class="ot">&lt;-</span> Violations <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">drop_na</span>(zipcode, score, boro) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  ...</span></code></pre></div>
 </div>
 <div id="question-8" class="section level4 question">
 <h4>Question 8</h4>
-<p>What steps can a researcher take to make their work more
-reproducible?</p>
+<p>Plot the number of median score vs. the number of inspections, using
+the <code>violations_summary</code> data you created in question 7.</p>
 </div>
+</div>
+</div>
+<div id="practice-with-lists" class="section level2">
+<h2>Practice with lists</h2>
+<p>In class, we learned about lists as a hierarchical structure for
+storing data. In these questions, we will practice more with lists and
+list indexing.</p>
 <div id="question-9" class="section level4 question">
 <h4>Question 9</h4>
-<p>The articles here focus mostly on reproducibility in academic
-research, particularly published academic research. Suppose you are
-performing statistical analysis for a private company instead. Why might
-reproducibility (perhaps by another statistician in your company) still
-be important?</p>
+<p>Create a list, <code>x</code>, such that:</p>
+<ul>
+<li><code>x[[2]][[1]]</code> stores the function <code>rnorm</code>. So,
+<code>x[[2]][[1]](3)</code> should sample 3 numbers from a <span class="math inline">\(N(0, 1)\)</span> distribution.</li>
+<li><code>x[[1]]</code> stores the function <code>rexp</code>. So,
+<code>x[[1]](3)</code> should sample 3 numbers from an Exponential
+distribution with rate 1.</li>
+<li><code>x[[3]][[1]]</code> stores a function which samples from a
+<span class="math inline">\(\chi^2_2\)</span> distribution. So,
+<code>x[[3]][[1]](3)</code> should sample 3 numbers from a <span class="math inline">\(\chi^2_2\)</span> distribution.</li>
+</ul>
+</div>
+<div id="logistic-regression" class="section level3">
+<h3>Logistic regression</h3>
+<p>As you learned in STA 112, <em>linear</em> regression is used with
+quantitative responses, whereas <em>logistic</em> regression is used for
+binary responses (<span class="math inline">\(Y_i = 0\)</span> or <span class="math inline">\(1\)</span>). In particular, if <span class="math inline">\(\pi_i = P(Y_i = 1)\)</span>, then a simple
+logistic regression model (with explanatory variable <span class="math inline">\(X_i\)</span>) is <span class="math display">\[\log
+\left( \frac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1
+X_i\]</span></p>
+<p>As an example, consider a dataset of 3402 pitches thrown by MLB
+pitcher Clayton Kershaw in the 2013 season. The data is contained in the
+<code>Kershaw</code> data set, in the <code>Stat2Data</code> R package.
+We will focus on two specific variables for each pitch:</p>
+<ul>
+<li><code>Result</code>: a negative result (a ball or a hit), or a
+positive result (a strike or an out)</li>
+<li><code>EndSpeed</code>: the speed at which the ball crossed home
+plate (in mph)</li>
+</ul>
+<p>Our goal is to investigate the relationship between pitch speed and
+result. We can fit a logistic regression model, with
+<code>EndSpeed</code> as the explanatory variable and
+<code>Result</code> as the response:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">library</span>(Stat2Data)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;Kershaw&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>log_reg <span class="ot">&lt;-</span> <span class="fu">glm</span>(Result <span class="sc">~</span> EndSpeed, <span class="at">family =</span> binomial, <span class="at">data =</span> Kershaw)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">summary</span>(log_reg)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## glm(formula = Result ~ EndSpeed, family = binomial, data = Kershaw)
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -1.432279   0.488616  -2.931 0.003375 ** 
+## EndSpeed     0.023360   0.006019   3.881 0.000104 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 4540.4  on 3401  degrees of freedom
+## Residual deviance: 4525.4  on 3400  degrees of freedom
+## AIC: 4529.4
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<p>Here, <code>log_reg</code> is the resulting logistic regression model
+in R. What type of object is <code>log_reg</code>?</p>
+<div id="question-10" class="section level4 question">
+<h4>Question 10</h4>
+<p>Use the <code>typeof</code> function to determine what type of object
+<code>log_reg</code> is.</p>
+</div>
+<div id="question-11" class="section level4 question">
+<h4>Question 11</h4>
+<p>Use the <code>length</code> function to determine how many components
+are in the top level of <code>log_reg</code>. (There’s a lot!)</p>
+</div>
+<div id="question-12" class="section level4 question">
+<h4>Question 12</h4>
+<p>Let’s look at the first component: use <code>log_reg[[1]]</code> to
+see what it contains. What is stored here?</p>
+</div>
+<p>How were we meant to know that the first component of
+<code>log_reg</code> contained the coefficients? We probably wouldn’t!
+Fortunately, R offers the option to <em>name</em> the components of a
+list, which makes it easier to access them without remembering all their
+indices. To get the coefficients, for example, we can run the
+following:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>log_reg[[<span class="st">&quot;coefficients&quot;</span>]]</span></code></pre></div>
+<pre><code>## (Intercept)    EndSpeed 
+## -1.43227907  0.02336011</code></pre>
+<p>Another way of accessing named entries in a list is with the
+<code>$</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>log_reg<span class="sc">$</span>coefficients</span></code></pre></div>
+<pre><code>## (Intercept)    EndSpeed 
+## -1.43227907  0.02336011</code></pre>
+<p>We can see all the names for a list with the <code>names</code>
+function:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">names</span>(log_reg)</span></code></pre></div>
+<pre><code>##  [1] &quot;coefficients&quot;      &quot;residuals&quot;         &quot;fitted.values&quot;    
+##  [4] &quot;effects&quot;           &quot;R&quot;                 &quot;rank&quot;             
+##  [7] &quot;qr&quot;                &quot;family&quot;            &quot;linear.predictors&quot;
+## [10] &quot;deviance&quot;          &quot;aic&quot;               &quot;null.deviance&quot;    
+## [13] &quot;iter&quot;              &quot;weights&quot;           &quot;prior.weights&quot;    
+## [16] &quot;df.residual&quot;       &quot;df.null&quot;           &quot;y&quot;                
+## [19] &quot;converged&quot;         &quot;boundary&quot;          &quot;model&quot;            
+## [22] &quot;call&quot;              &quot;formula&quot;           &quot;terms&quot;            
+## [25] &quot;data&quot;              &quot;offset&quot;            &quot;control&quot;          
+## [28] &quot;method&quot;            &quot;contrasts&quot;         &quot;xlevels&quot;</code></pre>
+<p>This makes it easy to see what information the list contains!</p>
+<div id="question-13" class="section level4 question">
+<h4>Question 13</h4>
+<p>How would you extract the AIC for your logistic regression model,
+<em>without</em> using the <code>summary</code> function? Write the code
+here.</p>
+</div>
 </div>
 </div>
 

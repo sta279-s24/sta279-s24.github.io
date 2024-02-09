@@ -7,8 +7,29 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-
 #### Question 1
+
+```{r}
+huber <- function(x){
+  return(ifelse(abs(x) <= 1, x^2, 2*abs(x) - 1))
+}
+```
+
+#### Question 2
+
+```{r}
+huber(c(0.5, 1, 2))
+```
+
+#### Question 3
+
+```{r}
+huber <- function(x, a=1){
+  return(ifelse(abs(x) <= a, x^2, 2*a*abs(x) - a^2))
+}
+```
+
+#### Question 4
 
 ```{r}
 relu <- function(x){
@@ -18,7 +39,7 @@ relu <- function(x){
 relu(c(-1, 1))
 ```
 
-#### Question 2
+#### Question 5
 
 ```{r}
 leaky_relu <- function(x, a=0){
@@ -26,83 +47,48 @@ leaky_relu <- function(x, a=0){
 }
 ```
 
-#### Question 3
-
-```{r}
-x <- list(rexp, list(rnorm), list(function(n){return(rchisq(n, 2))}))
-x[[1]](3)
-x[[2]][[1]](3)
-x[[3]][[1]](3)
-```
-
-#### Question 4
-
-```{r}
-library(tidyverse)
-library(Stat2Data)
-data("Kershaw")
-
-log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
-summary(log_reg)
-
-typeof(log_reg)
-```
-
-A list!
-
-#### Question 5
-
-```{r}
-length(log_reg)
-```
 
 #### Question 6
 
 ```{r}
-log_reg[[1]]
+test_power <- function(n, nsim, beta0, beta1, alpha = 0.05){
+  
+  pvals <- rep(NA, nsim)
+  
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- rnorm(n, mean=0, sd=1)
+    y <- beta0 + beta1*x + noise
+    
+    lm_mod <- lm(y ~ x)
+    pvals[i] <- summary(lm_mod)$coefficients[2,4]
+  }
+  
+  return(mean(pvals < alpha))
+}
 ```
 
-The estimated coefficients of the model
 
 #### Question 7
 
 ```{r}
-log_reg$aic
+test_power(100, 1000, 0, 0, 0.05)
+test_power(100, 1000, 0, -1, 0.05)
+test_power(100, 1000, 0, -0.5, 0.05)
+test_power(100, 1000, 0, 0.5, 0.05)
+test_power(100, 1000, 0, 1, 0.05)
 ```
+
+Holding other simulation settings fixed, power increases as $\beta_1$ moves further away from 0, because the difference between the null and alternative hypotheses is larger.
 
 #### Question 8
 
 ```{r}
-quant_resid <- function(mod){
-  # fitted values and response
-  yhat <- mod$fitted.values
-  y <- mod$y
-  
-  # sample from the uniform distribution, depending on y
-  u <- ifelse(y == 1, runif(length(y), 1-yhat, 1),
-              runif(length(y), 0, 1-yhat))
-  return(qnorm(u)) # quantile residuals
-}
+test_power(10, 1000, 0, 0.5, 0.05)
+test_power(50, 1000, 0, 0.5, 0.05)
+test_power(100, 1000, 0, 0.5, 0.05)
+test_power(500, 1000, 0, 0.5, 0.05)
 ```
 
-**Note:** Assigment (`<-`) should be done *outside* an `ifelse` statement, not inside
-
-#### Question 9
-
-```{r}
-quant_resid_plot <- function(mod){
-  data.frame(fitted = mod$fitted.values,
-           residuals = quant_resid(mod)) |>
-  ggplot(aes(x = fitted, y = residuals)) +
-  geom_abline(slope = 0, intercept = 0, color = "blue") +
-  geom_point() +
-  labs(x = "Fitted values", y = "Residuals") +
-  theme_bw()
-}
-
-quant_resid_plot(log_reg)
-```
-
-
-
+Power increases as sample size increases, because there is less variability in our estimation of $\beta_1$.
 
