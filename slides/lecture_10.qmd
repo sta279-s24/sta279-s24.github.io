@@ -1,0 +1,214 @@
+---
+title: "Lecture 10: Intro to Python"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+editor_options: 
+  chunk_output_type: console
+---
+
+## What *is* R?
+
+* R is a programming language specifically designed for statistics and data analysis
+  * Objects for storing data, and functions for interacting with data, are fundamental
+  * R is very good at graphics and visualization
+  * R is easily extended. Users can write and share their own functions and packages
+* We can interact with R through IDEs like RStudio
+
+## What other options exist?
+
+* SAS
+* Stata
+* SPSS
+* Excel
+* Python
+* Julia
+* Matlab
+* Many others...
+
+## What is Python
+
+* Python is a general-purpose programming language 
+* Like R, python has a wide range of packages to extend functionality
+* Certain Python packages allow for sophisticated data analysis and modeling
+  * `SciPy`, `NumPy`
+  * `scikit-learn`, `statsmodels`, `pytorch`
+  * `pandas`
+  * `matplotlib`
+  
+## R vs. Python
+
+My own, *personal*, preferences:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+R is good for
+
+* Data visualization and wrangling
+* Classical statistics
+* Statistical inference
+* New statistical methods
+:::
+
+::: {.column width="50%"}
+Python is good for
+
+* General-purpose programming
+* Challenging data types (e.g. images)
+* Prediction and machine learning
+:::
+
+::::
+
+## A taste of Python
+
+```{python, echo=T}
+import numpy as np
+
+M = 10 # number of people at the party
+hats = np.arange(M) # numbered hats
+nsim = 10000 # number of simulations
+results = np.zeros(nsim) # to store the results
+
+for i in range(nsim):
+    randomized_hats = np.random.choice(hats, M, replace = False)
+    results[i] = np.sum(randomized_hats == hats) > 0
+
+np.mean(results)
+```
+
+* What is this code doing?
+* What similarities and differences do you notice, compared to R?
+
+
+## A taste of Python
+
+Recall our code from the first class:
+
+```{r, echo=T}
+M <- 10 # number of people at the party
+hats <- 1:M # numbered hats
+nsim <- 10000 # number of simulations
+results <- rep(0, nsim) # vector to store the results
+
+for(i in 1:nsim){
+  randomized_hats <- sample(hats, M, replace = FALSE)
+  results[i] <- sum(randomized_hats == hats) > 0
+}
+
+mean(results)
+```
+
+## A taste of Python
+
+Here is the same code, written in Python
+
+```{python, echo=T}
+import numpy as np
+
+M = 10 # number of people at the party
+hats = np.arange(M) # numbered hats
+nsim = 10000 # number of simulations
+results = np.zeros(nsim) # to store the results
+
+for i in range(nsim):
+    randomized_hats = np.random.choice(hats, M, replace = False)
+    results[i] = np.sum(randomized_hats == hats) > 0
+
+np.mean(results)
+```
+
+## Step 1: representing the hats
+
+```{python, echo = T}
+import numpy as np
+
+M = 10 # number of people at the party
+hats = np.arange(M) # numbered hats
+
+hats
+hats[0]
+hats[1]
+```
+
+* `hats` is a 1-dimensional array (similar to a vector in R)
+* Python is *0-indexed*: the first entry is `hats[0]`
+
+## Step 2: everyone draws a random hat
+
+```{python, echo=T}
+import numpy as np
+
+M = 10 # number of people at the party
+hats = np.arange(M) # numbered hats
+
+randomized_hats = np.random.choice(hats, M, replace = False)
+
+randomized_hats
+```
+
+* `np.random.choice` works like R's `sample` function
+* Booleans in Python are `True` and `False` (as opposed to `TRUE` and `FALSE`, or `T` and `F`)
+
+## Step 3: check who got their original hat
+
+```{python, echo=T}
+import numpy as np
+
+M = 10 # number of people at the party
+hats = np.arange(M) # numbered hats
+
+randomized_hats = np.random.choice(hats, M, replace = False)
+randomized_hats
+
+randomized_hats == hats
+
+np.sum(randomized_hats == hats)
+```
+
+* NumPy arrays allow for "vectorized" operations, like in R
+
+## Step 4: iteration
+
+```{python, echo=T}
+import numpy as np
+
+M = 10 # number of people at the party
+hats = np.arange(M) # numbered hats
+nsim = 10000 # number of simulations
+results = np.zeros(nsim) # to store the results
+
+for i in range(nsim):
+    randomized_hats = np.random.choice(hats, M, replace = False)
+    results[i] = np.sum(randomized_hats == hats) > 0
+
+np.mean(results)
+```
+
+* `range(nsim)` is similar to `1:nsim` in R 
+* We don't use the curly braces `{ }`. Instead we use whitespace (four spaces is standard, you just have to be consistent)
+
+## Using Python through RStudio
+
+* You can make Python chunks in Quarto documents, just like R chunks:
+
+````{verbatim}
+```{python}
+
+```
+````
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_10.html](https://sta279-s24.github.io/class_activities/ca_lecture_10.html)
+
+
+
+
+
+
+
+
+

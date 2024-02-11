@@ -1,0 +1,15 @@
+---
+---
+---
+title: "Class activity"
+format: html
+editor: visual
+author: "Your name"
+---
+
+1. (Answer to question 1 goes here...)
+
+```{python}
+
+```
+

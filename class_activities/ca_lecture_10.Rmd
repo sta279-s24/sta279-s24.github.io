@@ -1,0 +1,45 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instruction:** Work with a neighbor to answer the following questions. Solutions will be posted on the course website. To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_10_template.qmd) file.
+
+## The birthday problem
+
+Suppose we have a class of 30 students. What is the probability that there is at least one shared birthday?
+
+* Assume there are 365 days in a year
+* Assume that each day is equally likely as a birthday
+* Assume there are no multiple-birth siblings (e.g. twins, triplets, etc.) in the class
+
+In a previous class activity, we wrote the following R code:
+
+```r
+days <- 1:365 # days of the year
+n_students <- 30
+
+nsim <- 10000
+results <- rep(NA, nsim) # store the simulation results
+for(i in 1:nsim){
+  birthdays <- sample(days, n_students, replace=TRUE)
+  results[i] <- length(unique(birthdays)) < n_students
+}
+
+mean(results)
+```
+
+In this class activity, we will re-write the code in Python.
+
+1. Use the `np.arange` function to create a 1-dimensional array, `days`, to store the days of the year (numbered 0 to 364)
+
+2. Use the `np.random.choice` function to randomly choose birthdays for the class (shared birthdays are possible, so use `replace=True` in the function!)
+
+3. Check the number of distinct birthdays (hints: the `np.unique` and `len` functions may be helpful!). Are there 30 distinct birthdays?
+
+4. Use a `for` loop to repeat the experiment `nsim = 10000` times, making sure to store the results. What is the probability of at least one shared birthday?

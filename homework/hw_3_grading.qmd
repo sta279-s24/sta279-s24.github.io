@@ -7,27 +7,46 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-Total points: 38
-
-**General grading notes:** 
-
-* They will write code in many different ways. As long as it works, they can receive credit for the question. If it doesn't work, but they made a reasonable attempt (at least some of the code has the right idea) then they receive partial credit.
-* If code is written particularly inefficiently, you don't need to take off points, but you can leave a comment on how to write it more simply
-
-#### Commenting code (2 pts)
-
-If they made a reasonable effort to comment code on at least some of the questions, then they get the 2 pts for the assignment. Otherwise, they do not receive the 2 pts.
-
-#### Setting a seed (2 pts)
-
-They get the 2 pts if they set a seed at the beginning of the document (or at least before any simulations). Otherwise, they do not receive the 2 pts.
-
-#### Naming (2 pts)
-
-Check that they used reasonable variable names on the assignment. If the names are generally terrible (e.g., `blah1` and `blah2` instead of `robotA` and `robotB`), they lose these 2 pts.
-
+Total: 26 pts
 
 #### Question 1 (3 pts)
+
+```{r}
+huber <- function(x){
+  return(ifelse(abs(x) <= 1, x^2, 2*abs(x) - 1))
+}
+```
+
+**Grading:** 
+
+* 1 pt for checking the correct condition ($|x| \leq 1$)
+* 1 pt for returning $x^2$ if $|x| \leq 1$
+* 1 pt for returning $2|x| - 1$ if $|x| > 1$
+* Note: the function does not technically have to be vectorized for question 1, but it *will* need to be vectorized for question 2
+
+#### Question 2 (2 pts)
+
+```{r}
+huber(c(0.5, 1, 2))
+```
+
+**Grading:** 2 pts if they get the correct answer. Otherwise no points.
+
+#### Question 3 (3 pts)
+
+```{r}
+huber <- function(x, a=1){
+  return(ifelse(abs(x) <= a, x^2, 2*a*abs(x) - a^2))
+}
+```
+
+**Grading:** 
+
+* 1 pt for updating the condition to be $|x| \leq a$
+* 1 pt for including `a` as an argument for the function
+* 1 pt for setting `a=1` as the default
+
+#### Question 4 (3 pts)
 
 ```{r}
 relu <- function(x){
@@ -43,7 +62,7 @@ relu(c(-1, 1))
 * 1 pt for the correct logical statement
 * 1 pt for vectorizing the function
 
-#### Question 2 (3 pts)
+#### Question 5 (3 pts)
 
 ```{r}
 leaky_relu <- function(x, a=0){
@@ -57,109 +76,58 @@ leaky_relu <- function(x, a=0){
 * 1 pt for including `a` as an argument
 * 1 pt for making `a=0` the default
 
-#### Question 3 (3 pts)
+
+#### Question 6 (6 pts)
 
 ```{r}
-x <- list(rexp, list(rnorm), list(function(n){return(rchisq(n, 2))}))
-x[[1]](3)
-x[[2]][[1]](3)
-x[[3]][[1]](3)
+test_power <- function(n, nsim, beta0, beta1, alpha){
+  
+  pvals <- rep(NA, nsim)
+  
+  for(i in 1:nsim){
+    x <- runif(n, min=0, max=1)
+    noise <- rnorm(n, mean=0, sd=1)
+    y <- beta0 + beta1*x + noise
+    
+    lm_mod <- lm(y ~ x)
+    pvals[i] <- summary(lm_mod)$coefficients[2,4]
+  }
+  
+  return(mean(pvals < alpha))
+}
 ```
 
 **Grading:** 
 
-* 1 pt for `x[[1]]` returning `rexp`
-* 1 pt for `x[[2]][[1]]` returning `rnorm`
-* 1 pt for `x[[3]][[1]]` sampling from a $\chi^2_2$
+* 2 pts for the correct arguments (no defaults are required)
+* 2 pts for using a loop inside the function to calculate power
+* 1 pt for correctly calculating the p-value at each iteration
+* 1 pt for returning the fraction of p-values less than the threshold
 
-#### Question 4 (2 pts)
 
-```{r}
-library(tidyverse)
-library(Stat2Data)
-data("Kershaw")
-
-log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
-summary(log_reg)
-
-typeof(log_reg)
-```
-
-A list!
-
-**Grading:** 2 pts if correct, otherwise no points
-
-#### Question 5 (2 pts)
+#### Question 7 (3 pts)
 
 ```{r}
-length(log_reg)
+test_power(100, 1000, 0, 0, 0.05)
+test_power(100, 1000, 0, -1, 0.05)
+test_power(100, 1000, 0, -0.5, 0.05)
+test_power(100, 1000, 0, 0.5, 0.05)
+test_power(100, 1000, 0, 1, 0.05)
 ```
 
-**Grading:** 2 pts if correct, otherwise no points
+Holding other simulation settings fixed, power increases as $\beta_1$ moves further away from 0, because the difference between the null and alternative hypotheses is larger.
 
-#### Question 6 (2 pts)
+**Grading:** 2 pts for calculating the powers, 1 pt for interpretation
+
+#### Question 8 (3 pts)
 
 ```{r}
-log_reg[[1]]
+test_power(10, 1000, 0, 0.5, 0.05)
+test_power(50, 1000, 0, 0.5, 0.05)
+test_power(100, 1000, 0, 0.5, 0.05)
+test_power(500, 1000, 0, 0.5, 0.05)
 ```
 
-The estimated coefficients of the model
+Power increases as sample size increases, because there is less variability in our estimation of $\beta_1$.
 
-**Grading:** 2 pts if correct, otherwise no points. (Other acceptable answers would include "the slope and the intercept" or similar)
-
-#### Question 7 (2 pts)
-
-```{r}
-log_reg$aic
-```
-
-**Grading:** 2 pts if correct, otherwise no points. Other acceptable answers include `log_reg[["aic"]]` or `AIC(log_reg)`
-
-#### Question 8 (8 pts)
-
-```{r}
-quant_resid <- function(mod){
-  yhat <- mod$fitted.values
-  y <- mod$y
-  u <- ifelse(y == 1, runif(length(y), 1-yhat, 1),
-              runif(length(y), 0, 1-yhat))
-  return(qnorm(u))
-}
-```
-
-**Grading:**
-
-* 1 pt for correctly defining a function
-* 2 pts for taking the correct argument: a logistic regression model (the output of a `glm` call). They should *not* make the inputs the observed data, e.g.
-* 2 pts for correctly simulating from the uniform distributions, depending on the value of Y
-* 2 pts for the body of the function being written in terms of the *argument*. E.g., if their argument is called `mod` (as in the function above), but they use the fitted model `log_reg` to get the fitted values and `y`, then they lose these 2 pts
-* 1 pt for returning $\Phi^{-1}(u)$, not just $u$
-
-**Note:** Assigment (`<-`) should be done *outside* an `ifelse` statement, not inside
-
-#### Question 9 (7 pts)
-
-```{r}
-quant_resid_plot <- function(mod){
-  data.frame(fitted = mod$fitted.values,
-           residuals = quant_resid(mod)) |>
-  ggplot(aes(x = fitted, y = residuals)) +
-  geom_abline(slope = 0, intercept = 0, color = "blue") +
-  geom_point() +
-  labs(x = "Fitted values", y = "Residuals") +
-  theme_bw()
-}
-
-quant_resid_plot(log_reg)
-```
-
-**Grading:** ggplot is not required here, they can use any approach they like to make the plot
-
-* 1 pt for correctly defining a function
-* 2 pts for the body of the function being written in terms of the *argument*. E.g., if their argument is called `mod` (as in the function above), but they use the fitted model `log_reg` to get the fitted values and `y`, then they lose these 2 pts. Lose 1 pt if they write the function in terms of the Kershaw data
-* 1 pt for plotting fitted values on the x axis
-* 1 pt for plotting residuals on the y axis
-* 2 pts for using the `quant_resid` function to calculate the quantile residuals
-
-
-
+**Grading:** 2 pts for calculating the powers, 1 pt for interpretation
