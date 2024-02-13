@@ -1,0 +1,334 @@
+---
+title: "Class Activity"
+output: 
+  rmdformats::robobook:
+    css: "../homework/homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+# Overview
+
+In this class activity, we will continue exploring Python fundamentals. When we first introduced Python, we got a glimpse of arrays (similar to vectors in R) and loops. In this activity, we will see arrays, lists, loops, and if-else statements.
+
+# 1-dimensional NumPy arrays
+
+## Recap: vectors in R
+
+Recall vectors in R. R vectors contain only one type:
+
+```{r}
+x <- c(0, 1, "a")
+x # the numbers get coerced into characters
+```
+
+Many operations work element-wise:
+
+```{r}
+x <- c(0, 1, 2)
+y <- c(1, 2, 3)
+x + y
+x == y
+x + 1
+```
+
+And many functions are (or can be) vectorized:
+
+```{r}
+x <- c(0, 1, 2)
+sqrt(x)
+```
+
+## NumPy arrays
+
+A 1-dimensional NumPy array functions very similarly to a vector in R. They can contain only one type:
+
+```{python}
+import numpy as np
+
+x = np.array([0, 1, "a"])
+x
+```
+
+Many operations work element-wise:
+
+```{python}
+x = np.array([0, 1, 2])
+y = np.array([1, 2, 3])
+x + y
+x == y
+x + 1
+```
+
+And many functions are "vectorized":
+
+```{python}
+x = np.array([0, 1, 2])
+np.sqrt(x)
+```
+
+## Indexing arrays
+
+Indexing a 1-d NumPy array is very similar to indexing a vector in R. Consider the following R code:
+
+```{r}
+x <- c(1, 5, 9)
+x[2] # select the second entry
+x[1:2] # select the first and second entries
+x[c(1, 3)] # select the first and third entries
+```
+
+:::{.question}
+#### Question 1
+
+Try to re-write the R code above in Python. Remember that Python is 0-indexed! Here is the NumPy array to get you started:
+
+```{python}
+x = np.array([1, 5, 9])
+```
+
+
+```{python, include=F, eval=F}
+x = np.array([1, 5, 9])
+x[0]
+x[0:2]
+x[np.array([0, 2])]
+```
+
+:::
+
+## Indexing using logical statements
+
+In R, I can subset a vector using a vector of booleans. For example, consider:
+
+```{r}
+x <- c(11, 23, 49)
+x[c(TRUE, FALSE, TRUE)]
+```
+
+That is, I keep only the entries in `x` where the boolean vector was `TRUE`. Now, the boolean vector can be created however we want -- often based on the values in a second vector. For example, the following code creates two vectors called `x` and `y`, and keeps only the entries in `x` where `y` is `> 3`:
+
+```{r}
+x <- c(23, 45, 5, 11)
+y <- c(0, 4, -1, 20)
+x[y > 3]
+```
+
+Or, I can subset a vector based on a logical statement about itself:
+
+```{r}
+x <- sample(1:100, 10, replace=F)
+x
+x[x < 50]
+```
+
+
+:::{.question}
+#### Question 2
+
+Try to re-write the R code above in Python. Recall that you can use the `np.random.choice` function to take a random sample, and the `np.arange` function:
+
+```{python}
+np.arange(4) # 0 to 3
+np.arange(1, 5) # 1 to 4
+```
+
+:::
+
+
+## An important difference between arrays and vectors
+
+Arrays and vectors don't always behave the same. One importanat example occurs when we use an negative number to index. In R, this will return a subset of the vector:
+
+```{r}
+x <- c(4, 5, 6)
+x[-1]
+```
+
+In Python, the indexing loops back around!
+
+```{python}
+x = np.array([4, 5, 6])
+x[-1]
+```
+
+# Python lists
+
+## Recap: lists in R
+
+A list in R is a hierarchical structure that can contain objects of multiple types. For example, in the following R code, `x` is a list which contains a vector and another list. We can pull out different pieces of this list:
+
+```{r}
+x <- list(c("a", "b"), list(1, 2, c(4, 5)))
+x[[1]]
+x[[2]][[3]]
+```
+
+## Lists in Python
+
+Like lists in R, lists in Python allow us to hold objects of multiple types. Indexing is similar to R, but uses single brackets `[ ]` instead of double brackets.
+
+```{python}
+x = ["a", 0, 1]
+x[0]
+x[1] + 1
+```
+
+```{python}
+x = [np.array(["a", "b"]), [1, 2, np.array([4, 5])]]
+x[1]
+x[1][2]
+```
+
+
+## An important difference between R and Python
+
+In R, we can't do arithmetic operations on a list:
+
+```{r, error = T}
+x <- list(0, 1, 2)
+x + 1
+x * 2
+```
+
+The same is sort of true in Python. In Python, "addition" between two lists concatenates them (note that both objects have to be lists!): 
+
+```{python}
+x = [10, 11, 12]
+x + [1]
+```
+
+while "multiplication" of a list repeats it:
+
+```{python}
+x = [10, 11, 12]
+x * 2
+```
+
+# if...else.. statements
+
+## Recap: if...else... statements in R
+
+Here is a very small example of an `if...else...` in R. If `x` is odd, we print `"odd"`, otherwise we print `"even"`:
+
+```{r}
+x <- 3
+if(x %% 2 == 1){
+  print('odd')
+} else {
+  print('even')
+}
+```
+
+We can also add other conditions with `else if` blocks:
+
+```{r}
+x <- "a"
+if(!is.numeric(x)){
+  print('not a number')
+} else if(x %% 2 == 1) {
+  print('odd')
+} else {
+  print('even')
+}
+```
+
+
+## In Python
+
+Here is the equivalent code in Python; just like with loops, Python uses white space to denote which lines go inside the `if` and `else` blocks:
+
+```{python}
+x = 3
+if x % 2 == 1:
+  print("odd")
+else:
+  print("even")
+```
+
+Instead of the `!` symbol to denote negation, Python uses the word `not`:
+
+```{python}
+x = 'a'
+if not type(x) in [int, float]:
+  print('not a number')
+elif x % 2 == 1:
+  print("odd")
+else:
+  print("even")
+```
+
+## More on logical conditions
+
+Generally, logical statements in Python are similar to logical statements in R. The syntax is slightly different for `and` and `or` statements:
+
+```{python}
+x = 3
+y = 5
+x < 3 or y == 5
+x == 3 and y == 4
+```
+
+Unlike R, we can also chain inequalities:
+
+```{python}
+0 < 2 < 3 < 4
+```
+
+Finally, element-wise comparison of NumPy arrays uses `&` and `|`, instead of `and` and `or`:
+
+```{python}
+x = np.array([0, 3, 4])
+y = np.array([2, 3, 4])
+(x < 3) & (y < 4) # the parentheses are important here
+(x < 3) | (y < 4)
+```
+
+
+# Putting it all together
+
+Now, let's put our Python knowledge together to write a simulation! During the first week, we created a simulation for the following gambling scenario:
+
+
+* A roulette wheel has 38 slots numbered 00, 0, and 1–36. Two are green, 18 are red, and 18 are black.
+* If a gambler bets based on color, the return on a \$1 bet is \$2
+* A gambler has \$50, and will continuously bet \$1 on red until they double their money (have \$100) or lose the money they came with
+* What is the probability the gambler doubles their money?
+
+Here is the R code we wrote for this simulation:
+
+```{r, eval=F}
+set.seed(279)
+
+nsim <- 1000
+results <- rep(0, nsim)
+wheel <- c(rep("green", 2), rep("black", 18), rep("red", 18))
+
+for(i in 1:nsim){
+  money <- 50 # starting money
+
+  while(money > 0 & money < 100){
+    spin <- sample(wheel, size = 1)
+    if(spin == "red"){
+      money <- money + 1
+    } else {
+      money <- money - 1
+    }
+  }
+  
+  results[i] <- money == 100
+}
+
+mean(results)
+```
+
+:::{.question}
+#### Question 3
+
+Re-write this simulation in Python. Some hints:
+
+* The `np.random.seed` function can be used to set a seed
+* The `np.zeros` function can be used to create an array of 0s
+* Create the wheel using a Python list; remember that multiplying a list will repeat its entries, while adding lists together concatentates them
+
+:::

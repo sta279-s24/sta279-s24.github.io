@@ -1,0 +1,25 @@
+---
+title: "Class activity solutions"
+format: html
+editor: source
+author: "Ciaran Evans"
+---
+
+```{python}
+import numpy as np
+
+# set a seed for reproducibility
+np.random.seed(33)
+
+days = np.arange(365) # days of the year
+n_students = 30
+nsim = 10000
+results = np.zeros(nsim)
+
+for i in range(nsim):
+    birthdays = np.random.choice(days, n_students, replace=True)
+    results[i] = len(np.unique(birthdays)) < n_students
+
+np.mean(results)
+```
+
