@@ -258,6 +258,17 @@ else:
   print("even")
 ```
 
+## Another way of writing the code
+
+Sometimes, `if...else...` statements can be written in a single line:
+
+```{python}
+x = 3
+y = 'odd' if x % 2 == 1 else 'even'
+print(y)
+```
+
+
 ## More on logical conditions
 
 Generally, logical statements in Python are similar to logical statements in R. The syntax is slightly different for `and` and `or` statements:
@@ -332,3 +343,43 @@ Re-write this simulation in Python. Some hints:
 * Create the wheel using a Python list; remember that multiplying a list will repeat its entries, while adding lists together concatentates them
 
 :::
+
+
+# Another practice question...
+
+If you're done early, try to re-write the movie theater simulation from HW 2 in Python. Here is the R code from the HW 2 solutions:
+
+```{r, eval=F}
+set.seed(111)
+
+n_people <- 100 # number of people in the theater
+nsim <- 1000 # number of simulations to estimate probability
+results <- rep(0, nsim)
+seats <- 1:n_people
+
+for(i in 1:nsim){
+  # vector to store which seats are taken
+  # taken[i] is 0 when the seat is free
+  taken <- rep(0, n_people)
+  
+  # first person randomly chooses a seat
+  choice <- sample(seats, 1)
+  taken[choice] <- 1
+  
+  # now go through everyone else (except the last person)
+  for(j in 2:(n_people - 1)){
+    
+    # if the seat is free, take their seat. Otherwise,
+    # randomly choose a seat from the ones available
+    choice <- ifelse(taken[j] == 0, j, 
+                     sample(seats[taken == 0], 1))
+    taken[choice] <- 1
+  }
+  
+  results[i] <- taken[n_people]
+}
+
+mean(results)
+```
+
+
