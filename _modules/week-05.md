@@ -8,9 +8,10 @@ February 12
 
 February 14
 : Python arrays and lists
-  : [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_11.html)
+  : [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_11.html), [Class Activity solutions](https://sta279-s24.github.io/class_activities/ca_lecture_11_solutions.html)
 
 February 16
 : Lab day
 
 : **Homework 5 released**{: .label .label-yellow }
+  : [HW 5](https://sta279-s24.github.io/homework/hw_5.html)

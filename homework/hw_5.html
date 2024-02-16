@@ -1645,11 +1645,7 @@ margin-left: 0 !important;
           <li class="divider"></li>
         </ul>
         <nav role="navigation" id="toc">
-          <ul>
-          <li><a href="#data-wrangling-in-r" id="toc-data-wrangling-in-r">Data wrangling in R</a></li>
-          <li><a href="#beginning-data-wrangling-in-python" id="toc-beginning-data-wrangling-in-python">Beginning data
-          wrangling in Python</a></li>
-          </ul>
+          
         </nav>
         <ul class="authors">
           <li class="divider"></li>
@@ -1673,10 +1669,10 @@ margin-left: 0 !important;
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<p><strong>Due:</strong> Friday, October 6, 11:00am on Canvas</p>
+<p><strong>Due:</strong> Friday, February 23, 2:00pm on Canvas</p>
 <p><strong>Instructions:</strong></p>
 <ul>
-<li>Download the <a href="https://sta279-f23.github.io/homework/hw_5_template.qmd">HW 5
+<li>Download the <a href="https://sta279-s24.github.io/homework/hw_5_template.qmd">HW 5
 template</a>, and open the template (a Quarto document) in RStudio.</li>
 <li>Put your name in the file header</li>
 <li>Click <code>Render</code></li>
@@ -1703,273 +1699,230 @@ function</li>
 <p><strong>Resources:</strong> In addition to the class notes and
 activities, I recommend reading the following resources:</p>
 <ul>
-<li><a href="https://mdsr-book.github.io/mdsr3e/04-dataI.html">Chapter
-4</a> in <em>Modern Data Science with R</em></li>
-<li><a href="https://r4ds.hadley.nz/data-transform">Chapter 4</a> in
-<em>R for Data Science</em> (2nd edition)</li>
+<li><a href="https://wesmckinney.com/book/numpy-basics">Chapter 4</a>
+(NumPy basics) in <em>Python for Data Analysis</em> (3rd edition)</li>
+<li><a href="https://mdsr-book.github.io/mdsr3e/C-algorithmic.html#simple-example">Appendix
+C.2</a> in <em>Modern Data Science with R</em></li>
 </ul>
-<div id="data-wrangling-in-r" class="section level2">
-<h2>Data wrangling in R</h2>
-<div id="ny-flights-data" class="section level3">
-<h3>NY Flights data</h3>
-<p>Let’s begin with the <code>flights</code> data from the
-<code>nycflights13</code> package.</p>
-<p>Suppose we want to know how many flights departed from each of the
-three NY airports (EWR, LGA, and JFK) in 2013. The <code>count</code>
-function allows us to count the number of rows, and to specify a
-variable to count by. Adding <code>sort = TRUE</code> will order the
-results from largest to smalles. For example:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(nycflights13)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>flights <span class="sc">|&gt;</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">count</span>(origin, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<pre><code>## # A tibble: 3 × 2
-##   origin      n
-##   &lt;chr&gt;   &lt;int&gt;
-## 1 EWR    120835
-## 2 JFK    111279
-## 3 LGA    104662</code></pre>
-<p>We can see that 120835 departed from EWR in 2013.</p>
+<div id="iteration-in-python-3-ways" class="section level3">
+<h3>Iteration in Python (3 ways)</h3>
+<p>In HW 1, you modified code that calculated <span class="math inline">\(\sqrt{x}\)</span> for each <span class="math inline">\(x = 0, 0.1, 0.2,...,1\)</span>. The
+<code>for</code> loop version of the code was</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from=</span><span class="dv">0</span>, <span class="at">to=</span><span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.1</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>sqrt_x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(x))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x)){</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  sqrt_x[i] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(x[i])</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>}</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>sqrt_x</span></code></pre></div>
+<p>and the vectorized version of the code was</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from=</span><span class="dv">0</span>, <span class="at">to=</span><span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.1</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>sqrt_x <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(x)</span></code></pre></div>
+<p>To help us learn some Python, let’s see how to replicate this code in
+Python. Like R, Python is a modular language (we can get lots of extra
+functionality by loading extra libraries). Some of the most common
+modules (particularly for statistics, data science, and machine
+learning) are <code>numpy</code>, <code>scipy</code>,
+<code>pandas</code>, and <code>scikit-learn</code>.</p>
+<p>Here we will reproduce the above R code in Python, with help from the
+<code>numpy</code> module. Run the following Python code (e.g.: in your
+Quarto document, create a Python chunk, copy the code, run the Python
+chunk):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># create x</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">11</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># for loop version</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># create sqrt_x for output</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>sqrt_x <span class="op">=</span> np.zeros(<span class="dv">11</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">11</span>):</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  sqrt_x[i] <span class="op">=</span> np.sqrt(x[i])</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>sqrt_x</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co"># &quot;vectorized&quot; version</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>sqrt_x <span class="op">=</span> np.sqrt(x)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>sqrt_x</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co"># list comprehension version</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>sqrt_x <span class="op">=</span> [np.sqrt(a) <span class="cf">for</span> a <span class="kw">in</span> x]</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>sqrt_x</span></code></pre></div>
+<p>Some notes:</p>
+<ul>
+<li>We have loaded the <code>numpy</code> module, and called it
+<code>np</code> for short. Now when we want to use the
+<code>numpy</code> module in our code, we will reference
+<code>np</code></li>
+<li><code>linspace</code>, <code>zeros</code>, and <code>sqrt</code> are
+functions in the <code>numpy</code> library, so we call them using
+<code>np.linspace</code>, <code>np.zeros</code>, and
+<code>np.sqrt</code></li>
+<li><code>np.linspace</code> works pretty similarly to the
+<code>seq</code> function in R. We specify the range (0 to 1) and the
+number of steps (11); the result is 0, 0.1, …, 0.9, 1</li>
+<li><code>np.zeros(11)</code> is equivalent to <code>rep(0, 11)</code>
+in R</li>
+<li><code>for i in range(11)</code> is essentially equivalent to
+<code>for(i in 1:11)</code> in R. The only difference is that Python is
+0-indexed, so <code>range(11)</code> is really 0, 1, 2, …, 10</li>
+<li>In R, the basic object is a vector. The closest object to R’s vector
+is possibly a NumPy array. This allows operations like “vectorized”
+functions, matrix multiplication, etc.</li>
+<li>A list comprehension is another way of iterating in Python (and in
+some sense is the most “Pythonic” approach). The code
+<code>[np.sqrt(a) for a in x]</code> means “create a list, where each
+entry of the list is the square root of the corresponding entry in
+<code>x</code>”.</li>
+<li>You will notice that, for both the <code>for</code> loop version and
+the “vectorized” versions of the code, <code>sqrt_x</code> is a numpy
+<code>array</code>. However, the list comprehension version produces (as
+we would expect!) a list instead</li>
+</ul>
 <div id="question-1" class="section level4 question">
 <h4>Question 1</h4>
-<p>Reproduce the output from the <code>count</code> function, but use
-the <code>group_by</code>, <code>summarize</code>, and
-<code>arrange</code> functions instead.</p>
+<p>Modify the Python code above to calculate <span class="math inline">\(x^2\)</span> instead of <span class="math inline">\(\sqrt{x}\)</span>. (In Python, <code>x**2</code>
+is the equivalent of <code>x^2</code> in R). Use the 3 iteration methods
+discussed above (for loop, vectorization, list comprehension).</p>
+<p><em>Notes</em>:</p>
+<ul>
+<li>You may use ChatGPT to check your work, but I expect you to make an
+honest effort to write the code yourself.</li>
+</ul>
 </div>
 <div id="question-2" class="section level4 question">
 <h4>Question 2</h4>
-<p>The <code>dep_time</code> variable in the <code>flights</code> data
-records the actual departure time for each flight. However, there are
-several rows with missing departure times. Let’s assume that these
-correspond to flights which were <em>cancelled</em>.</p>
-<p>Which month had the highest proportion of cancelled flights?</p>
-<p><em>Hint:</em> the <code>is.na()</code> function will return
-<code>TRUE</code> if missing, and <code>FALSE</code> otherwise. For
-example:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">is.na</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">3</span>))</span></code></pre></div>
-<pre><code>## [1] FALSE FALSE  TRUE FALSE</code></pre>
+<p>Modify the code from Question 2 so that instead of considering <span class="math inline">\(x = 0, 0.1, 0.2, ..., 0.9, 1\)</span> (i.e. the
+numbers between 0 and 1, in increments of 0.1), we consider <span class="math inline">\(x = 0, 0.05, 0.10, 0.15, ..., 1.95, 2\)</span>
+(the numbers between 0 and 2, in increments of 0.05).</p>
+<p><em>Notes</em>:</p>
+<ul>
+<li>You may use ChatGPT to check your work, but I expect you to make an
+honest effort to write the code yourself.</li>
+</ul>
 </div>
+</div>
+<div id="some-simulations-in-python" class="section level3">
+<h3>Some simulations in Python</h3>
+<p>In the following questions, you will practice working in Python by
+re-implementing some of questions from previous assignments in Python.
+The following table shows you corresponding Python code for several R
+operations.</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>R code</th>
+<th>(approximate) Python equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>length</code></td>
+<td><code>len</code></td>
+</tr>
+<tr class="even">
+<td><code>dim(x)</code></td>
+<td><code>x.shape</code></td>
+</tr>
+<tr class="odd">
+<td><code>seq</code></td>
+<td><code>np.linspace</code> or <code>np.arange</code></td>
+</tr>
+<tr class="even">
+<td><code>rep(0, n)</code></td>
+<td><code>np.zeros(n)</code></td>
+</tr>
+<tr class="odd">
+<td><code>runif(n, a, b)</code></td>
+<td><code>np.random.uniform(a, b, n)</code></td>
+</tr>
+<tr class="even">
+<td><code>mean(x)</code></td>
+<td><code>np.mean(x)</code></td>
+</tr>
+<tr class="odd">
+<td><code>for(i in 1:n)</code></td>
+<td><code>for i in range(n):</code></td>
+</tr>
+<tr class="even">
+<td><code>ifelse(...)</code></td>
+<td><code>np.where(...)</code></td>
+</tr>
+<tr class="odd">
+<td><code>x[i]</code></td>
+<td><code>x[i]</code> (but remember python is 0-indexed)</td>
+</tr>
+<tr class="even">
+<td><code>if(...){</code><br> <br><code>} else {</code> <br> <br>
+<code>}</code></td>
+<td><code>if ... :</code> <br> <br> <code>else:</code></td>
+</tr>
+<tr class="odd">
+<td><code>rnorm(n, mean=0, sd=0.5)</code></td>
+<td><code>np.random.normal(loc=0, scale=0.5, n)</code></td>
+</tr>
+<tr class="even">
+<td><code>set.seed(...)</code></td>
+<td><code>np.random.seed(...)</code></td>
+</tr>
+<tr class="odd">
+<td><code>sample(...)</code></td>
+<td><code>np.random.choice(...)</code></td>
+</tr>
+</tbody>
+</table>
 <div id="question-3" class="section level4 question">
 <h4>Question 3</h4>
-<p>Which plane (specified by the <code>tailnum</code> variable) traveled
-the most times from New York City airports in 2013?</p>
+<p>Re-do Question 6 from HW 1 in Python. Confirm that you get a similar
+result.</p>
 </div>
 <div id="question-4" class="section level4 question">
 <h4>Question 4</h4>
-<p>For the plane identified in question 3, plot the number of trips per
-week over the year.</p>
-<p>To create this plot, you will need to determine the week of the year
-for each flight. The <code>week</code> function in the
-<code>lubridate</code> package may be helpful here…</p>
+<p>Re-do Question 1 from HW 2 in Python. Confirm that you get a similar
+result.</p>
+<p><em>Hints:</em></p>
+<ul>
+<li>R is pretty flexible with <code>int</code> (an integer)
+vs. <code>float</code> (a floating point number). E.g.,
+<code>c(1, 2, 3)[1.5]</code> will return something in R. The same is not
+true in Python; your indices must be integers in Python</li>
+<li>The <code>np.arange</code> function may be useful. For example, to
+generate an array of seats numbered 0 to 99, use
+<code>seats = np.arange(0, 100, 1)</code></li>
+<li>Remember that Python is 0-index; if <code>seats</code> has length
+100, then <code>seats[0]</code> is the first entry, and
+<code>seats[99]</code> is the last entry</li>
+</ul>
 </div>
+</div>
+<div id="functions-in-python" class="section level3">
+<h3>Functions in Python</h3>
+<p>Here’s a simple example of a function in R which takes two numbers
+and adds them together (this is literally what <code>+</code> does, so
+the function is pointless, but bear with me for the purposes of
+demonstration):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>my_sum <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b){</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">return</span>(a <span class="sc">+</span> b)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>}</span></code></pre></div>
+<p>Here is the corresponding function definition in Python:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="kw">def</span> my_sum(a, b):</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="cf">return</span> a <span class="op">+</span> b</span></code></pre></div>
+<p>Let’s practice writing a short function in Python by re-writing the
+Huber loss function from HW 2.</p>
 <div id="question-5" class="section level4 question">
 <h4>Question 5</h4>
-<p>Which carrier has the worst average delays?</p>
+<p>Re-do Question 3 from HW 3 in Python. Here is a code skeleton to get
+you started:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="kw">def</span> huber(x, a<span class="op">=</span><span class="dv">1</span>):</span></code></pre></div>
 </div>
 <div id="question-6" class="section level4 question">
 <h4>Question 6</h4>
-<p>For the results in question 5, can you disentangle the effects of bad
-airports vs. bad carriers? Why or why not?</p>
-<p><em>Hint</em>: Look at
-<code>table(flights$origin, flights$carrier)</code></p>
-</div>
-</div>
-<div id="ny-health-inspections" class="section level3">
-<h3>NY Health Inspections</h3>
-<p>The <code>Violations</code> data from the <code>mdsr</code> package
-contains information on 480621 health inspections conducted on
-restaurants in New York City.</p>
-<div id="question-7" class="section level4 question">
-<h4>Question 7</h4>
-<p>Use the <code>Violations</code> data to create a new data frame
-called <code>violations_summary</code>, which contains the median
-inspection score by zip code for zip codes in Manhattan with 50 or more
-inspections.</p>
-<p><em>Hint</em>: You will probably want to remove rows with missing
-observations for zip code, borough, or inspection score. The
-<code>drop_na</code> function can be useful here. Below is some starter
-code, you will need to complete the rest:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>violations_summary <span class="ot">&lt;-</span> Violations <span class="sc">|&gt;</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">drop_na</span>(zipcode, score, boro) <span class="sc">|&gt;</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  ...</span></code></pre></div>
-</div>
-<div id="question-8" class="section level4 question">
-<h4>Question 8</h4>
-<p>Plot the number of median score vs. the number of inspections, using
-the <code>violations_summary</code> data you created in question 7.</p>
-</div>
-</div>
-</div>
-<div id="beginning-data-wrangling-in-python" class="section level2">
-<h2>Beginning data wrangling in Python</h2>
-<p>In the first part of this assignment, you practiced data wrangling in
-R, using some key <code>dplyr</code> functions. The remainder of this
-homework will walk you through the first steps of data wrangling in
-Python. Many of the ideas are similar, we just need to learn some
-different syntax.</p>
-<div id="importing-r-objects-into-python" class="section level3">
-<h3>Importing R objects into Python</h3>
-<p>To begin, let’s import the <code>flights</code> data into R. In your
-Quarto file for this assignment, you have been using R chunks so far.
-Create a new <em>Python</em> chunk, and copy the following code into the
-Python chunk:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>flights_py <span class="op">=</span> r.flights</span></code></pre></div>
-<p>This tells Python to load the <code>pandas</code> module (abbreviated
-<code>pd</code>), which we will use for data wrangling in Python
-(similar to the <code>dplyr</code> package in R). Then, we import the
-<code>flights</code> data from R into Python, with
-<code>r.flights</code>, and call it <code>flights_py</code>.</p>
-</div>
-<div id="pandas-dataframes-and-series" class="section level3">
-<h3>Pandas DataFrames and Series</h3>
-<p>Before we begin manipulating this data in Python, let’s take a look
-at what type of object it is:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="bu">type</span>(flights_py)</span></code></pre></div>
-<pre><code>## &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;</code></pre>
-<p>You can see that <code>flights_py</code> has been imported as a
-pandas DataFrame! Recall that R has two main ways of storing rectangular
-data: matrices and data frames. The equivalent of a matrix in Python is
-a 2-d NumPy array. The equivalent of an R data frame is a pandas data
-frame.</p>
-<p>Let’s take a look at some of the attributes of this data in
-Python:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>flights_py.shape</span></code></pre></div>
-<pre><code>## (336776, 19)</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>flights_py.columns</span></code></pre></div>
-<pre><code>## Index([&#39;year&#39;, &#39;month&#39;, &#39;day&#39;, &#39;dep_time&#39;, &#39;sched_dep_time&#39;, &#39;dep_delay&#39;,
-##        &#39;arr_time&#39;, &#39;sched_arr_time&#39;, &#39;arr_delay&#39;, &#39;carrier&#39;, &#39;flight&#39;,
-##        &#39;tailnum&#39;, &#39;origin&#39;, &#39;dest&#39;, &#39;air_time&#39;, &#39;distance&#39;, &#39;hour&#39;, &#39;minute&#39;,
-##        &#39;time_hour&#39;],
-##       dtype=&#39;object&#39;)</code></pre>
-<p>We can see that <code>flights_py</code> has 336776 and 19 columns,
-just like the <code>flights</code> data frame in R. The column names are
-also the same, and in the same order (just as we would hope).</p>
-<p><strong>Note:</strong> In Python (and many object-oriented language),
-the <code>.</code> notation (“dot notation”) is used to access
-attributes and methods of an object. Here, <code>flights_py</code> is an
-<em>object</em> (in particular, a pandas DataFrame). For example,
-<em>all</em> DataFrames in pandas have a <code>.shape</code> attribute,
-which stores information about their numbers of rows and columns.</p>
-<p>We can access column in Python by name:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>flights_py[<span class="st">&#39;origin&#39;</span>]</span></code></pre></div>
-<pre><code>## 0         EWR
-## 1         LGA
-## 2         JFK
-## 3         JFK
-## 4         LGA
-##          ... 
-## 336771    JFK
-## 336772    LGA
-## 336773    LGA
-## 336774    LGA
-## 336775    LGA
-## Name: origin, Length: 336776, dtype: object</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="bu">type</span>(flights_py[<span class="st">&#39;origin&#39;</span>])</span></code></pre></div>
-<pre><code>## &lt;class &#39;pandas.core.series.Series&#39;&gt;</code></pre>
-<p>Each column in a pandas DataFrame is a <em>Series</em>; basically a
-one-dimensional DataFrame (similar to a vector in R).</p>
-</div>
-<div id="basic-data-manipulation-with-pandas" class="section level3">
-<h3>Basic data manipulation with pandas</h3>
-<p>Pandas offers many functions which are similar to functions in
-<code>dplyr</code>. For example, if I want to group the flights by
-month, and calculate the mean departure delay in each month, I will use
-the <code>groupby</code> and <code>agg</code> (short for
-<em>aggregate</em>) functions:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>flights_py.groupby(by <span class="op">=</span> <span class="st">&#39;month&#39;</span>).agg({<span class="st">&#39;dep_delay&#39;</span>: <span class="st">&#39;mean&#39;</span>})</span></code></pre></div>
-<pre><code>##        dep_delay
-## month           
-## 1      10.036665
-## 2      10.816843
-## 3      13.227076
-## 4      13.938038
-## 5      12.986859
-## 6      20.846332
-## 7      21.727787
-## 8      12.611040
-## 9       6.722476
-## 10      6.243988
-## 11      5.435362
-## 12     16.576688</code></pre>
-<p>Let’s break this code down:</p>
-<ul>
-<li>First, notice that these functions are methods that belong to pandas
-DataFrames, so we access them with dot notation.
-<code>flights_py.groupby(by = &#39;month&#39;)</code> means “group the flights
-by month”</li>
-<li>Second, notice that instead of piping (<code>|&gt;</code>) from one
-step to the next, we chain the dot notation functions together. This is
-a similar idea to the pipe, just slightly different syntax. This
-chaining works because the output of
-<code>flights_py.groupby(...)</code> is itself a pandas DataFrame, and
-therefore has an <code>agg</code> method</li>
-<li>Also notice that when I refer to columns, I always include quotes
-around the name</li>
-<li><code>agg</code> applies summary functions to certain columns. Here
-we are calculating the mean of the <code>dep_delay</code> column. If we
-didn’t specify the <code>dep_delay</code> column, we would calculate the
-mean of all the numeric columns in the data</li>
-<li>By default, missing values were ignored when calculating the
-mean</li>
-</ul>
-<p>Now, what if I want to calculate the proportion of cancelled flights
-for each month? Well, the proportion of missing values is not a built-in
-function (whereas the mean <em>is</em> built-in), so we have to write it
-ourselves:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="kw">def</span> prop_na(x):</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">sum</span>(pd.isna(x))<span class="op">/</span><span class="bu">len</span>(x)</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>flights_py.groupby(by <span class="op">=</span> <span class="st">&#39;month&#39;</span>).agg(</span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>  {<span class="st">&#39;dep_delay&#39;</span>: prop_na}).sort_values(by <span class="op">=</span> <span class="st">&#39;dep_delay&#39;</span>, ascending <span class="op">=</span> <span class="va">False</span>)</span></code></pre></div>
-<pre><code>##        dep_delay
-## month           
-## 2       0.050539
-## 12      0.036431
-## 6       0.035726
-## 7       0.031946
-## 3       0.029861
-## 4       0.023579
-## 5       0.019551
-## 1       0.019293
-## 8       0.016572
-## 9       0.016392
-## 11      0.008545
-## 10      0.008169</code></pre>
-</div>
-<div id="questions" class="section level3">
-<h3>Questions</h3>
-<div id="question-9" class="section level4 question">
-<h4>Question 9</h4>
-<p>Using pandas, calculate the mean arrival delay for each carrier in
-the NY flights data.</p>
-</div>
-<p>Now, let’s look at the <code>Violations</code> data in Python. Before
-we do, though, we need to make a small change. The <code>score</code>
-column of the <code>Violations</code> data is an integer variable with
-some missing values. If we try to import that into Python, the way that
-R codes missing values will cause a problem. Instead, we’ll convert the
-<code>score</code> column to a numeric variable first:</p>
-<p>In R:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>my_violations <span class="ot">&lt;-</span> Violations <span class="sc">|&gt;</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">score =</span> <span class="fu">as.numeric</span>(score))</span></code></pre></div>
-<p>In Python:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>vio_py <span class="op">=</span> r.my_violations</span></code></pre></div>
-<div id="question-10" class="section level4 question">
-<h4>Question 10</h4>
-<p>Using pandas, calculate the median inspection score by zip code for
-zip codes in Manhattan with 50 or more inspections.</p>
-<p><em>Hints:</em> The following functions for pandas DataFrames will be
-useful:</p>
-<ul>
-<li><code>loc</code></li>
-<li><code>dropna</code></li>
-<li><code>groupby</code></li>
-<li><code>agg</code></li>
-</ul>
-</div>
+<p>Re-do Question 5 from HW 3 in Python. Here is a code skeleton to get
+you started:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="kw">def</span> leaky_relu(x, a<span class="op">=</span><span class="dv">0</span>):</span></code></pre></div>
 </div>
 </div>
 

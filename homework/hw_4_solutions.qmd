@@ -7,182 +7,142 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-
 #### Question 1
 
-```{python}
-import numpy as np
+```{r, message=F, warning=F}
+library(nycflights13)
+library(tidyverse)
+library(mdsr)
 
-# create x
-x = np.linspace(0, 1, 11)
-
-# for loop version
-x_square = np.zeros(11)
-for i in range(11):
-  x_square[i] = x[i]**2
-
-x_square
-
-# "vectorized" version
-x_square = x**2
-x_square
-
-# list comprehension version
-x_square = [a**2 for a in x]
-x_square
+flights |>
+  group_by(origin) |>
+  summarize(N = n()) |>
+  arrange(desc(N))
 ```
 
-#### Question 2 
 
-```{python}
-# create x
-x = np.linspace(0, 2, 41)
+#### Question 2
 
-# for loop version
-x_square = np.zeros(11)
-for i in range(11):
-  x_square[i] = x[i]**2
-
-x_square
-
-# "vectorized" version
-x_square = x**2
-x_square
-
-# list comprehension version
-x_square = [a**2 for a in x]
-x_square
+```{r}
+flights |>
+  group_by(month) |>
+  summarize(prop_cancelled = mean(is.na(dep_time))) |>
+  arrange(desc(prop_cancelled))
 ```
 
 #### Question 3
 
-There are two different ways you could approach the problem here (the wording of the problem is slightly ambiguous). *I am fine with either approach*. 
+Two ways of approaching this question: either using `head`, or using `slice_max`:
 
-The simpler approach is to have the robots pull simultaneously, in which case the game is fair (each robot wins 50% of the time):
-
-```{python}
-np.random.seed(321)
-
-nsim = 1000
-results = np.zeros(nsim)
-
-for i in range(nsim):
-  marker = 0
-  
-  while -0.5 < marker < 0.5:
-    robotA = np.random.uniform(0, 0.5)
-    robotB = np.random.uniform(0, 0.5)
-    marker += robotA - robotB
-    
-  results[i] = marker >= 0.5
-
-np.mean(results)
+```{r}
+flights |>
+  count(tailnum) |>
+  arrange(desc(n)) |>
+  head()
 ```
 
-The slightly more complicated approach is to have the robots take *turns* pulling, and update the marker each time. Now there is a distinct advantage to robot A for pulling first.
-
-#### Question 4 
-
-```{python}
-np.random.seed(111)
-
-n_people = 100 # number of people in the theater
-nsim = 1000 # number of simulations to estimate probability
-results = np.zeros(nsim)
-seats = np.arange(n_people)
-
-for i in range(nsim):
-  taken = np.zeros(n_people)
-  
-  choice = np.random.choice(seats)
-  taken[choice] = 1
-  
-  for j in range(1, n_people - 1):
-    if taken[j] == 0:
-      taken[j] = 1
-    else:
-      choice = np.random.choice(seats[taken == 0])
-      taken[choice] = 1
-  
-  results[i] = taken[n_people-1] == 0
-
-np.mean(results)
+```{r}
+flights |>
+  count(tailnum) |>
+  slice_max(order_by = n, 
+            n = 5)
 ```
 
-**Notes:**
+#### Question 4
 
-* Make sure to use difference indices for the two `for` loops! Here I have used `i` and `j`
-* There are lots of other ways to code this question (e.g., you could use a counter to record the results, rather than a vector)
-* It is crucial to treat the first person separately from the rest
-
+```{r}
+flights |>
+  filter(tailnum == "N725MQ") |>
+  mutate(week = week(time_hour)) |>
+  group_by(week) |>
+  summarize(count = n()) |>
+  ggplot(aes(x = week, y = count)) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  labs(x = "Week", y = "Number of trips")
+```
 
 #### Question 5
 
-There is a typo in this question. The original question reads
-
-$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2|x| - 1 & \text{if } |x| > a  \end{cases}$$
-
-Here is the code for that (incorrect) version:
-
-```{python}
-def huber(x, a=1):
-  return np.where(x <= a, x**2, 2*abs(x) - 1)
+```{r}
+flights |>
+  group_by(carrier) |>
+  summarize(mean_delay = mean(arr_delay, na.rm=T)) |>
+  arrange(desc(mean_delay))
 ```
 
-The *correct* definition of $\psi_a(x)$ should be
+#### Question 6
 
-$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2a|x| - a^2 & \text{if } |x| > a  \end{cases}$$
+We *cannot* disentangle bad carriers from bad airports.
 
-Here is code for the correct version:
-
-```{python}
-def huber(x, a=1):
-  return np.where(x <= a, x**2, 2*a*abs(x) - a**2)
+```{r}
+table(flights$origin, flights$carrier)
 ```
 
-(For this homework assignment, either is ok).
+#### Question 7
 
-#### Question 6 
-
-There are *lots* of ways to approach this problem. For example, you could randomly assign the position of the car, randomly choose your door, etc. And you could store the doors and choices in their own arrays. 
-
-However, perhaps the simplest approach is to fix the door which contains the car (in this case, let's say the third door). The player's initial choice is random. Then, the player will always *switch* doors. This means that the player will win whenever their initial choice was *not* the third door, and lose if their initial choice *was* the third door.
-
-```{python}
-nsim = 1000
-results = np.zeros(nsim)
-
-for i in range(nsim):
-  door_choice = np.random.choice([0, 1, 2])
-  
-  # Always put the car behind door 3
-  # They always switch
-  # If they randomly choose door 3, they lose (bc they switch)
-  # Otherwise they win
-  if door_choice == 2:
-    results[i] = 0
-  else:
-    results[i] = 1
-
-np.mean(results)
+```{r}
+violations_summary <- Violations |>
+  drop_na(zipcode, score, boro) |>
+  filter(boro == "MANHATTAN") |>
+  group_by(zipcode) |>
+  summarize(med_score = median(score),
+            N = n()) |>
+  filter(N >= 50)
 ```
-
-
-#### Question 7 
-
-Reproducibility is important because it allows other researchers to verify and evaluate computational research. For example, we can see the decisions which were made when cleaning data, when fitting models, when conducting simulations, etc. By reproducing the work ourselves, we can judge whether those decisions were reasonable, or whether different choices should have been made. We can also experiment with making different choices, and see how they would change the conclusions of the research.
-
 
 #### Question 8
 
-Steps include (but are not limited to) making code and data publicly available, end-to-end scripting of the entire data analysis pipeline, thoroughly commenting and documenting the code and data, and sharing all versions of software used to create the results.
+```{r}
+violations_summary |>
+  ggplot(aes(x = N, y = med_score)) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Number of inspections",
+       y = "Median inspection score")
+```
 
 #### Question 9
 
-* You may switch to a different project, and another employee will need to continue your work
-* Collaborating in a team, you will need to share your work with others
+```{r}
+x <- list(rexp, list(rnorm), list(function(n){return(rchisq(n, 2))}))
+x[[1]](3)
+x[[2]][[1]](3)
+x[[3]][[1]](3)
+```
 
+#### Question 10
 
+```{r}
+library(tidyverse)
+library(Stat2Data)
+data("Kershaw")
 
+log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
+summary(log_reg)
 
+typeof(log_reg)
+```
 
+A list!
+
+#### Question 11
+
+```{r}
+length(log_reg)
+```
+
+#### Question 12
+
+```{r}
+log_reg[[1]]
+```
+
+The estimated coefficients of the model
+
+#### Question 13
+
+```{r}
+log_reg$aic
+```

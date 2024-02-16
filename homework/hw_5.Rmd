@@ -7,11 +7,11 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday, October 6, 11:00am on Canvas
+**Due:** Friday, February 23, 2:00pm on Canvas
 
 **Instructions:** 
 
-* Download the [HW 5 template](https://sta279-f23.github.io/homework/hw_5_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Download the [HW 5 template](https://sta279-s24.github.io/homework/hw_5_template.qmd), and open the template (a Quarto document) in RStudio. 
 * Put your name in the file header
 * Click `Render`
 * Type all code and answers in the document (using `###` for section headings and `####` for question headings)
@@ -30,216 +30,167 @@ link-citations: yes
   
 **Resources:** In addition to the class notes and activities, I recommend reading the following resources:
 
-* [Chapter 4](https://mdsr-book.github.io/mdsr3e/04-dataI.html) in *Modern Data Science with R*
-* [Chapter 4](https://r4ds.hadley.nz/data-transform) in *R for Data Science* (2nd edition)
+* [Chapter 4](https://wesmckinney.com/book/numpy-basics) (NumPy basics) in *Python for Data Analysis* (3rd edition)
+* [Appendix C.2](https://mdsr-book.github.io/mdsr3e/C-algorithmic.html#simple-example) in *Modern Data Science with R*
 
-## Data wrangling in R
 
-### NY Flights data
+### Iteration in Python (3 ways)
 
-Let's begin with the `flights` data from the `nycflights13` package.
+In HW 1, you modified code that calculated $\sqrt{x}$ for each $x = 0, 0.1, 0.2,...,1$. The `for` loop version of the code was
 
-Suppose we want to know how many flights departed from each of the three NY airports (EWR, LGA, and JFK) in 2013. The `count` function allows us to count the number of rows, and to specify a variable to count by. Adding `sort = TRUE` will order the results from largest to smalles. For example:
-
-```{r, message=F, warning=F}
-library(nycflights13)
-library(tidyverse)
-
-flights |>
-  count(origin, sort = TRUE)
+```r
+x <- seq(from=0, to=1, by=0.1)
+sqrt_x <- rep(0, length(x))
+for(i in 1:length(x)){
+  sqrt_x[i] <- sqrt(x[i])
+}
+sqrt_x
 ```
 
-We can see that 120835 departed from EWR in 2013.
+and the vectorized version of the code was
 
+```r
+x <- seq(from=0, to=1, by=0.1)
+sqrt_x <- sqrt(x)
+```
+
+To help us learn some Python, let's see how to replicate this code in Python. Like R, Python is a modular language (we can get lots of extra functionality by loading extra libraries). Some of the most common modules (particularly for statistics, data science, and machine learning) are `numpy`, `scipy`, `pandas`, and `scikit-learn`.
+
+Here we will reproduce the above R code in Python, with help from the `numpy` module. Run the following Python code (e.g.: in your Quarto document, create a Python chunk, copy the code, run the Python chunk):
+
+```{python, eval=F}
+import numpy as np
+
+# create x
+x = np.linspace(0, 1, 11)
+
+# for loop version
+# create sqrt_x for output
+sqrt_x = np.zeros(11)
+for i in range(11):
+  sqrt_x[i] = np.sqrt(x[i])
+
+sqrt_x
+
+# "vectorized" version
+sqrt_x = np.sqrt(x)
+sqrt_x
+
+# list comprehension version
+sqrt_x = [np.sqrt(a) for a in x]
+sqrt_x
+```
+
+Some notes:
+
+* We have loaded the `numpy` module, and called it `np` for short. Now when we want to use the `numpy` module in our code, we will reference `np`
+* `linspace`, `zeros`, and `sqrt` are functions in the `numpy` library, so we call them using `np.linspace`, `np.zeros`, and `np.sqrt`
+* `np.linspace` works pretty similarly to the `seq` function in R. We specify the range (0 to 1) and the number of steps (11); the result is 0, 0.1, ..., 0.9, 1
+* `np.zeros(11)` is equivalent to `rep(0, 11)` in R
+* `for i in range(11)` is essentially equivalent to `for(i in 1:11)` in R. The only difference is that Python is 0-indexed, so `range(11)` is really 0, 1, 2, ..., 10
+* In R, the basic object is a vector. The closest object to R's vector is possibly a NumPy array. This allows operations like "vectorized" functions, matrix multiplication, etc. 
+* A list comprehension is another way of iterating in Python (and in some sense is the most "Pythonic" approach). The code `[np.sqrt(a) for a in x]` means "create a list, where each entry of the list is the square root of the corresponding entry in `x`".
+* You will notice that, for both the `for` loop version and the "vectorized" versions of the code, `sqrt_x` is a numpy `array`. However, the list comprehension version produces (as we would expect!) a list instead
 
 :::{.question}
 #### Question 1
 
-Reproduce the output from the `count` function, but use the `group_by`, `summarize`, and `arrange` functions instead.
+Modify the Python code above to calculate $x^2$ instead of $\sqrt{x}$. (In Python, `x**2` is the equivalent of `x^2` in R). Use the 3 iteration methods discussed above (for loop, vectorization, list comprehension).
+
+*Notes*:
+
+* You may use ChatGPT to check your work, but I expect you to make an honest effort to write the code yourself.
 :::
 
 :::{.question}
 #### Question 2
 
-The `dep_time` variable in the `flights` data records the actual departure time for each flight. However, there are several rows with missing departure times. Let's assume that these correspond to flights which were *cancelled*.
+Modify the code from Question 2 so that instead of considering $x = 0, 0.1, 0.2, ..., 0.9, 1$ (i.e. the numbers between 0 and 1, in increments of 0.1), we consider $x = 0, 0.05, 0.10, 0.15, ..., 1.95, 2$ (the numbers between 0 and 2, in increments of 0.05).
 
-Which month had the highest proportion of cancelled flights?
+*Notes*:
 
-*Hint:* the `is.na()` function will return `TRUE` if missing, and `FALSE` otherwise. For example:
-
-```{r}
-is.na(c(1, 2, NA, 3))
-```
-
+* You may use ChatGPT to check your work, but I expect you to make an honest effort to write the code yourself.
 :::
+
+### Some simulations in Python
+
+In the following questions, you will practice working in Python by re-implementing some of questions from previous assignments in Python. The following table shows you corresponding Python code for several R operations.
+
+| R code | (approximate) Python equivalent |
+| --- | --- |
+| `length` | `len` |
+| `dim(x)` | `x.shape` |
+| `seq` | `np.linspace` or `np.arange` |
+| `rep(0, n)` | `np.zeros(n)` |
+| `runif(n, a, b)` | `np.random.uniform(a, b, n)` |
+| `mean(x)` | `np.mean(x)` |
+| `for(i in 1:n)` | `for i in range(n):` |
+| `ifelse(...)` | `np.where(...)` |
+| `x[i]` | `x[i]` (but remember python is 0-indexed) |
+| `if(...){`<br> <br>`} else {` <br> <br> `}` | `if ... :` <br> <br> `else:` |
+| `rnorm(n, mean=0, sd=0.5)` | `np.random.normal(loc=0, scale=0.5, n)` |
+| `set.seed(...)` | `np.random.seed(...)` |
+| `sample(...)` | `np.random.choice(...)` |
 
 :::{.question}
 #### Question 3
 
-Which plane (specified by the `tailnum` variable) traveled the most times from New York City airports in 2013?
+Re-do Question 6 from HW 1 in Python. Confirm that you get a similar result.
+
 :::
 
 :::{.question}
 #### Question 4
 
-For the plane identified in question 3, plot the number of trips per week over the year.
+Re-do Question 1 from HW 2 in Python. Confirm that you get a similar result.
 
-To create this plot, you will need to determine the week of the year for each flight. The `week` function in the `lubridate` package may be helpful here...
+*Hints:* 
+
+* R is pretty flexible with `int` (an integer) vs. `float` (a floating point number). E.g., `c(1, 2, 3)[1.5]` will return something in R. The same is not true in Python; your indices must be integers in Python
+* The `np.arange` function may be useful. For example, to generate an array of seats numbered 0 to 99, use `seats = np.arange(0, 100, 1)`
+* Remember that Python is 0-index; if `seats` has length 100, then `seats[0]` is the first entry, and `seats[99]` is the last entry
 :::
+
+### Functions in Python
+
+Here's a simple example of a function in R which takes two numbers and adds them together (this is literally what `+` does, so the function is pointless, but bear with me for the purposes of demonstration):
+
+```r
+my_sum <- function(a, b){
+  return(a + b)
+}
+```
+
+Here is the corresponding function definition in Python:
+
+```python
+def my_sum(a, b):
+  return a + b
+```
+
+Let's practice writing a short function in Python by re-writing the Huber loss function from HW 2.
 
 :::{.question}
 #### Question 5
 
-Which carrier has the worst average delays?
+Re-do Question 3 from HW 3 in Python. Here is a code skeleton to get you started:
+
+```python
+def huber(x, a=1):
+
+```
+
 :::
 
 :::{.question}
 #### Question 6
 
-For the results in question 5, can you disentangle the effects of bad airports vs. bad carriers? Why or why not?
+Re-do Question 5 from HW 3 in Python. Here is a code skeleton to get you started:
 
-*Hint*: Look at `table(flights$origin, flights$carrier)`
-:::
+```python
+def leaky_relu(x, a=0):
 
-
-### NY Health Inspections
-
-The `Violations` data from the `mdsr` package contains information on 480621 health inspections conducted on restaurants in New York City. 
-
-:::{.question}
-#### Question 7
-
-Use the `Violations` data to create a new data frame called `violations_summary`, which contains the median inspection score by zip code for zip codes in Manhattan with 50 or more inspections.
-
-*Hint*: You will probably want to remove rows with missing observations for zip code, borough, or inspection score. The `drop_na` function can be useful here. Below is some starter code, you will need to complete the rest:
-
-```{r, eval=F}
-violations_summary <- Violations |>
-  drop_na(zipcode, score, boro) |>
-  ...
 ```
 
 :::
-
-
-:::{.question}
-#### Question 8
-
-Plot the number of median score vs. the number of inspections, using the `violations_summary` data you created in question 7.
-:::
-
-
-## Beginning data wrangling in Python
-
-In the first part of this assignment, you practiced data wrangling in R, using some key `dplyr` functions. The remainder of this homework will walk you through the first steps of data wrangling in Python. Many of the ideas are similar, we just need to learn some different syntax.
-
-### Importing R objects into Python
-
-To begin, let's import the `flights` data into R. In your Quarto file for this assignment, you have been using R chunks so far. Create a new *Python* chunk, and copy the following code into the Python chunk:
-
-```{python}
-import pandas as pd
-
-flights_py = r.flights
-```
-
-This tells Python to load the `pandas` module (abbreviated `pd`), which we will use for data wrangling in Python (similar to the `dplyr` package in R). Then, we import the `flights` data from R into Python, with `r.flights`, and call it `flights_py`.
-
-### Pandas DataFrames and Series
-
-Before we begin manipulating this data in Python, let's take a look at what type of object it is:
-
-```{python}
-type(flights_py)
-```
-
-You can see that `flights_py` has been imported as a pandas DataFrame! Recall that R has two main ways of storing rectangular data: matrices and data frames. The equivalent of a matrix in Python is a 2-d NumPy array. The equivalent of an R data frame is a pandas data frame.
-
-Let's take a look at some of the attributes of this data in Python:
-
-```{python}
-flights_py.shape
-
-flights_py.columns
-```
-
-We can see that `flights_py` has 336776 and 19 columns, just like the `flights` data frame in R. The column names are also the same, and in the same order (just as we would hope).
-
-**Note:** In Python (and many object-oriented language), the `.` notation ("dot notation") is used to access attributes and methods of an object. Here, `flights_py` is an *object* (in particular, a pandas DataFrame). For example, *all* DataFrames in pandas have a `.shape` attribute, which stores information about their numbers of rows and columns.
-
-We can access column in Python by name:
-
-```{python}
-flights_py['origin']
-
-type(flights_py['origin'])
-```
-
-Each column in a pandas DataFrame is a *Series*; basically a one-dimensional DataFrame (similar to a vector in R).
-
-### Basic data manipulation with pandas
-
-Pandas offers many functions which are similar to functions in `dplyr`. For example, if I want to group the flights by month, and calculate the mean departure delay in each month, I will use the `groupby` and `agg` (short for *aggregate*) functions:
-
-```{python}
-flights_py.groupby(by = 'month').agg({'dep_delay': 'mean'})
-```
-
-Let's break this code down:
-
-* First, notice that these functions are methods that belong to pandas DataFrames, so we access them with dot notation. `flights_py.groupby(by = 'month')` means "group the flights by month"
-* Second, notice that instead of piping (`|>`) from one step to the next, we chain the dot notation functions together. This is a similar idea to the pipe, just slightly different syntax. This chaining works because the output of `flights_py.groupby(...)` is itself a pandas DataFrame, and therefore has an `agg` method
-* Also notice that when I refer to columns, I always include quotes around the name
-* `agg` applies summary functions to certain columns. Here we are calculating the mean of the `dep_delay` column. If we didn't specify the `dep_delay` column, we would calculate the mean of all the numeric columns in the data
-* By default, missing values were ignored when calculating the mean
-
-Now, what if I want to calculate the proportion of cancelled flights for each month? Well, the proportion of missing values is not a built-in function (whereas the mean *is* built-in), so we have to write it ourselves:
-
-```{python}
-def prop_na(x):
-  return sum(pd.isna(x))/len(x)
-
-flights_py.groupby(by = 'month').agg(
-  {'dep_delay': prop_na}).sort_values(by = 'dep_delay', ascending = False)
-```
-
-### Questions
-
-
-:::{.question}
-#### Question 9
-
-Using pandas, calculate the mean arrival delay for each carrier in the NY flights data.
-:::
-
-Now, let's look at the `Violations` data in Python. Before we do, though, we need to make a small change. The `score` column of the `Violations` data is an integer variable with some missing values. If we try to import that into Python, the way that R codes missing values will cause a problem. Instead, we'll convert the `score` column to a numeric variable first:
-
-In R:
-```{r, eval=F}
-my_violations <- Violations |>
-  mutate(score = as.numeric(score))
-```
-
-In Python:
-
-```{python, eval=F}
-vio_py = r.my_violations
-```
-
-
-:::{.question}
-#### Question 10
-
-Using pandas, calculate the median inspection score by zip code for zip codes in Manhattan with 50 or more inspections.
-
-*Hints:* The following functions for pandas DataFrames will be useful:
-
-* `loc`
-* `dropna`
-* `groupby`
-* `agg`
-:::
-
-
-
 
