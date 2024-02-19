@@ -1,0 +1,69 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** Work with a neighbor to answer the following questions. To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_10_template.qmd) file.
+
+## Data
+
+We will work with data on global health and economic development. The data is called `gapminder`, and is part of the `gapminder` package in R. You will need to install the `gapminder` package before beginning the questions.
+
+# dplyr practice with gapminder data
+
+In this activity, you will practice using the `dplyr` functions we learned in class. 
+
+1. Fill in the following code to create a new data frame, containing only countries in 2007 with life expectancy at least 70 years and GDP per capita at most $20000.
+
+```r
+new_gapminder <- gapminder |>
+  filter(year ..., 
+         lifeExp ..., 
+         gdpPercap ...)
+```
+
+2. Fill in the following code to count the number of countries in each continent in the data for 2007.
+
+```r
+gapminder |>
+  filter(...) |>
+  count(...)
+```
+
+3. Fill in the following code to create a data frame with a new column that is the natural log of GDP per capita. (Hint: in R, the natural log function is `log`).
+
+```r
+new_gapminder <- gapminder |>
+  mutate(log_gdp_percap = ...)
+```
+
+4. Fill in the following code to calculate the median natural log of GDP per capita in countries with a life expectancy of at least 70 years in 2007. (Hint: in R, the median function is `median`).
+
+```r
+gapminder |>
+  mutate(log_gdp_percap = ...) |>
+  filter(...) |>
+  summarize(...)
+```
+
+5. Fill in the following code to calculate the median natural log of GDP per capita in countries with a life expectancy of at least 70 years in 2007, broken down by continent.
+
+```r
+gapminder |>
+  mutate(...) |>
+  filter(...) |>
+  group_by(...) |>
+  summarize(...)
+```
+
+6. Does it matter whether we `mutate` or `filter` first in question 5?
+
+7. Calculate the median life expectancy for each continent in 2007, and the correlation between log GDP per capita and life expectancy for each continent in 2007.
+
+8. Using your summary statistics, describe the relationship between GDP per capita and life expectancy, and summarize the differences between continents.
+

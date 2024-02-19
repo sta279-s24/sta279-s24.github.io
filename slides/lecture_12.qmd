@@ -1,0 +1,181 @@
+---
+title: "Lecture 11: Data wrangling"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Last time
+
+* `filter`: choose certain rows
+* `summarize`: calculate summary statistics
+* `group_by`: group rows together
+* `mutate`: create new columns
+
+## Data for today
+
+* Data on professional baseball teams between 1871 and 2022
+* 3015 rows and 48 columns
+* Each row represents one year (season) for one team
+* Variables include:
+  * `yearID`: Year
+  * `franchID`: Franchise
+  * `W`: Wins
+  * `L`: Losses
+  
+## Data for today
+
+* Variables include:
+  * `yearID`: Year
+  * `franchID`: Franchise
+  * `W`: Wins
+  * `L`: Losses
+  
+We want to know: which NY Mets general manager performed best between 1998 - 2018
+
+## Making a plan
+
+We want to know: which NY Mets general manager performed best between 1998 - 2018
+
+**Question:** What steps could we take to answer this question?
+
+```{r, include=F}
+library(Lahman)
+library(tidyverse)
+```
+
+## Step 0: Make the columns more manageable
+
+There are 48 columns in the initial data! Let's only focus on the ones we care about:
+
+```{r}
+Teams |>
+  select(yearID, franchID, W, L)
+```
+
+## Step 1: Focus on the Mets
+
+
+```{r, eval=F}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  ...(franchID == "NYM")
+```
+
+What function do I use to choose only the rows corresponding to the Mets?
+
+
+## Step 1: Focus on the Mets
+
+```{r}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  filter(franchID == "NYM")
+```
+
+## Step 2: Focus on the Mets between 1998 and 2018
+
+```{r, eval=F}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  filter(franchID == "NYM",
+         ...)
+```
+
+How do I specify the range of years I want?
+
+## Step 2: Focus on the Mets between 1998 and 2018
+
+```{r}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  filter(franchID == "NYM",
+         yearID >= 1998, yearID <= 2018)
+```
+
+## Step 3: Who was the GM?
+
+* 1998 - 2003: Steve Phillips
+* 2004: Jim Duquette
+* 2005 - 2010: Omar Minaya
+* 2011 - 2018: Sandy Alderson
+
+How should we add this information to the data?
+
+## Step 3: Who was the GM?
+
+```{r}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  filter(franchID == "NYM",
+         yearID >= 1998, yearID <= 2018) |>
+  mutate(gm = case_when(
+    yearID <= 2003 ~ "Phillips",
+    yearID == 2004 ~ "Duquette",
+    yearID <= 2010 ~ "Minaya",
+    yearID <= 2018 ~ "Alderson"
+  ))
+```
+
+## Step 4: Summarize performance
+
+How do I calculate performance for *each* GM?
+
+```{r}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  filter(franchID == "NYM",
+         yearID >= 1998, yearID <= 2018) |>
+  mutate(gm = case_when(
+    yearID <= 2003 ~ "Phillips",
+    yearID == 2004 ~ "Duquette",
+    yearID <= 2010 ~ "Minaya",
+    yearID <= 2018 ~ "Alderson"
+  )) |>
+  summarize(wpct = sum(W)/sum(W + L))
+```
+
+## Step 4: Summarize performance
+
+```{r}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  filter(franchID == "NYM",
+         yearID >= 1998, yearID <= 2018) |>
+  mutate(gm = case_when(
+    yearID <= 2003 ~ "Phillips",
+    yearID == 2004 ~ "Duquette",
+    yearID <= 2010 ~ "Minaya",
+    yearID <= 2018 ~ "Alderson"
+  )) |>
+  group_by(gm) |>
+  summarize(wpct = sum(W)/sum(W + L))
+```
+
+## Finally: arrange results
+
+```{r}
+Teams |>
+  select(yearID, franchID, W, L) |>
+  filter(franchID == "NYM",
+         yearID >= 1998, yearID <= 2018) |>
+  mutate(gm = case_when(
+    yearID <= 2003 ~ "Phillips",
+    yearID == 2004 ~ "Duquette",
+    yearID <= 2010 ~ "Minaya",
+    yearID <= 2018 ~ "Alderson"
+  )) |>
+  group_by(gm) |>
+  summarize(wpct = sum(W)/sum(W + L)) |>
+  arrange(desc(wpct))
+```
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_11.html](https://sta279-s24.github.io/class_activities/ca_lecture_11.html)
+
