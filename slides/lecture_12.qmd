@@ -1,5 +1,5 @@
 ---
-title: "Lecture 11: Data wrangling"
+title: "Lecture 12: Data wrangling"
 format: 
   revealjs:
     theme: theme.scss
@@ -177,5 +177,5 @@ Teams |>
 
 ## Class activity
 
-[https://sta279-s24.github.io/class_activities/ca_lecture_11.html](https://sta279-s24.github.io/class_activities/ca_lecture_11.html)
+[https://sta279-s24.github.io/class_activities/ca_lecture_12.html](https://sta279-s24.github.io/class_activities/ca_lecture_12.html)
 

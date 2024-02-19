@@ -1,0 +1,4117 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="lecture_12_files/libs/clipboard/clipboard.min.js"></script>
+<script src="lecture_12_files/libs/quarto-html/tabby.min.js"></script>
+<script src="lecture_12_files/libs/quarto-html/popper.min.js"></script>
+<script src="lecture_12_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="lecture_12_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="lecture_12_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="lecture_12_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="lecture_12_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.3.353">
+
+  <title>Lecture 12: Data wrangling</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="lecture_12_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="lecture_12_files/libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="lecture_12_files/libs/revealjs/dist/theme/quarto.css">
+  <link href="lecture_12_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="lecture_12_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="lecture_12_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="lecture_12_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Lecture 12: Data wrangling</h1>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="last-time" class="slide level2">
+<h2>Last time</h2>
+<ul>
+<li><code>filter</code>: choose certain rows</li>
+<li><code>summarize</code>: calculate summary statistics</li>
+<li><code>group_by</code>: group rows together</li>
+<li><code>mutate</code>: create new columns</li>
+</ul>
+</section>
+<section id="data-for-today" class="slide level2">
+<h2>Data for today</h2>
+<ul>
+<li>Data on professional baseball teams between 1871 and 2022</li>
+<li>3015 rows and 48 columns</li>
+<li>Each row represents one year (season) for one team</li>
+<li>Variables include:
+<ul>
+<li><code>yearID</code>: Year</li>
+<li><code>franchID</code>: Franchise</li>
+<li><code>W</code>: Wins</li>
+<li><code>L</code>: Losses</li>
+</ul></li>
+</ul>
+</section>
+<section id="data-for-today-1" class="slide level2">
+<h2>Data for today</h2>
+<ul>
+<li>Variables include:
+<ul>
+<li><code>yearID</code>: Year</li>
+<li><code>franchID</code>: Franchise</li>
+<li><code>W</code>: Wins</li>
+<li><code>L</code>: Losses</li>
+</ul></li>
+</ul>
+<p>We want to know: which NY Mets general manager performed best between 1998 - 2018</p>
+</section>
+<section id="making-a-plan" class="slide level2">
+<h2>Making a plan</h2>
+<p>We want to know: which NY Mets general manager performed best between 1998 - 2018</p>
+<p><strong>Question:</strong> What steps could we take to answer this question?</p>
+</section>
+<section id="step-0-make-the-columns-more-manageable" class="slide level2">
+<h2>Step 0: Make the columns more manageable</h2>
+<p>There are 48 columns in the initial data! Let’s only focus on the ones we care about:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     yearID franchID   W   L
+1      1871      BNA  20  10
+2      1871      CNA  19   9
+3      1871      CFC  10  19
+4      1871      KEK   7  12
+5      1871      NNA  16  17
+6      1871      PNA  21   7
+7      1871      ROK   4  21
+8      1871      TRO  13  15
+9      1871      OLY  15  15
+10     1872      BLC  35  19
+11     1872      ECK   3  26
+12     1872      BRA   9  28
+13     1872      BNA  39   8
+14     1872      CFC   6  16
+15     1872      MAN   5  19
+16     1872      NNA  34  20
+17     1872      PNA  30  14
+18     1872      TRO  15  10
+19     1872      OLY   2   7
+20     1872      NAT   0  11
+21     1873      BLC  34  22
+22     1873      MAR   0   6
+23     1873      BRA  17  37
+24     1873      BNA  43  16
+25     1873      RES   2  21
+26     1873      NNA  29  24
+27     1873      PNA  28  23
+28     1873      PWS  36  17
+29     1873      WBL   8  31
+30     1874      BLC   9  38
+31     1874      BRA  22  33
+32     1874      BNA  52  18
+33     1874      CNA  28  31
+34     1874      HNA  16  37
+35     1874      NNA  42  23
+36     1874      PNA  33  22
+37     1874      PWS  29  29
+38     1875      BRA   2  42
+39     1875      BNA  71   8
+40     1875      CNA  30  37
+41     1875      HNA  54  28
+42     1875      WES   1  12
+43     1875      NHV   7  40
+44     1875      NNA  30  38
+45     1875      PNA  53  20
+46     1875      PWS  37  31
+47     1875      CEN   2  12
+48     1875      SLR   4  15
+49     1875      SNA  39  29
+50     1875      WNT   5  23
+51     1876      ATL  39  31
+52     1876      CHC  52  14
+53     1876      CNR   9  56
+54     1876      HAR  47  21
+55     1876      LGR  30  36
+56     1876      NYU  21  35
+57     1876      ATH  14  45
+58     1876      SBS  45  19
+59     1877      ATL  42  18
+60     1877      CHC  26  33
+61     1877      CNR  15  42
+62     1877      HAR  31  27
+63     1877      LGR  35  25
+64     1877      SBS  28  32
+65     1878      ATL  41  19
+66     1878      CHC  30  30
+67     1878      CNR  37  23
+68     1878      IBL  24  36
+69     1878      MLG  15  45
+70     1878      PRO  33  27
+71     1879      BUF  46  32
+72     1879      ATL  54  30
+73     1879      CHC  46  33
+74     1879      CBL  27  55
+75     1879      CNR  43  37
+76     1879      PRO  59  25
+77     1879      SYR  22  48
+78     1879      TRT  19  56
+79     1880      BUF  24  58
+80     1880      ATL  40  44
+81     1880      CHC  67  17
+82     1880      CBL  47  37
+83     1880      CNR  21  59
+84     1880      PRO  52  32
+85     1880      TRT  41  42
+86     1880      WOR  40  43
+87     1881      BUF  45  38
+88     1881      ATL  38  45
+89     1881      CHC  56  28
+90     1881      CBL  36  48
+91     1881      DTN  41  43
+92     1881      PRO  47  37
+93     1881      TRT  39  45
+94     1881      WOR  32  50
+95     1882      BUF  45  39
+96     1882      BLO  19  54
+97     1882      ATL  45  39
+98     1882      CHC  55  29
+99     1882      CBL  42  40
+100    1882      CIN  55  25
+101    1882      DTN  42  41
+102    1882      LOU  42  38
+103    1882      PHA  41  34
+104    1882      PRO  52  32
+105    1882      PIT  39  39
+106    1882      STL  37  43
+107    1882      TRT  35  48
+108    1882      WOR  18  66
+109    1883      BUF  52  45
+110    1883      BLO  28  68
+111    1883      ATL  63  35
+112    1883      CHC  59  39
+113    1883      CBL  55  42
+114    1883      CBK  32  65
+115    1883      CIN  61  37
+116    1883      DTN  40  58
+117    1883      LOU  52  45
+118    1883      SFG  46  50
+119    1883      NYP  54  42
+120    1883      PHA  66  32
+121    1883      PHI  17  81
+122    1883      PRO  58  40
+123    1883      PIT  31  67
+124    1883      STL  65  33
+125    1884      ALT   6  19
+126    1884      BUF  64  47
+127    1884      BLO  63  43
+128    1884      BLU  58  47
+129    1884      LAD  40  64
+130    1884      ATL  73  38
+131    1884      BRD  58  51
+132    1884      CHC  62  50
+133    1884      CPI  41  50
+134    1884      CBL  35  77
+135    1884      CBK  69  39
+136    1884      CIN  68  41
+137    1884      COR  69  36
+138    1884      DTN  28  84
+139    1884      IHO  29  78
+140    1884      KCU  16  63
+141    1884      LOU  68  40
+142    1884      MLU   8   4
+143    1884      SFG  62  50
+144    1884      NYP  75  32
+145    1884      PHA  61  46
+146    1884      PHI  39  73
+147    1884      PHK  21  46
+148    1884      PRO  84  28
+149    1884      PIT  30  78
+150    1884      RIC  12  30
+151    1884      STL  67  40
+152    1884      SLM  94  19
+153    1884      STP   2   6
+154    1884      TOL  46  58
+155    1884      WIL   2  16
+156    1884      WST  12  51
+157    1884      WNA  47  65
+158    1885      BUF  38  74
+159    1885      BLO  41  68
+160    1885      LAD  53  59
+161    1885      ATL  46  66
+162    1885      CHC  87  25
+163    1885      CIN  63  49
+164    1885      DTN  41  67
+165    1885      LOU  53  59
+166    1885      SFG  85  27
+167    1885      NYP  44  64
+168    1885      PHA  55  57
+169    1885      PHI  56  54
+170    1885      PRO  53  57
+171    1885      PIT  56  55
+172    1885      STL  79  33
+173    1885      SLM  36  72
+174    1886      BLO  48  83
+175    1886      LAD  76  61
+176    1886      ATL  56  61
+177    1886      CHC  90  34
+178    1886      CIN  65  73
+179    1886      DTN  87  36
+180    1886      KCN  30  91
+181    1886      LOU  66  70
+182    1886      SFG  75  44
+183    1886      NYP  53  82
+184    1886      PHA  63  72
+185    1886      PHI  71  43
+186    1886      PIT  80  57
+187    1886      STL  93  46
+188    1886      SLM  43  79
+189    1886      WNL  28  92
+190    1887      BLO  77  58
+191    1887      LAD  60  74
+192    1887      ATL  61  60
+193    1887      CHC  71  50
+194    1887      CLV  39  92
+195    1887      CIN  81  54
+196    1887      DTN  79  45
+197    1887      IND  37  89
+198    1887      LOU  76  60
+199    1887      SFG  68  55
+200    1887      NYP  44  89
+201    1887      PHA  64  69
+202    1887      PHI  75  48
+203    1887      PIT  55  69
+204    1887      STL  95  40
+205    1887      WNL  46  76
+206    1888      BLO  57  80
+207    1888      LAD  88  52
+208    1888      ATL  70  64
+209    1888      CHC  77  58
+210    1888      CLV  50  82
+211    1888      CIN  80  54
+212    1888      DTN  68  63
+213    1888      IND  50  85
+214    1888      KCC  43  89
+215    1888      LOU  48  87
+216    1888      SFG  84  47
+217    1888      PHA  81  52
+218    1888      PHI  69  61
+219    1888      PIT  66  68
+220    1888      STL  92  43
+221    1888      WNL  48  86
+222    1889      BLO  70  65
+223    1889      LAD  93  44
+224    1889      ATL  83  45
+225    1889      CHC  67  65
+226    1889      CLV  61  72
+227    1889      CLS  60  78
+228    1889      CIN  76  63
+229    1889      IND  59  75
+230    1889      KCC  55  82
+231    1889      LOU  27 111
+232    1889      SFG  83  43
+233    1889      PHA  75  58
+234    1889      PHI  63  64
+235    1889      PIT  61  71
+236    1889      STL  90  45
+237    1889      WNL  41  83
+238    1890      BFB  36  96
+239    1890      BLO  15  19
+240    1890      BRG  26  72
+241    1890      LAD  86  43
+242    1890      BWW  76  56
+243    1890      ATL  76  57
+244    1890      BRS  81  48
+245    1890      CHC  83  53
+246    1890      CHP  75  62
+247    1890      CIN  77  55
+248    1890      CLV  44  88
+249    1890      CLS  79  55
+250    1890      CLI  55  75
+251    1890      LOU  88  44
+252    1890      SFG  63  68
+253    1890      NYI  74  57
+254    1890      PHA  54  78
+255    1890      PHI  78  53
+256    1890      PHQ  68  63
+257    1890      PIT  23 113
+258    1890      PBB  60  68
+259    1890      ROC  63  63
+260    1890      STL  77  58
+261    1890      SYS  55  72
+262    1890      TLM  68  64
+263    1891      BLO  71  64
+264    1891      LAD  61  76
+265    1891      BRS  93  42
+266    1891      ATL  87  51
+267    1891      CHC  82  53
+268    1891      CIN  56  81
+269    1891      CLV  65  74
+270    1891      CLS  61  76
+271    1891      CKK  43  57
+272    1891      LOU  54  83
+273    1891      MLA  21  15
+274    1891      SFG  71  61
+275    1891      PHQ  73  66
+276    1891      PHI  68  69
+277    1891      PIT  55  80
+278    1891      STL  85  51
+279    1891      WAS  44  91
+280    1892      BLO  46 101
+281    1892      LAD  95  59
+282    1892      ATL 102  48
+283    1892      CHC  70  76
+284    1892      CIN  82  68
+285    1892      CLV  93  56
+286    1892      LOU  63  89
+287    1892      SFG  71  80
+288    1892      PHI  87  66
+289    1892      PIT  80  73
+290    1892      STL  56  94
+291    1892      WAS  58  93
+292    1893      BLO  60  70
+293    1893      LAD  65  63
+294    1893      ATL  86  43
+295    1893      CHC  56  71
+296    1893      CIN  65  63
+297    1893      CLV  73  55
+298    1893      LOU  50  75
+299    1893      SFG  68  64
+300    1893      PHI  72  57
+301    1893      PIT  81  48
+302    1893      STL  57  75
+303    1893      WAS  40  89
+304    1894      BLO  89  39
+305    1894      LAD  70  61
+306    1894      ATL  83  49
+307    1894      CHC  57  75
+308    1894      CIN  55  75
+309    1894      CLV  68  61
+310    1894      LOU  36  94
+311    1894      SFG  88  44
+312    1894      PHI  71  57
+313    1894      PIT  65  65
+314    1894      STL  56  76
+315    1894      WAS  45  87
+316    1895      BLO  87  43
+317    1895      LAD  71  60
+318    1895      ATL  71  60
+319    1895      CHC  72  58
+320    1895      CIN  66  64
+321    1895      CLV  84  46
+322    1895      LOU  35  96
+323    1895      SFG  66  65
+324    1895      PHI  78  53
+325    1895      PIT  71  61
+326    1895      STL  39  92
+327    1895      WAS  43  85
+328    1896      BLO  90  39
+329    1896      LAD  58  73
+330    1896      ATL  74  57
+331    1896      CHC  71  57
+332    1896      CIN  77  50
+333    1896      CLV  80  48
+334    1896      LOU  38  93
+335    1896      SFG  64  67
+336    1896      PHI  62  68
+337    1896      PIT  66  63
+338    1896      STL  40  90
+339    1896      WAS  58  73
+340    1897      BLO  90  40
+341    1897      LAD  61  71
+342    1897      ATL  93  39
+343    1897      CHC  59  73
+344    1897      CIN  76  56
+345    1897      CLV  69  62
+346    1897      LOU  52  78
+347    1897      SFG  83  48
+348    1897      PHI  55  77
+349    1897      PIT  60  71
+350    1897      STL  29 102
+351    1897      WAS  61  71
+352    1898      BLO  96  53
+353    1898      LAD  54  91
+354    1898      ATL 102  47
+355    1898      CHC  85  65
+356    1898      CIN  92  60
+357    1898      CLV  81  68
+358    1898      LOU  70  81
+359    1898      SFG  77  73
+360    1898      PHI  78  71
+361    1898      PIT  72  76
+362    1898      STL  39 111
+363    1898      WAS  51 101
+364    1899      BLO  86  62
+365    1899      LAD 101  47
+366    1899      ATL  95  57
+367    1899      CHC  75  73
+368    1899      CIN  83  67
+369    1899      CLV  20 134
+370    1899      LOU  75  77
+371    1899      SFG  60  90
+372    1899      PHI  94  58
+373    1899      PIT  76  73
+374    1899      STL  84  67
+375    1899      WAS  54  98
+376    1900      LAD  82  54
+377    1900      ATL  66  72
+378    1900      CHC  65  75
+379    1900      CIN  62  77
+380    1900      SFG  60  78
+381    1900      PHI  75  63
+382    1900      PIT  79  60
+383    1900      STL  65  75
+384    1901      NYY  68  65
+385    1901      BOS  79  57
+386    1901      LAD  79  57
+387    1901      ATL  69  69
+388    1901      CHW  83  53
+389    1901      CHC  53  86
+390    1901      CIN  52  87
+391    1901      CLE  54  82
+392    1901      DET  74  61
+393    1901      BAL  48  89
+394    1901      SFG  52  85
+395    1901      OAK  74  62
+396    1901      PHI  83  57
+397    1901      PIT  90  49
+398    1901      STL  76  64
+399    1901      MIN  61  72
+400    1902      NYY  50  88
+401    1902      BOS  77  60
+402    1902      LAD  75  63
+403    1902      ATL  73  64
+404    1902      CHW  74  60
+405    1902      CHC  68  69
+406    1902      CIN  70  70
+407    1902      CLE  69  67
+408    1902      DET  52  83
+409    1902      SFG  48  88
+410    1902      OAK  83  53
+411    1902      PHI  56  81
+412    1902      PIT 103  36
+413    1902      BAL  78  58
+414    1902      STL  56  78
+415    1902      MIN  61  75
+416    1903      BOS  91  47
+417    1903      LAD  70  66
+418    1903      ATL  58  80
+419    1903      CHW  60  77
+420    1903      CHC  82  56
+421    1903      CIN  74  65
+422    1903      CLE  77  63
+423    1903      DET  65  71
+424    1903      SFG  84  55
+425    1903      NYY  72  62
+426    1903      OAK  75  60
+427    1903      PHI  49  86
+428    1903      PIT  91  49
+429    1903      BAL  65  74
+430    1903      STL  43  94
+431    1903      MIN  43  94
+432    1904      BOS  95  59
+433    1904      LAD  56  97
+434    1904      ATL  55  98
+435    1904      CHW  89  65
+436    1904      CHC  93  60
+437    1904      CIN  88  65
+438    1904      CLE  86  65
+439    1904      DET  62  90
+440    1904      SFG 106  47
+441    1904      NYY  92  59
+442    1904      OAK  81  70
+443    1904      PHI  52 100
+444    1904      PIT  87  66
+445    1904      BAL  65  87
+446    1904      STL  75  79
+447    1904      MIN  38 113
+448    1905      BOS  78  74
+449    1905      LAD  48 104
+450    1905      ATL  51 103
+451    1905      CHW  92  60
+452    1905      CHC  92  61
+453    1905      CIN  79  74
+454    1905      CLE  76  78
+455    1905      DET  79  74
+456    1905      SFG 105  48
+457    1905      NYY  71  78
+458    1905      OAK  92  56
+459    1905      PHI  83  69
+460    1905      PIT  96  57
+461    1905      BAL  54  99
+462    1905      STL  58  96
+463    1905      MIN  64  87
+464    1906      BOS  49 105
+465    1906      LAD  66  86
+466    1906      ATL  49 102
+467    1906      CHW  93  58
+468    1906      CHC 116  36
+469    1906      CIN  64  87
+470    1906      CLE  89  64
+471    1906      DET  71  78
+472    1906      SFG  96  56
+473    1906      NYY  90  61
+474    1906      OAK  78  67
+475    1906      PHI  71  82
+476    1906      PIT  93  60
+477    1906      BAL  76  73
+478    1906      STL  52  98
+479    1906      MIN  55  95
+480    1907      BOS  59  90
+481    1907      LAD  65  83
+482    1907      ATL  58  90
+483    1907      CHW  87  64
+484    1907      CHC 107  45
+485    1907      CIN  66  87
+486    1907      CLE  85  67
+487    1907      DET  92  58
+488    1907      SFG  82  71
+489    1907      NYY  70  78
+490    1907      OAK  88  57
+491    1907      PHI  83  64
+492    1907      PIT  91  63
+493    1907      BAL  69  83
+494    1907      STL  52 101
+495    1907      MIN  49 102
+496    1908      BOS  75  79
+497    1908      LAD  53 101
+498    1908      ATL  63  91
+499    1908      CHW  88  64
+500    1908      CHC  99  55
+501    1908      CIN  73  81
+502    1908      CLE  90  64
+503    1908      DET  90  63
+504    1908      SFG  98  56
+505    1908      NYY  51 103
+506    1908      OAK  68  85
+507    1908      PHI  83  71
+508    1908      PIT  98  56
+509    1908      BAL  83  69
+510    1908      STL  49 105
+511    1908      MIN  67  85
+512    1909      BOS  88  63
+513    1909      LAD  55  98
+514    1909      ATL  45 108
+515    1909      CHW  78  74
+516    1909      CHC 104  49
+517    1909      CIN  77  76
+518    1909      CLE  71  82
+519    1909      DET  98  54
+520    1909      SFG  92  61
+521    1909      NYY  74  77
+522    1909      OAK  95  58
+523    1909      PHI  74  79
+524    1909      PIT 110  42
+525    1909      BAL  61  89
+526    1909      STL  54  98
+527    1909      MIN  42 110
+528    1910      BOS  81  72
+529    1910      LAD  64  90
+530    1910      ATL  53 100
+531    1910      CHW  68  85
+532    1910      CHC 104  50
+533    1910      CIN  75  79
+534    1910      CLE  71  81
+535    1910      DET  86  68
+536    1910      SFG  91  63
+537    1910      NYY  88  63
+538    1910      OAK 102  48
+539    1910      PHI  78  75
+540    1910      PIT  86  67
+541    1910      BAL  47 107
+542    1910      STL  63  90
+543    1910      MIN  66  85
+544    1911      BOS  78  75
+545    1911      LAD  64  86
+546    1911      ATL  44 107
+547    1911      CHW  77  74
+548    1911      CHC  92  62
+549    1911      CIN  70  83
+550    1911      CLE  80  73
+551    1911      DET  89  65
+552    1911      SFG  99  54
+553    1911      NYY  76  76
+554    1911      OAK 101  50
+555    1911      PHI  79  73
+556    1911      PIT  85  69
+557    1911      BAL  45 107
+558    1911      STL  75  74
+559    1911      MIN  64  90
+560    1912      BOS 105  47
+561    1912      LAD  58  95
+562    1912      ATL  52 101
+563    1912      CHW  78  76
+564    1912      CHC  91  59
+565    1912      CIN  75  78
+566    1912      CLE  75  78
+567    1912      DET  69  84
+568    1912      SFG 103  48
+569    1912      NYY  50 102
+570    1912      OAK  90  62
+571    1912      PHI  73  79
+572    1912      PIT  93  58
+573    1912      BAL  53 101
+574    1912      STL  63  90
+575    1912      MIN  91  61
+576    1913      BOS  79  71
+577    1913      LAD  65  84
+578    1913      ATL  69  82
+579    1913      CHW  78  74
+580    1913      CHC  88  65
+581    1913      CIN  64  89
+582    1913      CLE  86  66
+583    1913      DET  66  87
+584    1913      SFG 101  51
+585    1913      NYY  57  94
+586    1913      OAK  96  57
+587    1913      PHI  88  63
+588    1913      PIT  78  71
+589    1913      BAL  57  96
+590    1913      STL  51  99
+591    1913      MIN  90  64
+592    1914      BLT  84  70
+593    1914      BOS  91  62
+594    1914      BTT  77  77
+595    1914      LAD  75  79
+596    1914      ATL  94  59
+597    1914      BFL  80  71
+598    1914      CHW  70  84
+599    1914      CHH  87  67
+600    1914      CHC  78  76
+601    1914      CIN  60  94
+602    1914      CLE  51 102
+603    1914      DET  80  73
+604    1914      NEW  88  65
+605    1914      KCP  67  84
+606    1914      SFG  84  70
+607    1914      NYY  70  84
+608    1914      OAK  99  53
+609    1914      PHI  74  80
+610    1914      PIT  69  85
+611    1914      PBS  64  86
+612    1914      BAL  71  82
+613    1914      SLI  62  89
+614    1914      STL  81  72
+615    1914      MIN  81  73
+616    1915      BLT  47 107
+617    1915      BOS 101  50
+618    1915      BTT  70  82
+619    1915      LAD  80  72
+620    1915      ATL  83  69
+621    1915      BFL  74  78
+622    1915      CHW  93  61
+623    1915      CHH  86  66
+624    1915      CHC  73  80
+625    1915      CIN  71  83
+626    1915      CLE  57  95
+627    1915      DET 100  54
+628    1915      KCP  81  72
+629    1915      NEW  80  72
+630    1915      SFG  69  83
+631    1915      NYY  69  83
+632    1915      OAK  43 109
+633    1915      PHI  90  62
+634    1915      PIT  73  81
+635    1915      PBS  86  67
+636    1915      BAL  63  91
+637    1915      SLI  87  67
+638    1915      STL  72  81
+639    1915      MIN  85  68
+640    1916      BOS  91  63
+641    1916      LAD  94  60
+642    1916      ATL  89  63
+643    1916      CHW  89  65
+644    1916      CHC  67  86
+645    1916      CIN  60  93
+646    1916      CLE  77  77
+647    1916      DET  87  67
+648    1916      SFG  86  66
+649    1916      NYY  80  74
+650    1916      OAK  36 117
+651    1916      PHI  91  62
+652    1916      PIT  65  89
+653    1916      BAL  79  75
+654    1916      STL  60  93
+655    1916      MIN  76  77
+656    1917      BOS  90  62
+657    1917      LAD  70  81
+658    1917      ATL  72  81
+659    1917      CHW 100  54
+660    1917      CHC  74  80
+661    1917      CIN  78  76
+662    1917      CLE  88  66
+663    1917      DET  78  75
+664    1917      SFG  98  56
+665    1917      NYY  71  82
+666    1917      OAK  55  98
+667    1917      PHI  87  65
+668    1917      PIT  51 103
+669    1917      BAL  57  97
+670    1917      STL  82  70
+671    1917      MIN  74  79
+672    1918      BOS  75  51
+673    1918      LAD  57  69
+674    1918      ATL  53  71
+675    1918      CHW  57  67
+676    1918      CHC  84  45
+677    1918      CIN  68  60
+678    1918      CLE  73  54
+679    1918      DET  55  71
+680    1918      SFG  71  53
+681    1918      NYY  60  63
+682    1918      OAK  52  76
+683    1918      PHI  55  68
+684    1918      PIT  65  60
+685    1918      BAL  58  64
+686    1918      STL  51  78
+687    1918      MIN  72  56
+688    1919      BOS  66  71
+689    1919      LAD  69  71
+690    1919      ATL  57  82
+691    1919      CHW  88  52
+692    1919      CHC  75  65
+693    1919      CIN  96  44
+694    1919      CLE  84  55
+695    1919      DET  80  60
+696    1919      SFG  87  53
+697    1919      NYY  80  59
+698    1919      OAK  36 104
+699    1919      PHI  47  90
+700    1919      PIT  71  68
+701    1919      BAL  67  72
+702    1919      STL  54  83
+703    1919      MIN  56  84
+704    1920      BOS  72  81
+705    1920      LAD  93  61
+706    1920      ATL  62  90
+707    1920      CHW  96  58
+708    1920      CHC  75  79
+709    1920      CIN  82  71
+710    1920      CLE  98  56
+711    1920      DET  61  93
+712    1920      SFG  86  68
+713    1920      NYY  95  59
+714    1920      OAK  48 106
+715    1920      PHI  62  91
+716    1920      PIT  79  75
+717    1920      BAL  76  77
+718    1920      STL  75  79
+719    1920      MIN  68  84
+720    1921      BOS  75  79
+721    1921      LAD  77  75
+722    1921      ATL  79  74
+723    1921      CHW  62  92
+724    1921      CHC  64  89
+725    1921      CIN  70  83
+726    1921      CLE  94  60
+727    1921      DET  71  82
+728    1921      SFG  94  59
+729    1921      NYY  98  55
+730    1921      OAK  53 100
+731    1921      PHI  51 103
+732    1921      PIT  90  63
+733    1921      BAL  81  73
+734    1921      STL  87  66
+735    1921      MIN  80  73
+736    1922      BOS  61  93
+737    1922      LAD  76  78
+738    1922      ATL  53 100
+739    1922      CHW  77  77
+740    1922      CHC  80  74
+741    1922      CIN  86  68
+742    1922      CLE  78  76
+743    1922      DET  79  75
+744    1922      SFG  93  61
+745    1922      NYY  94  60
+746    1922      OAK  65  89
+747    1922      PHI  57  96
+748    1922      PIT  85  69
+749    1922      BAL  93  61
+750    1922      STL  85  69
+751    1922      MIN  69  85
+752    1923      BOS  61  91
+753    1923      LAD  76  78
+754    1923      ATL  54 100
+755    1923      CHW  69  85
+756    1923      CHC  83  71
+757    1923      CIN  91  63
+758    1923      CLE  82  71
+759    1923      DET  83  71
+760    1923      SFG  95  58
+761    1923      NYY  98  54
+762    1923      OAK  69  83
+763    1923      PHI  50 104
+764    1923      PIT  87  67
+765    1923      BAL  74  78
+766    1923      STL  79  74
+767    1923      MIN  75  78
+768    1924      BOS  67  87
+769    1924      LAD  92  62
+770    1924      ATL  53 100
+771    1924      CHW  66  87
+772    1924      CHC  81  72
+773    1924      CIN  83  70
+774    1924      CLE  67  86
+775    1924      DET  86  68
+776    1924      SFG  93  60
+777    1924      NYY  89  63
+778    1924      OAK  71  81
+779    1924      PHI  55  96
+780    1924      PIT  90  63
+781    1924      BAL  74  78
+782    1924      STL  65  89
+783    1924      MIN  92  62
+784    1925      BOS  47 105
+785    1925      LAD  68  85
+786    1925      ATL  70  83
+787    1925      CHW  79  75
+788    1925      CHC  68  86
+789    1925      CIN  80  73
+790    1925      CLE  70  84
+791    1925      DET  81  73
+792    1925      SFG  86  66
+793    1925      NYY  69  85
+794    1925      OAK  88  64
+795    1925      PHI  68  85
+796    1925      PIT  95  58
+797    1925      BAL  82  71
+798    1925      STL  77  76
+799    1925      MIN  96  55
+800    1926      BOS  46 107
+801    1926      LAD  71  82
+802    1926      ATL  66  86
+803    1926      CHW  81  72
+804    1926      CHC  82  72
+805    1926      CIN  87  67
+806    1926      CLE  88  66
+807    1926      DET  79  75
+808    1926      SFG  74  77
+809    1926      NYY  91  63
+810    1926      OAK  83  67
+811    1926      PHI  58  93
+812    1926      PIT  84  69
+813    1926      BAL  62  92
+814    1926      STL  89  65
+815    1926      MIN  81  69
+816    1927      BOS  51 103
+817    1927      LAD  65  88
+818    1927      ATL  60  94
+819    1927      CHW  70  83
+820    1927      CHC  85  68
+821    1927      CIN  75  78
+822    1927      CLE  66  87
+823    1927      DET  82  71
+824    1927      SFG  92  62
+825    1927      NYY 110  44
+826    1927      OAK  91  63
+827    1927      PHI  51 103
+828    1927      PIT  94  60
+829    1927      BAL  59  94
+830    1927      STL  92  61
+831    1927      MIN  85  69
+832    1928      BOS  57  96
+833    1928      LAD  77  76
+834    1928      ATL  50 103
+835    1928      CHW  72  82
+836    1928      CHC  91  63
+837    1928      CIN  78  74
+838    1928      CLE  62  92
+839    1928      DET  68  86
+840    1928      SFG  93  61
+841    1928      NYY 101  53
+842    1928      OAK  98  55
+843    1928      PHI  43 109
+844    1928      PIT  85  67
+845    1928      BAL  82  72
+846    1928      STL  95  59
+847    1928      MIN  75  79
+848    1929      BOS  58  96
+849    1929      LAD  70  83
+850    1929      ATL  56  98
+851    1929      CHW  59  93
+852    1929      CHC  98  54
+853    1929      CIN  66  88
+854    1929      CLE  81  71
+855    1929      DET  70  84
+856    1929      SFG  84  67
+857    1929      NYY  88  66
+858    1929      OAK 104  46
+859    1929      PHI  71  82
+860    1929      PIT  88  65
+861    1929      BAL  79  73
+862    1929      STL  78  74
+863    1929      MIN  71  81
+864    1930      BOS  52 102
+865    1930      LAD  86  68
+866    1930      ATL  70  84
+867    1930      CHW  62  92
+868    1930      CHC  90  64
+869    1930      CIN  59  95
+870    1930      CLE  81  73
+871    1930      DET  75  79
+872    1930      SFG  87  67
+873    1930      NYY  86  68
+874    1930      OAK 102  52
+875    1930      PHI  52 102
+876    1930      PIT  80  74
+877    1930      BAL  64  90
+878    1930      STL  92  62
+879    1930      MIN  94  60
+880    1931      BOS  62  90
+881    1931      LAD  79  73
+882    1931      ATL  64  90
+883    1931      CHW  56  97
+884    1931      CHC  84  70
+885    1931      CIN  58  96
+886    1931      CLE  78  76
+887    1931      DET  61  93
+888    1931      SFG  87  65
+889    1931      NYY  94  59
+890    1931      OAK 107  45
+891    1931      PHI  66  88
+892    1931      PIT  75  79
+893    1931      BAL  63  91
+894    1931      STL 101  53
+895    1931      MIN  92  62
+896    1932      BOS  43 111
+897    1932      LAD  81  73
+898    1932      ATL  77  77
+899    1932      CHW  49 102
+900    1932      CHC  90  64
+901    1932      CIN  60  94
+902    1932      CLE  87  65
+903    1932      DET  76  75
+904    1932      SFG  72  82
+905    1932      NYY 107  47
+906    1932      OAK  94  60
+907    1932      PHI  78  76
+908    1932      PIT  86  68
+909    1932      BAL  63  91
+910    1932      STL  72  82
+911    1932      MIN  93  61
+912    1933      BOS  63  86
+913    1933      LAD  65  88
+914    1933      ATL  83  71
+915    1933      CHW  67  83
+916    1933      CHC  86  68
+917    1933      CIN  58  94
+918    1933      CLE  75  76
+919    1933      DET  75  79
+920    1933      SFG  91  61
+921    1933      NYY  91  59
+922    1933      OAK  79  72
+923    1933      PHI  60  92
+924    1933      PIT  87  67
+925    1933      BAL  55  96
+926    1933      STL  82  71
+927    1933      MIN  99  53
+928    1934      BOS  76  76
+929    1934      LAD  71  81
+930    1934      ATL  78  73
+931    1934      CHW  53  99
+932    1934      CHC  86  65
+933    1934      CIN  52  99
+934    1934      CLE  85  69
+935    1934      DET 101  53
+936    1934      SFG  93  60
+937    1934      NYY  94  60
+938    1934      OAK  68  82
+939    1934      PHI  56  93
+940    1934      PIT  74  76
+941    1934      BAL  67  85
+942    1934      STL  95  58
+943    1934      MIN  66  86
+944    1935      BOS  78  75
+945    1935      LAD  70  83
+946    1935      ATL  38 115
+947    1935      CHW  74  78
+948    1935      CHC 100  54
+949    1935      CIN  68  85
+950    1935      CLE  82  71
+951    1935      DET  93  58
+952    1935      SFG  91  62
+953    1935      NYY  89  60
+954    1935      OAK  58  91
+955    1935      PHI  64  89
+956    1935      PIT  86  67
+957    1935      BAL  65  87
+958    1935      STL  96  58
+959    1935      MIN  67  86
+960    1936      BOS  74  80
+961    1936      LAD  67  87
+962    1936      ATL  71  83
+963    1936      CHW  81  70
+964    1936      CHC  87  67
+965    1936      CIN  74  80
+966    1936      CLE  80  74
+967    1936      DET  83  71
+968    1936      SFG  92  62
+969    1936      NYY 102  51
+970    1936      OAK  53 100
+971    1936      PHI  54 100
+972    1936      PIT  84  70
+973    1936      BAL  57  95
+974    1936      STL  87  67
+975    1936      MIN  82  71
+976    1937      BOS  80  72
+977    1937      LAD  62  91
+978    1937      ATL  79  73
+979    1937      CHW  86  68
+980    1937      CHC  93  61
+981    1937      CIN  56  98
+982    1937      CLE  83  71
+983    1937      DET  89  65
+984    1937      SFG  95  57
+985    1937      NYY 102  52
+986    1937      OAK  54  97
+987    1937      PHI  61  92
+988    1937      PIT  86  68
+989    1937      BAL  46 108
+990    1937      STL  81  73
+991    1937      MIN  73  80
+992    1938      BOS  88  61
+993    1938      LAD  69  80
+994    1938      ATL  77  75
+995    1938      CHW  65  83
+996    1938      CHC  89  63
+997    1938      CIN  82  68
+998    1938      CLE  86  66
+999    1938      DET  84  70
+1000   1938      SFG  83  67
+1001   1938      NYY  99  53
+1002   1938      OAK  53  99
+1003   1938      PHI  45 105
+1004   1938      PIT  86  64
+1005   1938      BAL  55  97
+1006   1938      STL  71  80
+1007   1938      MIN  75  76
+1008   1939      BOS  89  62
+1009   1939      LAD  84  69
+1010   1939      ATL  63  88
+1011   1939      CHW  85  69
+1012   1939      CHC  84  70
+1013   1939      CIN  97  57
+1014   1939      CLE  87  67
+1015   1939      DET  81  73
+1016   1939      SFG  77  74
+1017   1939      NYY 106  45
+1018   1939      OAK  55  97
+1019   1939      PHI  45 106
+1020   1939      PIT  68  85
+1021   1939      BAL  43 111
+1022   1939      STL  92  61
+1023   1939      MIN  65  87
+1024   1940      BOS  82  72
+1025   1940      LAD  88  65
+1026   1940      ATL  65  87
+1027   1940      CHW  82  72
+1028   1940      CHC  75  79
+1029   1940      CIN 100  53
+1030   1940      CLE  89  65
+1031   1940      DET  90  64
+1032   1940      SFG  72  80
+1033   1940      NYY  88  66
+1034   1940      OAK  54 100
+1035   1940      PHI  50 103
+1036   1940      PIT  78  76
+1037   1940      BAL  67  87
+1038   1940      STL  84  69
+1039   1940      MIN  64  90
+1040   1941      BOS  84  70
+1041   1941      LAD 100  54
+1042   1941      ATL  62  92
+1043   1941      CHW  77  77
+1044   1941      CHC  70  84
+1045   1941      CIN  88  66
+1046   1941      CLE  75  79
+1047   1941      DET  75  79
+1048   1941      SFG  74  79
+1049   1941      NYY 101  53
+1050   1941      OAK  64  90
+1051   1941      PHI  43 111
+1052   1941      PIT  81  73
+1053   1941      BAL  70  84
+1054   1941      STL  97  56
+1055   1941      MIN  70  84
+1056   1942      BOS  93  59
+1057   1942      LAD 104  50
+1058   1942      ATL  59  89
+1059   1942      CHW  66  82
+1060   1942      CHC  68  86
+1061   1942      CIN  76  76
+1062   1942      CLE  75  79
+1063   1942      DET  73  81
+1064   1942      SFG  85  67
+1065   1942      NYY 103  51
+1066   1942      OAK  55  99
+1067   1942      PHI  42 109
+1068   1942      PIT  66  81
+1069   1942      BAL  82  69
+1070   1942      STL 106  48
+1071   1942      MIN  62  89
+1072   1943      BOS  68  84
+1073   1943      LAD  81  72
+1074   1943      ATL  68  85
+1075   1943      CHW  82  72
+1076   1943      CHC  74  79
+1077   1943      CIN  87  67
+1078   1943      CLE  82  71
+1079   1943      DET  78  76
+1080   1943      SFG  55  98
+1081   1943      NYY  98  56
+1082   1943      OAK  49 105
+1083   1943      PHI  64  90
+1084   1943      PIT  80  74
+1085   1943      BAL  72  80
+1086   1943      STL 105  49
+1087   1943      MIN  84  69
+1088   1944      BOS  77  77
+1089   1944      LAD  63  91
+1090   1944      ATL  65  89
+1091   1944      CHW  71  83
+1092   1944      CHC  75  79
+1093   1944      CIN  89  65
+1094   1944      CLE  72  82
+1095   1944      DET  88  66
+1096   1944      SFG  67  87
+1097   1944      NYY  83  71
+1098   1944      OAK  72  82
+1099   1944      PHI  61  92
+1100   1944      PIT  90  63
+1101   1944      BAL  89  65
+1102   1944      STL 105  49
+1103   1944      MIN  64  90
+1104   1945      BOS  71  83
+1105   1945      LAD  87  67
+1106   1945      ATL  67  85
+1107   1945      CHW  71  78
+1108   1945      CHC  98  56
+1109   1945      CIN  61  93
+1110   1945      CLE  73  72
+1111   1945      DET  88  65
+1112   1945      SFG  78  74
+1113   1945      NYY  81  71
+1114   1945      OAK  52  98
+1115   1945      PHI  46 108
+1116   1945      PIT  82  72
+1117   1945      BAL  81  70
+1118   1945      STL  95  59
+1119   1945      MIN  87  67
+1120   1946      BOS 104  50
+1121   1946      LAD  96  60
+1122   1946      ATL  81  72
+1123   1946      CHW  74  80
+1124   1946      CHC  82  71
+1125   1946      CIN  67  87
+1126   1946      CLE  68  86
+1127   1946      DET  92  62
+1128   1946      SFG  61  93
+1129   1946      NYY  87  67
+1130   1946      OAK  49 105
+1131   1946      PHI  69  85
+1132   1946      PIT  63  91
+1133   1946      BAL  66  88
+1134   1946      STL  98  58
+1135   1946      MIN  76  78
+1136   1947      BOS  83  71
+1137   1947      LAD  94  60
+1138   1947      ATL  86  68
+1139   1947      CHW  70  84
+1140   1947      CHC  69  85
+1141   1947      CIN  73  81
+1142   1947      CLE  80  74
+1143   1947      DET  85  69
+1144   1947      SFG  81  73
+1145   1947      NYY  97  57
+1146   1947      OAK  78  76
+1147   1947      PHI  62  92
+1148   1947      PIT  62  92
+1149   1947      BAL  59  95
+1150   1947      STL  89  65
+1151   1947      MIN  64  90
+1152   1948      BOS  96  59
+1153   1948      LAD  84  70
+1154   1948      ATL  91  62
+1155   1948      CHW  51 101
+1156   1948      CHC  64  90
+1157   1948      CIN  64  89
+1158   1948      CLE  97  58
+1159   1948      DET  78  76
+1160   1948      SFG  78  76
+1161   1948      NYY  94  60
+1162   1948      OAK  84  70
+1163   1948      PHI  66  88
+1164   1948      PIT  83  71
+1165   1948      BAL  59  94
+1166   1948      STL  85  69
+1167   1948      MIN  56  97
+1168   1949      BOS  96  58
+1169   1949      LAD  97  57
+1170   1949      ATL  75  79
+1171   1949      CHW  63  91
+1172   1949      CHC  61  93
+1173   1949      CIN  62  92
+1174   1949      CLE  89  65
+1175   1949      DET  87  67
+1176   1949      SFG  73  81
+1177   1949      NYY  97  57
+1178   1949      OAK  81  73
+1179   1949      PHI  81  73
+1180   1949      PIT  71  83
+1181   1949      BAL  53 101
+1182   1949      STL  96  58
+1183   1949      MIN  50 104
+1184   1950      BOS  94  60
+1185   1950      LAD  89  65
+1186   1950      ATL  83  71
+1187   1950      CHW  60  94
+1188   1950      CHC  64  89
+1189   1950      CIN  66  87
+1190   1950      CLE  92  62
+1191   1950      DET  95  59
+1192   1950      SFG  86  68
+1193   1950      NYY  98  56
+1194   1950      OAK  52 102
+1195   1950      PHI  91  63
+1196   1950      PIT  57  96
+1197   1950      BAL  58  96
+1198   1950      STL  78  75
+1199   1950      MIN  67  87
+1200   1951      BOS  87  67
+1201   1951      LAD  97  60
+1202   1951      ATL  76  78
+1203   1951      CHW  81  73
+1204   1951      CHC  62  92
+1205   1951      CIN  68  86
+1206   1951      CLE  93  61
+1207   1951      DET  73  81
+1208   1951      SFG  98  59
+1209   1951      NYY  98  56
+1210   1951      OAK  70  84
+1211   1951      PHI  73  81
+1212   1951      PIT  64  90
+1213   1951      BAL  52 102
+1214   1951      STL  81  73
+1215   1951      MIN  62  92
+1216   1952      BOS  76  78
+1217   1952      LAD  96  57
+1218   1952      ATL  64  89
+1219   1952      CHW  81  73
+1220   1952      CHC  77  77
+1221   1952      CIN  69  85
+1222   1952      CLE  93  61
+1223   1952      DET  50 104
+1224   1952      SFG  92  62
+1225   1952      NYY  95  59
+1226   1952      OAK  79  75
+1227   1952      PHI  87  67
+1228   1952      PIT  42 112
+1229   1952      BAL  64  90
+1230   1952      STL  88  66
+1231   1952      MIN  78  76
+1232   1953      BOS  84  69
+1233   1953      LAD 105  49
+1234   1953      CHW  89  65
+1235   1953      CHC  65  89
+1236   1953      CIN  68  86
+1237   1953      CLE  92  62
+1238   1953      DET  60  94
+1239   1953      ATL  92  62
+1240   1953      SFG  70  84
+1241   1953      NYY  99  52
+1242   1953      OAK  59  95
+1243   1953      PHI  83  71
+1244   1953      PIT  50 104
+1245   1953      BAL  54 100
+1246   1953      STL  83  71
+1247   1953      MIN  76  76
+1248   1954      BAL  54 100
+1249   1954      BOS  69  85
+1250   1954      LAD  92  62
+1251   1954      CHW  94  60
+1252   1954      CHC  64  90
+1253   1954      CIN  74  80
+1254   1954      CLE 111  43
+1255   1954      DET  68  86
+1256   1954      ATL  89  65
+1257   1954      SFG  97  57
+1258   1954      NYY 103  51
+1259   1954      OAK  51 103
+1260   1954      PHI  75  79
+1261   1954      PIT  53 101
+1262   1954      STL  72  82
+1263   1954      MIN  66  88
+1264   1955      BAL  57  97
+1265   1955      BOS  84  70
+1266   1955      LAD  98  55
+1267   1955      CHW  91  63
+1268   1955      CHC  72  81
+1269   1955      CIN  75  79
+1270   1955      CLE  93  61
+1271   1955      DET  79  75
+1272   1955      OAK  63  91
+1273   1955      ATL  85  69
+1274   1955      SFG  80  74
+1275   1955      NYY  96  58
+1276   1955      PHI  77  77
+1277   1955      PIT  60  94
+1278   1955      STL  68  86
+1279   1955      MIN  53 101
+1280   1956      BAL  69  85
+1281   1956      BOS  84  70
+1282   1956      LAD  93  61
+1283   1956      CHW  85  69
+1284   1956      CHC  60  94
+1285   1956      CIN  91  63
+1286   1956      CLE  88  66
+1287   1956      DET  82  72
+1288   1956      OAK  52 102
+1289   1956      ATL  92  62
+1290   1956      SFG  67  87
+1291   1956      NYY  97  57
+1292   1956      PHI  71  83
+1293   1956      PIT  66  88
+1294   1956      STL  76  78
+1295   1956      MIN  59  95
+1296   1957      BAL  76  76
+1297   1957      BOS  82  72
+1298   1957      LAD  84  70
+1299   1957      CHW  90  64
+1300   1957      CHC  62  92
+1301   1957      CIN  80  74
+1302   1957      CLE  76  77
+1303   1957      DET  78  76
+1304   1957      OAK  59  94
+1305   1957      ATL  95  59
+1306   1957      SFG  69  85
+1307   1957      NYY  98  56
+1308   1957      PHI  77  77
+1309   1957      PIT  62  92
+1310   1957      STL  87  67
+1311   1957      MIN  55  99
+1312   1958      BAL  74  79
+1313   1958      BOS  79  75
+1314   1958      CHW  82  72
+1315   1958      CHC  72  82
+1316   1958      CIN  76  78
+1317   1958      CLE  77  76
+1318   1958      DET  77  77
+1319   1958      OAK  73  81
+1320   1958      LAD  71  83
+1321   1958      ATL  92  62
+1322   1958      NYY  92  62
+1323   1958      PHI  69  85
+1324   1958      PIT  84  70
+1325   1958      SFG  80  74
+1326   1958      STL  72  82
+1327   1958      MIN  61  93
+1328   1959      BAL  74  80
+1329   1959      BOS  75  79
+1330   1959      CHW  94  60
+1331   1959      CHC  74  80
+1332   1959      CIN  74  80
+1333   1959      CLE  89  65
+1334   1959      DET  76  78
+1335   1959      OAK  66  88
+1336   1959      LAD  88  68
+1337   1959      ATL  86  70
+1338   1959      NYY  79  75
+1339   1959      PHI  64  90
+1340   1959      PIT  78  76
+1341   1959      SFG  83  71
+1342   1959      STL  71  83
+1343   1959      MIN  63  91
+1344   1960      BAL  89  65
+1345   1960      BOS  65  89
+1346   1960      CHW  87  67
+1347   1960      CHC  60  94
+1348   1960      CIN  67  87
+1349   1960      CLE  76  78
+1350   1960      DET  71  83
+1351   1960      OAK  58  96
+1352   1960      LAD  82  72
+1353   1960      ATL  88  66
+1354   1960      NYY  97  57
+1355   1960      PHI  59  95
+1356   1960      PIT  95  59
+1357   1960      SFG  79  75
+1358   1960      STL  86  68
+1359   1960      MIN  73  81
+1360   1961      BAL  95  67
+1361   1961      BOS  76  86
+1362   1961      CHW  86  76
+1363   1961      CHC  64  90
+1364   1961      CIN  93  61
+1365   1961      CLE  78  83
+1366   1961      DET 101  61
+1367   1961      OAK  61 100
+1368   1961      ANA  70  91
+1369   1961      LAD  89  65
+1370   1961      MIN  70  90
+1371   1961      ATL  83  71
+1372   1961      NYY 109  53
+1373   1961      PHI  47 107
+1374   1961      PIT  75  79
+1375   1961      SFG  85  69
+1376   1961      STL  80  74
+1377   1961      TEX  61 100
+1378   1962      BAL  77  85
+1379   1962      BOS  76  84
+1380   1962      CHW  85  77
+1381   1962      CHC  59 103
+1382   1962      CIN  98  64
+1383   1962      CLE  80  82
+1384   1962      DET  85  76
+1385   1962      HOU  64  96
+1386   1962      OAK  72  90
+1387   1962      ANA  86  76
+1388   1962      LAD 102  63
+1389   1962      MIN  91  71
+1390   1962      ATL  86  76
+1391   1962      NYY  96  66
+1392   1962      NYM  40 120
+1393   1962      PHI  81  80
+1394   1962      PIT  93  68
+1395   1962      SFG 103  62
+1396   1962      STL  84  78
+1397   1962      TEX  60 101
+1398   1963      BAL  86  76
+1399   1963      BOS  76  85
+1400   1963      CHW  94  68
+1401   1963      CHC  82  80
+1402   1963      CIN  86  76
+1403   1963      CLE  79  83
+1404   1963      DET  79  83
+1405   1963      HOU  66  96
+1406   1963      OAK  73  89
+1407   1963      ANA  70  91
+1408   1963      LAD  99  63
+1409   1963      MIN  91  70
+1410   1963      ATL  84  78
+1411   1963      NYY 104  57
+1412   1963      NYM  51 111
+1413   1963      PHI  87  75
+1414   1963      PIT  74  88
+1415   1963      SFG  88  74
+1416   1963      STL  93  69
+1417   1963      TEX  56 106
+1418   1964      BAL  97  65
+1419   1964      BOS  72  90
+1420   1964      CHW  98  64
+1421   1964      CHC  76  86
+1422   1964      CIN  92  70
+1423   1964      CLE  79  83
+1424   1964      DET  85  77
+1425   1964      HOU  66  96
+1426   1964      OAK  57 105
+1427   1964      ANA  82  80
+1428   1964      LAD  80  82
+1429   1964      MIN  79  83
+1430   1964      ATL  88  74
+1431   1964      NYY  99  63
+1432   1964      NYM  53 109
+1433   1964      PHI  92  70
+1434   1964      PIT  80  82
+1435   1964      SFG  90  72
+1436   1964      STL  93  69
+1437   1964      TEX  62 100
+1438   1965      BAL  94  68
+1439   1965      BOS  62 100
+1440   1965      ANA  75  87
+1441   1965      CHW  95  67
+1442   1965      CHC  72  90
+1443   1965      CIN  89  73
+1444   1965      CLE  87  75
+1445   1965      DET  89  73
+1446   1965      HOU  65  97
+1447   1965      OAK  59 103
+1448   1965      LAD  97  65
+1449   1965      MIN 102  60
+1450   1965      ATL  86  76
+1451   1965      NYY  77  85
+1452   1965      NYM  50 112
+1453   1965      PHI  85  76
+1454   1965      PIT  90  72
+1455   1965      SFG  95  67
+1456   1965      STL  80  81
+1457   1965      TEX  70  92
+1458   1966      ATL  85  77
+1459   1966      BAL  97  63
+1460   1966      BOS  72  90
+1461   1966      ANA  80  82
+1462   1966      CHW  83  79
+1463   1966      CHC  59 103
+1464   1966      CIN  76  84
+1465   1966      CLE  81  81
+1466   1966      DET  88  74
+1467   1966      HOU  72  90
+1468   1966      OAK  74  86
+1469   1966      LAD  95  67
+1470   1966      MIN  89  73
+1471   1966      NYY  70  89
+1472   1966      NYM  66  95
+1473   1966      PHI  87  75
+1474   1966      PIT  92  70
+1475   1966      SFG  93  68
+1476   1966      STL  83  79
+1477   1966      TEX  71  88
+1478   1967      ATL  77  85
+1479   1967      BAL  76  85
+1480   1967      BOS  92  70
+1481   1967      ANA  84  77
+1482   1967      CHW  89  73
+1483   1967      CHC  87  74
+1484   1967      CIN  87  75
+1485   1967      CLE  75  87
+1486   1967      DET  91  71
+1487   1967      HOU  69  93
+1488   1967      OAK  62  99
+1489   1967      LAD  73  89
+1490   1967      MIN  91  71
+1491   1967      NYY  72  90
+1492   1967      NYM  61 101
+1493   1967      PHI  82  80
+1494   1967      PIT  81  81
+1495   1967      SFG  91  71
+1496   1967      STL 101  60
+1497   1967      TEX  76  85
+1498   1968      ATL  81  81
+1499   1968      BAL  91  71
+1500   1968      BOS  86  76
+1501   1968      ANA  67  95
+1502   1968      CHW  67  95
+1503   1968      CHC  84  78
+1504   1968      CIN  83  79
+1505   1968      CLE  86  75
+1506   1968      DET 103  59
+1507   1968      HOU  72  90
+1508   1968      LAD  76  86
+1509   1968      MIN  79  83
+1510   1968      NYY  83  79
+1511   1968      NYM  73  89
+1512   1968      OAK  82  80
+1513   1968      PHI  76  86
+1514   1968      PIT  80  82
+1515   1968      SFG  88  74
+1516   1968      STL  97  65
+1517   1968      TEX  65  96
+1518   1969      ATL  93  69
+1519   1969      BAL 109  53
+1520   1969      BOS  87  75
+1521   1969      ANA  71  91
+1522   1969      CHW  68  94
+1523   1969      CHC  92  70
+1524   1969      CIN  89  73
+1525   1969      CLE  62  99
+1526   1969      DET  90  72
+1527   1969      HOU  81  81
+1528   1969      KCR  69  93
+1529   1969      LAD  85  77
+1530   1969      MIN  97  65
+1531   1969      WSN  52 110
+1532   1969      NYY  80  81
+1533   1969      NYM 100  62
+1534   1969      OAK  88  74
+1535   1969      PHI  63  99
+1536   1969      PIT  88  74
+1537   1969      SDP  52 110
+1538   1969      MIL  64  98
+1539   1969      SFG  90  72
+1540   1969      STL  87  75
+1541   1969      TEX  86  76
+1542   1970      ATL  76  86
+1543   1970      BAL 108  54
+1544   1970      BOS  87  75
+1545   1970      ANA  86  76
+1546   1970      CHW  56 106
+1547   1970      CHC  84  78
+1548   1970      CIN 102  60
+1549   1970      CLE  76  86
+1550   1970      DET  79  83
+1551   1970      HOU  79  83
+1552   1970      KCR  65  97
+1553   1970      LAD  87  74
+1554   1970      MIN  98  64
+1555   1970      MIL  65  97
+1556   1970      WSN  73  89
+1557   1970      NYY  93  69
+1558   1970      NYM  83  79
+1559   1970      OAK  89  73
+1560   1970      PHI  73  88
+1561   1970      PIT  89  73
+1562   1970      SDP  63  99
+1563   1970      SFG  86  76
+1564   1970      STL  76  86
+1565   1970      TEX  70  92
+1566   1971      ATL  82  80
+1567   1971      BAL 101  57
+1568   1971      BOS  85  77
+1569   1971      ANA  76  86
+1570   1971      CHW  79  83
+1571   1971      CHC  83  79
+1572   1971      CIN  79  83
+1573   1971      CLE  60 102
+1574   1971      DET  91  71
+1575   1971      HOU  79  83
+1576   1971      KCR  85  76
+1577   1971      LAD  89  73
+1578   1971      MIN  74  86
+1579   1971      MIL  69  92
+1580   1971      WSN  71  90
+1581   1971      NYY  82  80
+1582   1971      NYM  83  79
+1583   1971      OAK 101  60
+1584   1971      PHI  67  95
+1585   1971      PIT  97  65
+1586   1971      SDP  61 100
+1587   1971      SFG  90  72
+1588   1971      STL  90  72
+1589   1971      TEX  63  96
+1590   1972      ATL  70  84
+1591   1972      BAL  80  74
+1592   1972      BOS  85  70
+1593   1972      ANA  75  80
+1594   1972      CHW  87  67
+1595   1972      CHC  85  70
+1596   1972      CIN  95  59
+1597   1972      CLE  72  84
+1598   1972      DET  86  70
+1599   1972      HOU  84  69
+1600   1972      KCR  76  78
+1601   1972      LAD  85  70
+1602   1972      MIN  77  77
+1603   1972      MIL  65  91
+1604   1972      WSN  70  86
+1605   1972      NYY  79  76
+1606   1972      NYM  83  73
+1607   1972      OAK  93  62
+1608   1972      PHI  59  97
+1609   1972      PIT  96  59
+1610   1972      SDP  58  95
+1611   1972      SFG  69  86
+1612   1972      STL  75  81
+1613   1972      TEX  54 100
+1614   1973      ATL  76  85
+1615   1973      BAL  97  65
+1616   1973      BOS  89  73
+1617   1973      ANA  79  83
+1618   1973      CHW  77  85
+1619   1973      CHC  77  84
+1620   1973      CIN  99  63
+1621   1973      CLE  71  91
+1622   1973      DET  85  77
+1623   1973      HOU  82  80
+1624   1973      KCR  88  74
+1625   1973      LAD  95  66
+1626   1973      MIN  81  81
+1627   1973      MIL  74  88
+1628   1973      WSN  79  83
+1629   1973      NYY  80  82
+1630   1973      NYM  82  79
+1631   1973      OAK  94  68
+1632   1973      PHI  71  91
+1633   1973      PIT  80  82
+1634   1973      SDP  60 102
+1635   1973      SFG  88  74
+1636   1973      STL  81  81
+1637   1973      TEX  57 105
+1638   1974      ATL  88  74
+1639   1974      BAL  91  71
+1640   1974      BOS  84  78
+1641   1974      ANA  68  94
+1642   1974      CHW  80  80
+1643   1974      CHC  66  96
+1644   1974      CIN  98  64
+1645   1974      CLE  77  85
+1646   1974      DET  72  90
+1647   1974      HOU  81  81
+1648   1974      KCR  77  85
+1649   1974      LAD 102  60
+1650   1974      MIN  82  80
+1651   1974      MIL  76  86
+1652   1974      WSN  79  82
+1653   1974      NYY  89  73
+1654   1974      NYM  71  91
+1655   1974      OAK  90  72
+1656   1974      PHI  80  82
+1657   1974      PIT  88  74
+1658   1974      SDP  60 102
+1659   1974      SFG  72  90
+1660   1974      STL  86  75
+1661   1974      TEX  84  76
+1662   1975      ATL  67  94
+1663   1975      BAL  90  69
+1664   1975      BOS  95  65
+1665   1975      ANA  72  89
+1666   1975      CHW  75  86
+1667   1975      CHC  75  87
+1668   1975      CIN 108  54
+1669   1975      CLE  79  80
+1670   1975      DET  57 102
+1671   1975      HOU  64  97
+1672   1975      KCR  91  71
+1673   1975      LAD  88  74
+1674   1975      MIN  76  83
+1675   1975      MIL  68  94
+1676   1975      WSN  75  87
+1677   1975      NYY  83  77
+1678   1975      NYM  82  80
+1679   1975      OAK  98  64
+1680   1975      PHI  86  76
+1681   1975      PIT  92  69
+1682   1975      SDP  71  91
+1683   1975      SFG  80  81
+1684   1975      STL  82  80
+1685   1975      TEX  79  83
+1686   1976      ATL  70  92
+1687   1976      BAL  88  74
+1688   1976      BOS  83  79
+1689   1976      ANA  76  86
+1690   1976      CHW  64  97
+1691   1976      CHC  75  87
+1692   1976      CIN 102  60
+1693   1976      CLE  81  78
+1694   1976      DET  74  87
+1695   1976      HOU  80  82
+1696   1976      KCR  90  72
+1697   1976      LAD  92  70
+1698   1976      MIN  85  77
+1699   1976      MIL  66  95
+1700   1976      WSN  55 107
+1701   1976      NYY  97  62
+1702   1976      NYM  86  76
+1703   1976      OAK  87  74
+1704   1976      PHI 101  61
+1705   1976      PIT  92  70
+1706   1976      SDP  73  89
+1707   1976      SFG  74  88
+1708   1976      STL  72  90
+1709   1976      TEX  76  86
+1710   1977      ATL  61 101
+1711   1977      BAL  97  64
+1712   1977      BOS  97  64
+1713   1977      ANA  74  88
+1714   1977      CHW  90  72
+1715   1977      CHC  81  81
+1716   1977      CIN  88  74
+1717   1977      CLE  71  90
+1718   1977      DET  74  88
+1719   1977      HOU  81  81
+1720   1977      KCR 102  60
+1721   1977      LAD  98  64
+1722   1977      MIN  84  77
+1723   1977      MIL  67  95
+1724   1977      WSN  75  87
+1725   1977      NYY 100  62
+1726   1977      NYM  64  98
+1727   1977      OAK  63  98
+1728   1977      PHI 101  61
+1729   1977      PIT  96  66
+1730   1977      SDP  69  93
+1731   1977      SEA  64  98
+1732   1977      SFG  75  87
+1733   1977      STL  83  79
+1734   1977      TEX  94  68
+1735   1977      TOR  54 107
+1736   1978      ATL  69  93
+1737   1978      BAL  90  71
+1738   1978      BOS  99  64
+1739   1978      ANA  87  75
+1740   1978      CHW  71  90
+1741   1978      CHC  79  83
+1742   1978      CIN  92  69
+1743   1978      CLE  69  90
+1744   1978      DET  86  76
+1745   1978      HOU  74  88
+1746   1978      KCR  92  70
+1747   1978      LAD  95  67
+1748   1978      MIN  73  89
+1749   1978      MIL  93  69
+1750   1978      WSN  76  86
+1751   1978      NYY 100  63
+1752   1978      NYM  66  96
+1753   1978      OAK  69  93
+1754   1978      PHI  90  72
+1755   1978      PIT  88  73
+1756   1978      SDP  84  78
+1757   1978      SEA  56 104
+1758   1978      SFG  89  73
+1759   1978      STL  69  93
+1760   1978      TEX  87  75
+1761   1978      TOR  59 102
+1762   1979      ATL  66  94
+1763   1979      BAL 102  57
+1764   1979      BOS  91  69
+1765   1979      ANA  88  74
+1766   1979      CHW  73  87
+1767   1979      CHC  80  82
+1768   1979      CIN  90  71
+1769   1979      CLE  81  80
+1770   1979      DET  85  76
+1771   1979      HOU  89  73
+1772   1979      KCR  85  77
+1773   1979      LAD  79  83
+1774   1979      MIN  82  80
+1775   1979      MIL  95  66
+1776   1979      WSN  95  65
+1777   1979      NYY  89  71
+1778   1979      NYM  63  99
+1779   1979      OAK  54 108
+1780   1979      PHI  84  78
+1781   1979      PIT  98  64
+1782   1979      SDP  68  93
+1783   1979      SEA  67  95
+1784   1979      SFG  71  91
+1785   1979      STL  86  76
+1786   1979      TEX  83  79
+1787   1979      TOR  53 109
+1788   1980      ATL  81  80
+1789   1980      BAL 100  62
+1790   1980      BOS  83  77
+1791   1980      ANA  65  95
+1792   1980      CHW  70  90
+1793   1980      CHC  64  98
+1794   1980      CIN  89  73
+1795   1980      CLE  79  81
+1796   1980      DET  84  78
+1797   1980      HOU  93  70
+1798   1980      KCR  97  65
+1799   1980      LAD  92  71
+1800   1980      MIN  77  84
+1801   1980      MIL  86  76
+1802   1980      WSN  90  72
+1803   1980      NYY 103  59
+1804   1980      NYM  67  95
+1805   1980      OAK  83  79
+1806   1980      PHI  91  71
+1807   1980      PIT  83  79
+1808   1980      SDP  73  89
+1809   1980      SEA  59 103
+1810   1980      SFG  75  86
+1811   1980      STL  74  88
+1812   1980      TEX  76  85
+1813   1980      TOR  67  95
+1814   1981      ATL  50  56
+1815   1981      BAL  59  46
+1816   1981      BOS  59  49
+1817   1981      ANA  51  59
+1818   1981      CHW  54  52
+1819   1981      CHC  38  65
+1820   1981      CIN  66  42
+1821   1981      CLE  52  51
+1822   1981      DET  60  49
+1823   1981      HOU  61  49
+1824   1981      KCR  50  53
+1825   1981      LAD  63  47
+1826   1981      MIN  41  68
+1827   1981      MIL  62  47
+1828   1981      WSN  60  48
+1829   1981      NYY  59  48
+1830   1981      NYM  41  62
+1831   1981      OAK  64  45
+1832   1981      PHI  59  48
+1833   1981      PIT  46  56
+1834   1981      SDP  41  69
+1835   1981      SEA  44  65
+1836   1981      SFG  56  55
+1837   1981      STL  59  43
+1838   1981      TEX  57  48
+1839   1981      TOR  37  69
+1840   1982      ATL  89  73
+1841   1982      BAL  94  68
+1842   1982      BOS  89  73
+1843   1982      ANA  93  69
+1844   1982      CHW  87  75
+1845   1982      CHC  73  89
+1846   1982      CIN  61 101
+1847   1982      CLE  78  84
+1848   1982      DET  83  79
+1849   1982      HOU  77  85
+1850   1982      KCR  90  72
+1851   1982      LAD  88  74
+1852   1982      MIN  60 102
+1853   1982      MIL  95  67
+1854   1982      WSN  86  76
+1855   1982      NYY  79  83
+1856   1982      NYM  65  97
+1857   1982      OAK  68  94
+1858   1982      PHI  89  73
+1859   1982      PIT  84  78
+1860   1982      SDP  81  81
+1861   1982      SEA  76  86
+1862   1982      SFG  87  75
+1863   1982      STL  92  70
+1864   1982      TEX  64  98
+1865   1982      TOR  78  84
+1866   1983      ATL  88  74
+1867   1983      BAL  98  64
+1868   1983      BOS  78  84
+1869   1983      ANA  70  92
+1870   1983      CHW  99  63
+1871   1983      CHC  71  91
+1872   1983      CIN  74  88
+1873   1983      CLE  70  92
+1874   1983      DET  92  70
+1875   1983      HOU  85  77
+1876   1983      KCR  79  83
+1877   1983      LAD  91  71
+1878   1983      MIN  70  92
+1879   1983      MIL  87  75
+1880   1983      WSN  82  80
+1881   1983      NYY  91  71
+1882   1983      NYM  68  94
+1883   1983      OAK  74  88
+1884   1983      PHI  90  72
+1885   1983      PIT  84  78
+1886   1983      SDP  81  81
+1887   1983      SEA  60 102
+1888   1983      SFG  79  83
+1889   1983      STL  79  83
+1890   1983      TEX  77  85
+1891   1983      TOR  89  73
+1892   1984      ATL  80  82
+1893   1984      BAL  85  77
+1894   1984      BOS  86  76
+1895   1984      ANA  81  81
+1896   1984      CHW  74  88
+1897   1984      CHC  96  65
+1898   1984      CIN  70  92
+1899   1984      CLE  75  87
+1900   1984      DET 104  58
+1901   1984      HOU  80  82
+1902   1984      KCR  84  78
+1903   1984      LAD  79  83
+1904   1984      MIN  81  81
+1905   1984      MIL  67  94
+1906   1984      WSN  78  83
+1907   1984      NYY  87  75
+1908   1984      NYM  90  72
+1909   1984      OAK  77  85
+1910   1984      PHI  81  81
+1911   1984      PIT  75  87
+1912   1984      SDP  92  70
+1913   1984      SEA  74  88
+1914   1984      SFG  66  96
+1915   1984      STL  84  78
+1916   1984      TEX  69  92
+1917   1984      TOR  89  73
+1918   1985      ATL  66  96
+1919   1985      BAL  83  78
+1920   1985      BOS  81  81
+1921   1985      ANA  90  72
+1922   1985      CHW  85  77
+1923   1985      CHC  77  84
+1924   1985      CIN  89  72
+1925   1985      CLE  60 102
+1926   1985      DET  84  77
+1927   1985      HOU  83  79
+1928   1985      KCR  91  71
+1929   1985      LAD  95  67
+1930   1985      MIN  77  85
+1931   1985      MIL  71  90
+1932   1985      WSN  84  77
+1933   1985      NYY  97  64
+1934   1985      NYM  98  64
+1935   1985      OAK  77  85
+1936   1985      PHI  75  87
+1937   1985      PIT  57 104
+1938   1985      SDP  83  79
+1939   1985      SEA  74  88
+1940   1985      SFG  62 100
+1941   1985      STL 101  61
+1942   1985      TEX  62  99
+1943   1985      TOR  99  62
+1944   1986      ATL  72  89
+1945   1986      BAL  73  89
+1946   1986      BOS  95  66
+1947   1986      ANA  92  70
+1948   1986      CHW  72  90
+1949   1986      CHC  70  90
+1950   1986      CIN  86  76
+1951   1986      CLE  84  78
+1952   1986      DET  87  75
+1953   1986      HOU  96  66
+1954   1986      KCR  76  86
+1955   1986      LAD  73  89
+1956   1986      MIN  71  91
+1957   1986      MIL  77  84
+1958   1986      WSN  78  83
+1959   1986      NYY  90  72
+1960   1986      NYM 108  54
+1961   1986      OAK  76  86
+1962   1986      PHI  86  75
+1963   1986      PIT  64  98
+1964   1986      SDP  74  88
+1965   1986      SEA  67  95
+1966   1986      SFG  83  79
+1967   1986      STL  79  82
+1968   1986      TEX  87  75
+1969   1986      TOR  86  76
+1970   1987      ATL  69  92
+1971   1987      BAL  67  95
+1972   1987      BOS  78  84
+1973   1987      ANA  75  87
+1974   1987      CHW  77  85
+1975   1987      CHC  76  85
+1976   1987      CIN  84  78
+1977   1987      CLE  61 101
+1978   1987      DET  98  64
+1979   1987      HOU  76  86
+1980   1987      KCR  83  79
+1981   1987      LAD  73  89
+1982   1987      MIN  85  77
+1983   1987      MIL  91  71
+1984   1987      WSN  91  71
+1985   1987      NYY  89  73
+1986   1987      NYM  92  70
+1987   1987      OAK  81  81
+1988   1987      PHI  80  82
+1989   1987      PIT  80  82
+1990   1987      SDP  65  97
+1991   1987      SEA  78  84
+1992   1987      SFG  90  72
+1993   1987      STL  95  67
+1994   1987      TEX  75  87
+1995   1987      TOR  96  66
+1996   1988      ATL  54 106
+1997   1988      BAL  54 107
+1998   1988      BOS  89  73
+1999   1988      ANA  75  87
+2000   1988      CHW  71  90
+2001   1988      CHC  77  85
+2002   1988      CIN  87  74
+2003   1988      CLE  78  84
+2004   1988      DET  88  74
+2005   1988      HOU  82  80
+2006   1988      KCR  84  77
+2007   1988      LAD  94  67
+2008   1988      MIN  91  71
+2009   1988      MIL  87  75
+2010   1988      WSN  81  81
+2011   1988      NYY  85  76
+2012   1988      NYM 100  60
+2013   1988      OAK 104  58
+2014   1988      PHI  65  96
+2015   1988      PIT  85  75
+2016   1988      SDP  83  78
+2017   1988      SEA  68  93
+2018   1988      SFG  83  79
+2019   1988      STL  76  86
+2020   1988      TEX  70  91
+2021   1988      TOR  87  75
+2022   1989      ATL  63  97
+2023   1989      BAL  87  75
+2024   1989      BOS  83  79
+2025   1989      ANA  91  71
+2026   1989      CHW  69  92
+2027   1989      CHC  93  69
+2028   1989      CIN  75  87
+2029   1989      CLE  73  89
+2030   1989      DET  59 103
+2031   1989      HOU  86  76
+2032   1989      KCR  92  70
+2033   1989      LAD  77  83
+2034   1989      MIN  80  82
+2035   1989      MIL  81  81
+2036   1989      WSN  81  81
+2037   1989      NYY  74  87
+2038   1989      NYM  87  75
+2039   1989      OAK  99  63
+2040   1989      PHI  67  95
+2041   1989      PIT  74  88
+2042   1989      SDP  89  73
+2043   1989      SEA  73  89
+2044   1989      SFG  92  70
+2045   1989      STL  86  76
+2046   1989      TEX  83  79
+2047   1989      TOR  89  73
+2048   1990      ATL  65  97
+2049   1990      BAL  76  85
+2050   1990      BOS  88  74
+2051   1990      ANA  80  82
+2052   1990      CHW  94  68
+2053   1990      CHC  77  85
+2054   1990      CIN  91  71
+2055   1990      CLE  77  85
+2056   1990      DET  79  83
+2057   1990      HOU  75  87
+2058   1990      KCR  75  86
+2059   1990      LAD  86  76
+2060   1990      MIN  74  88
+2061   1990      MIL  74  88
+2062   1990      WSN  85  77
+2063   1990      NYY  67  95
+2064   1990      NYM  91  71
+2065   1990      OAK 103  59
+2066   1990      PHI  77  85
+2067   1990      PIT  95  67
+2068   1990      SDP  75  87
+2069   1990      SEA  77  85
+2070   1990      SFG  85  77
+2071   1990      STL  70  92
+2072   1990      TEX  83  79
+2073   1990      TOR  86  76
+2074   1991      ATL  94  68
+2075   1991      BAL  67  95
+2076   1991      BOS  84  78
+2077   1991      ANA  81  81
+2078   1991      CHW  87  75
+2079   1991      CHC  77  83
+2080   1991      CIN  74  88
+2081   1991      CLE  57 105
+2082   1991      DET  84  78
+2083   1991      HOU  65  97
+2084   1991      KCR  82  80
+2085   1991      LAD  93  69
+2086   1991      MIN  95  67
+2087   1991      MIL  83  79
+2088   1991      WSN  71  90
+2089   1991      NYY  71  91
+2090   1991      NYM  77  84
+2091   1991      OAK  84  78
+2092   1991      PHI  78  84
+2093   1991      PIT  98  64
+2094   1991      SDP  84  78
+2095   1991      SEA  83  79
+2096   1991      SFG  75  87
+2097   1991      STL  84  78
+2098   1991      TEX  85  77
+2099   1991      TOR  91  71
+2100   1992      ATL  98  64
+2101   1992      BAL  89  73
+2102   1992      BOS  73  89
+2103   1992      ANA  72  90
+2104   1992      CHW  86  76
+2105   1992      CHC  78  84
+2106   1992      CIN  90  72
+2107   1992      CLE  76  86
+2108   1992      DET  75  87
+2109   1992      HOU  81  81
+2110   1992      KCR  72  90
+2111   1992      LAD  63  99
+2112   1992      MIN  90  72
+2113   1992      MIL  92  70
+2114   1992      WSN  87  75
+2115   1992      NYY  76  86
+2116   1992      NYM  72  90
+2117   1992      OAK  96  66
+2118   1992      PHI  70  92
+2119   1992      PIT  96  66
+2120   1992      SDP  82  80
+2121   1992      SEA  64  98
+2122   1992      SFG  72  90
+2123   1992      STL  83  79
+2124   1992      TEX  77  85
+2125   1992      TOR  96  66
+2126   1993      ATL 104  58
+2127   1993      BAL  85  77
+2128   1993      BOS  80  82
+2129   1993      ANA  71  91
+2130   1993      CHW  94  68
+2131   1993      CHC  84  78
+2132   1993      CIN  73  89
+2133   1993      CLE  76  86
+2134   1993      COL  67  95
+2135   1993      DET  85  77
+2136   1993      FLA  64  98
+2137   1993      HOU  85  77
+2138   1993      KCR  84  78
+2139   1993      LAD  81  81
+2140   1993      MIN  71  91
+2141   1993      MIL  69  93
+2142   1993      WSN  94  68
+2143   1993      NYY  88  74
+2144   1993      NYM  59 103
+2145   1993      OAK  68  94
+2146   1993      PHI  97  65
+2147   1993      PIT  75  87
+2148   1993      SDP  61 101
+2149   1993      SEA  82  80
+2150   1993      SFG 103  59
+2151   1993      STL  87  75
+2152   1993      TEX  86  76
+2153   1993      TOR  95  67
+2154   1994      ATL  68  46
+2155   1994      BAL  63  49
+2156   1994      BOS  54  61
+2157   1994      ANA  47  68
+2158   1994      CHW  67  46
+2159   1994      CHC  49  64
+2160   1994      CIN  66  48
+2161   1994      CLE  66  47
+2162   1994      COL  53  64
+2163   1994      DET  53  62
+2164   1994      FLA  51  64
+2165   1994      HOU  66  49
+2166   1994      KCR  64  51
+2167   1994      LAD  58  56
+2168   1994      MIN  53  60
+2169   1994      MIL  53  62
+2170   1994      WSN  74  40
+2171   1994      NYY  70  43
+2172   1994      NYM  55  58
+2173   1994      OAK  51  63
+2174   1994      PHI  54  61
+2175   1994      PIT  53  61
+2176   1994      SDP  47  70
+2177   1994      SEA  49  63
+2178   1994      SFG  55  60
+2179   1994      STL  53  61
+2180   1994      TEX  52  62
+2181   1994      TOR  55  60
+2182   1995      ATL  90  54
+2183   1995      BAL  71  73
+2184   1995      BOS  86  58
+2185   1995      ANA  78  67
+2186   1995      CHW  68  76
+2187   1995      CHC  73  71
+2188   1995      CIN  85  59
+2189   1995      CLE 100  44
+2190   1995      COL  77  67
+2191   1995      DET  60  84
+2192   1995      FLA  67  76
+2193   1995      HOU  76  68
+2194   1995      KCR  70  74
+2195   1995      LAD  78  66
+2196   1995      MIN  56  88
+2197   1995      MIL  65  79
+2198   1995      WSN  66  78
+2199   1995      NYY  79  65
+2200   1995      NYM  69  75
+2201   1995      OAK  67  77
+2202   1995      PHI  69  75
+2203   1995      PIT  58  86
+2204   1995      SDP  70  74
+2205   1995      SEA  79  66
+2206   1995      SFG  67  77
+2207   1995      STL  62  81
+2208   1995      TEX  74  70
+2209   1995      TOR  56  88
+2210   1996      ATL  96  66
+2211   1996      BAL  88  74
+2212   1996      BOS  85  77
+2213   1996      ANA  70  91
+2214   1996      CHW  85  77
+2215   1996      CHC  76  86
+2216   1996      CIN  81  81
+2217   1996      CLE  99  62
+2218   1996      COL  83  79
+2219   1996      DET  53 109
+2220   1996      FLA  80  82
+2221   1996      HOU  82  80
+2222   1996      KCR  75  86
+2223   1996      LAD  90  72
+2224   1996      MIN  78  84
+2225   1996      MIL  80  82
+2226   1996      WSN  88  74
+2227   1996      NYY  92  70
+2228   1996      NYM  71  91
+2229   1996      OAK  78  84
+2230   1996      PHI  67  95
+2231   1996      PIT  73  89
+2232   1996      SDP  91  71
+2233   1996      SEA  85  76
+2234   1996      SFG  68  94
+2235   1996      STL  88  74
+2236   1996      TEX  90  72
+2237   1996      TOR  74  88
+2238   1997      ANA  84  78
+2239   1997      ATL 101  61
+2240   1997      BAL  98  64
+2241   1997      BOS  78  84
+2242   1997      CHW  80  81
+2243   1997      CHC  68  94
+2244   1997      CIN  76  86
+2245   1997      CLE  86  75
+2246   1997      COL  83  79
+2247   1997      DET  79  83
+2248   1997      FLA  92  70
+2249   1997      HOU  84  78
+2250   1997      KCR  67  94
+2251   1997      LAD  88  74
+2252   1997      MIN  68  94
+2253   1997      MIL  78  83
+2254   1997      WSN  78  84
+2255   1997      NYY  96  66
+2256   1997      NYM  88  74
+2257   1997      OAK  65  97
+2258   1997      PHI  68  94
+2259   1997      PIT  79  83
+2260   1997      SDP  76  86
+2261   1997      SEA  90  72
+2262   1997      SFG  90  72
+2263   1997      STL  73  89
+2264   1997      TEX  77  85
+2265   1997      TOR  76  86
+2266   1998      ANA  85  77
+2267   1998      ARI  65  97
+2268   1998      ATL 106  56
+2269   1998      BAL  79  83
+2270   1998      BOS  92  70
+2271   1998      CHW  80  82
+2272   1998      CHC  90  73
+2273   1998      CIN  77  85
+2274   1998      CLE  89  73
+2275   1998      COL  77  85
+2276   1998      DET  65  97
+2277   1998      FLA  54 108
+2278   1998      HOU 102  60
+2279   1998      KCR  72  89
+2280   1998      LAD  83  79
+2281   1998      MIL  74  88
+2282   1998      MIN  70  92
+2283   1998      WSN  65  97
+2284   1998      NYY 114  48
+2285   1998      NYM  88  74
+2286   1998      OAK  74  88
+2287   1998      PHI  75  87
+2288   1998      PIT  69  93
+2289   1998      SDP  98  64
+2290   1998      SEA  76  85
+2291   1998      SFG  89  74
+2292   1998      STL  83  79
+2293   1998      TBD  63  99
+2294   1998      TEX  88  74
+2295   1998      TOR  88  74
+2296   1999      ANA  70  92
+2297   1999      ARI 100  62
+2298   1999      ATL 103  59
+2299   1999      BAL  78  84
+2300   1999      BOS  94  68
+2301   1999      CHW  75  86
+2302   1999      CHC  67  95
+2303   1999      CIN  96  67
+2304   1999      CLE  97  65
+2305   1999      COL  72  90
+2306   1999      DET  69  92
+2307   1999      FLA  64  98
+2308   1999      HOU  97  65
+2309   1999      KCR  64  97
+2310   1999      LAD  77  85
+2311   1999      MIL  74  87
+2312   1999      MIN  63  97
+2313   1999      WSN  68  94
+2314   1999      NYY  98  64
+2315   1999      NYM  97  66
+2316   1999      OAK  87  75
+2317   1999      PHI  77  85
+2318   1999      PIT  78  83
+2319   1999      SDP  74  88
+2320   1999      SEA  79  83
+2321   1999      SFG  86  76
+2322   1999      STL  75  86
+2323   1999      TBD  69  93
+2324   1999      TEX  95  67
+2325   1999      TOR  84  78
+2326   2000      ANA  82  80
+2327   2000      ARI  85  77
+2328   2000      ATL  95  67
+2329   2000      BAL  74  88
+2330   2000      BOS  85  77
+2331   2000      CHW  95  67
+2332   2000      CHC  65  97
+2333   2000      CIN  85  77
+2334   2000      CLE  90  72
+2335   2000      COL  82  80
+2336   2000      DET  79  83
+2337   2000      FLA  79  82
+2338   2000      HOU  72  90
+2339   2000      KCR  77  85
+2340   2000      LAD  86  76
+2341   2000      MIL  73  89
+2342   2000      MIN  69  93
+2343   2000      WSN  67  95
+2344   2000      NYY  87  74
+2345   2000      NYM  94  68
+2346   2000      OAK  91  70
+2347   2000      PHI  65  97
+2348   2000      PIT  69  93
+2349   2000      SDP  76  86
+2350   2000      SEA  91  71
+2351   2000      SFG  97  65
+2352   2000      STL  95  67
+2353   2000      TBD  69  92
+2354   2000      TEX  71  91
+2355   2000      TOR  83  79
+2356   2001      ANA  75  87
+2357   2001      ARI  92  70
+2358   2001      ATL  88  74
+2359   2001      BAL  63  98
+2360   2001      BOS  82  79
+2361   2001      CHW  83  79
+2362   2001      CHC  88  74
+2363   2001      CIN  66  96
+2364   2001      CLE  91  71
+2365   2001      COL  73  89
+2366   2001      DET  66  96
+2367   2001      FLA  76  86
+2368   2001      HOU  93  69
+2369   2001      KCR  65  97
+2370   2001      LAD  86  76
+2371   2001      MIL  68  94
+2372   2001      MIN  85  77
+2373   2001      WSN  68  94
+2374   2001      NYY  95  65
+2375   2001      NYM  82  80
+2376   2001      OAK 102  60
+2377   2001      PHI  86  76
+2378   2001      PIT  62 100
+2379   2001      SDP  79  83
+2380   2001      SEA 116  46
+2381   2001      SFG  90  72
+2382   2001      STL  93  69
+2383   2001      TBD  62 100
+2384   2001      TEX  73  89
+2385   2001      TOR  80  82
+2386   2002      ANA  99  63
+2387   2002      ARI  98  64
+2388   2002      ATL 101  59
+2389   2002      BAL  67  95
+2390   2002      BOS  93  69
+2391   2002      CHW  81  81
+2392   2002      CHC  67  95
+2393   2002      CIN  78  84
+2394   2002      CLE  74  88
+2395   2002      COL  73  89
+2396   2002      DET  55 106
+2397   2002      FLA  79  83
+2398   2002      HOU  84  78
+2399   2002      KCR  62 100
+2400   2002      LAD  92  70
+2401   2002      MIL  56 106
+2402   2002      MIN  94  67
+2403   2002      WSN  83  79
+2404   2002      NYY 103  58
+2405   2002      NYM  75  86
+2406   2002      OAK 103  59
+2407   2002      PHI  80  81
+2408   2002      PIT  72  89
+2409   2002      SDP  66  96
+2410   2002      SEA  93  69
+2411   2002      SFG  95  66
+2412   2002      STL  97  65
+2413   2002      TBD  55 106
+2414   2002      TEX  72  90
+2415   2002      TOR  78  84
+2416   2003      ANA  77  85
+2417   2003      ARI  84  78
+2418   2003      ATL 101  61
+2419   2003      BAL  71  91
+2420   2003      BOS  95  67
+2421   2003      CHW  86  76
+2422   2003      CHC  88  74
+2423   2003      CIN  69  93
+2424   2003      CLE  68  94
+2425   2003      COL  74  88
+2426   2003      DET  43 119
+2427   2003      FLA  91  71
+2428   2003      HOU  87  75
+2429   2003      KCR  83  79
+2430   2003      LAD  85  77
+2431   2003      MIL  68  94
+2432   2003      MIN  90  72
+2433   2003      WSN  83  79
+2434   2003      NYY 101  61
+2435   2003      NYM  66  95
+2436   2003      OAK  96  66
+2437   2003      PHI  86  76
+2438   2003      PIT  75  87
+2439   2003      SDP  64  98
+2440   2003      SEA  93  69
+2441   2003      SFG 100  61
+2442   2003      STL  85  77
+2443   2003      TBD  63  99
+2444   2003      TEX  71  91
+2445   2003      TOR  86  76
+2446   2004      ANA  92  70
+2447   2004      ARI  51 111
+2448   2004      ATL  96  66
+2449   2004      BAL  78  84
+2450   2004      BOS  98  64
+2451   2004      CHW  83  79
+2452   2004      CHC  89  73
+2453   2004      CIN  76  86
+2454   2004      CLE  80  82
+2455   2004      COL  68  94
+2456   2004      DET  72  90
+2457   2004      FLA  83  79
+2458   2004      HOU  92  70
+2459   2004      KCR  58 104
+2460   2004      LAD  93  69
+2461   2004      MIL  67  94
+2462   2004      MIN  92  70
+2463   2004      WSN  67  95
+2464   2004      NYY 101  61
+2465   2004      NYM  71  91
+2466   2004      OAK  91  71
+2467   2004      PHI  86  76
+2468   2004      PIT  72  89
+2469   2004      SDP  87  75
+2470   2004      SEA  63  99
+2471   2004      SFG  91  71
+2472   2004      STL 105  57
+2473   2004      TBD  70  91
+2474   2004      TEX  89  73
+2475   2004      TOR  67  94
+2476   2005      ARI  77  85
+2477   2005      ATL  90  72
+2478   2005      BAL  74  88
+2479   2005      BOS  95  67
+2480   2005      CHW  99  63
+2481   2005      CHC  79  83
+2482   2005      CIN  73  89
+2483   2005      CLE  93  69
+2484   2005      COL  67  95
+2485   2005      DET  71  91
+2486   2005      FLA  83  79
+2487   2005      HOU  89  73
+2488   2005      KCR  56 106
+2489   2005      ANA  95  67
+2490   2005      LAD  71  91
+2491   2005      MIL  81  81
+2492   2005      MIN  83  79
+2493   2005      NYY  95  67
+2494   2005      NYM  83  79
+2495   2005      OAK  88  74
+2496   2005      PHI  88  74
+2497   2005      PIT  67  95
+2498   2005      SDP  82  80
+2499   2005      SEA  69  93
+2500   2005      SFG  75  87
+2501   2005      STL 100  62
+2502   2005      TBD  67  95
+2503   2005      TEX  79  83
+2504   2005      TOR  80  82
+2505   2005      WSN  81  81
+2506   2006      ARI  76  86
+2507   2006      ATL  79  83
+2508   2006      BAL  70  92
+2509   2006      BOS  86  76
+2510   2006      CHW  90  72
+2511   2006      CHC  66  96
+2512   2006      CIN  80  82
+2513   2006      CLE  78  84
+2514   2006      COL  76  86
+2515   2006      DET  95  67
+2516   2006      FLA  78  84
+2517   2006      HOU  82  80
+2518   2006      KCR  62 100
+2519   2006      ANA  89  73
+2520   2006      LAD  88  74
+2521   2006      MIL  75  87
+2522   2006      MIN  96  66
+2523   2006      NYY  97  65
+2524   2006      NYM  97  65
+2525   2006      OAK  93  69
+2526   2006      PHI  85  77
+2527   2006      PIT  67  95
+2528   2006      SDP  88  74
+2529   2006      SEA  78  84
+2530   2006      SFG  76  85
+2531   2006      STL  83  78
+2532   2006      TBD  61 101
+2533   2006      TEX  80  82
+2534   2006      TOR  87  75
+2535   2006      WSN  71  91
+2536   2007      ARI  90  72
+2537   2007      ATL  84  78
+2538   2007      BAL  69  93
+2539   2007      BOS  96  66
+2540   2007      CHW  72  90
+2541   2007      CHC  85  77
+2542   2007      CIN  72  90
+2543   2007      CLE  96  66
+2544   2007      COL  90  73
+2545   2007      DET  88  74
+2546   2007      FLA  71  91
+2547   2007      HOU  73  89
+2548   2007      KCR  69  93
+2549   2007      ANA  94  68
+2550   2007      LAD  82  80
+2551   2007      MIL  83  79
+2552   2007      MIN  79  83
+2553   2007      NYY  94  68
+2554   2007      NYM  88  74
+2555   2007      OAK  76  86
+2556   2007      PHI  89  73
+2557   2007      PIT  68  94
+2558   2007      SDP  89  74
+2559   2007      SEA  88  74
+2560   2007      SFG  71  91
+2561   2007      STL  78  84
+2562   2007      TBD  66  96
+2563   2007      TEX  75  87
+2564   2007      TOR  83  79
+2565   2007      WSN  73  89
+2566   2008      ARI  82  80
+2567   2008      ATL  72  90
+2568   2008      BAL  68  93
+2569   2008      BOS  95  67
+2570   2008      CHW  89  74
+2571   2008      CHC  97  64
+2572   2008      CIN  74  88
+2573   2008      CLE  81  81
+2574   2008      COL  74  88
+2575   2008      DET  74  88
+2576   2008      FLA  84  77
+2577   2008      HOU  86  75
+2578   2008      KCR  75  87
+2579   2008      ANA 100  62
+2580   2008      LAD  84  78
+2581   2008      MIL  90  72
+2582   2008      MIN  88  75
+2583   2008      NYY  89  73
+2584   2008      NYM  89  73
+2585   2008      OAK  75  86
+2586   2008      PHI  92  70
+2587   2008      PIT  67  95
+2588   2008      SDP  63  99
+2589   2008      SEA  61 101
+2590   2008      SFG  72  90
+2591   2008      STL  86  76
+2592   2008      TBD  97  65
+2593   2008      TEX  79  83
+2594   2008      TOR  86  76
+2595   2008      WSN  59 102
+2596   2009      ARI  70  92
+2597   2009      ATL  86  76
+2598   2009      BAL  64  98
+2599   2009      BOS  95  67
+2600   2009      CHW  79  83
+2601   2009      CHC  83  78
+2602   2009      CIN  78  84
+2603   2009      CLE  65  97
+2604   2009      COL  92  70
+2605   2009      DET  86  77
+2606   2009      FLA  87  75
+2607   2009      HOU  74  88
+2608   2009      KCR  65  97
+2609   2009      ANA  97  65
+2610   2009      LAD  95  67
+2611   2009      MIL  80  82
+2612   2009      MIN  87  76
+2613   2009      NYY 103  59
+2614   2009      NYM  70  92
+2615   2009      OAK  75  87
+2616   2009      PHI  93  69
+2617   2009      PIT  62  99
+2618   2009      SDP  75  87
+2619   2009      SEA  85  77
+2620   2009      SFG  88  74
+2621   2009      STL  91  71
+2622   2009      TBD  84  78
+2623   2009      TEX  87  75
+2624   2009      TOR  75  87
+2625   2009      WSN  59 103
+2626   2010      ARI  65  97
+2627   2010      ATL  91  71
+2628   2010      BAL  66  96
+2629   2010      BOS  89  73
+2630   2010      CHW  88  74
+2631   2010      CHC  75  87
+2632   2010      CIN  91  71
+2633   2010      CLE  69  93
+2634   2010      COL  83  79
+2635   2010      DET  81  81
+2636   2010      FLA  80  82
+2637   2010      HOU  76  86
+2638   2010      KCR  67  95
+2639   2010      ANA  80  82
+2640   2010      LAD  80  82
+2641   2010      MIL  77  85
+2642   2010      MIN  94  68
+2643   2010      NYY  95  67
+2644   2010      NYM  79  83
+2645   2010      OAK  81  81
+2646   2010      PHI  97  65
+2647   2010      PIT  57 105
+2648   2010      SDP  90  72
+2649   2010      SEA  61 101
+2650   2010      SFG  92  70
+2651   2010      STL  86  76
+2652   2010      TBD  96  66
+2653   2010      TEX  90  72
+2654   2010      TOR  85  77
+2655   2010      WSN  69  93
+2656   2011      ARI  94  68
+2657   2011      ATL  89  73
+2658   2011      BAL  69  93
+2659   2011      BOS  90  72
+2660   2011      CHW  79  83
+2661   2011      CHC  71  91
+2662   2011      CIN  79  83
+2663   2011      CLE  80  82
+2664   2011      COL  73  89
+2665   2011      DET  95  67
+2666   2011      FLA  72  90
+2667   2011      HOU  56 106
+2668   2011      KCR  71  91
+2669   2011      ANA  86  76
+2670   2011      LAD  82  79
+2671   2011      MIL  96  66
+2672   2011      MIN  63  99
+2673   2011      NYY  97  65
+2674   2011      NYM  77  85
+2675   2011      OAK  74  88
+2676   2011      PHI 102  60
+2677   2011      PIT  72  90
+2678   2011      SDP  71  91
+2679   2011      SEA  67  95
+2680   2011      SFG  86  76
+2681   2011      STL  90  72
+2682   2011      TBD  91  71
+2683   2011      TEX  96  66
+2684   2011      TOR  81  81
+2685   2011      WSN  80  81
+2686   2012      ARI  81  81
+2687   2012      ATL  94  68
+2688   2012      BAL  93  69
+2689   2012      BOS  69  93
+2690   2012      CHW  85  77
+2691   2012      CHC  61 101
+2692   2012      CIN  97  65
+2693   2012      CLE  68  94
+2694   2012      COL  64  98
+2695   2012      DET  88  74
+2696   2012      HOU  55 107
+2697   2012      KCR  72  90
+2698   2012      ANA  89  73
+2699   2012      LAD  86  76
+2700   2012      FLA  69  93
+2701   2012      MIL  83  79
+2702   2012      MIN  66  96
+2703   2012      NYY  95  67
+2704   2012      NYM  74  88
+2705   2012      OAK  94  68
+2706   2012      PHI  81  81
+2707   2012      PIT  79  83
+2708   2012      SDP  76  86
+2709   2012      SEA  75  87
+2710   2012      SFG  94  68
+2711   2012      STL  88  74
+2712   2012      TBD  90  72
+2713   2012      TEX  93  69
+2714   2012      TOR  73  89
+2715   2012      WSN  98  64
+2716   2013      ARI  81  81
+2717   2013      ATL  96  66
+2718   2013      BAL  85  77
+2719   2013      BOS  97  65
+2720   2013      CHW  63  99
+2721   2013      CHC  66  96
+2722   2013      CIN  90  72
+2723   2013      CLE  92  70
+2724   2013      COL  74  88
+2725   2013      DET  93  69
+2726   2013      HOU  51 111
+2727   2013      KCR  86  76
+2728   2013      ANA  78  84
+2729   2013      LAD  92  70
+2730   2013      FLA  62 100
+2731   2013      MIL  74  88
+2732   2013      MIN  66  96
+2733   2013      NYY  85  77
+2734   2013      NYM  74  88
+2735   2013      OAK  96  66
+2736   2013      PHI  73  89
+2737   2013      PIT  94  68
+2738   2013      SDP  76  86
+2739   2013      SEA  71  91
+2740   2013      SFG  76  86
+2741   2013      STL  97  65
+2742   2013      TBD  92  71
+2743   2013      TEX  91  72
+2744   2013      TOR  74  88
+2745   2013      WSN  86  76
+2746   2014      ARI  64  98
+2747   2014      ATL  79  83
+2748   2014      BAL  96  66
+2749   2014      BOS  71  91
+2750   2014      CHW  73  89
+2751   2014      CHC  73  89
+2752   2014      CIN  76  86
+2753   2014      CLE  85  77
+2754   2014      COL  66  96
+2755   2014      DET  90  72
+2756   2014      HOU  70  92
+2757   2014      KCR  89  73
+2758   2014      ANA  98  64
+2759   2014      LAD  94  68
+2760   2014      FLA  77  85
+2761   2014      MIL  82  80
+2762   2014      MIN  70  92
+2763   2014      NYY  84  78
+2764   2014      NYM  79  83
+2765   2014      OAK  88  74
+2766   2014      PHI  73  89
+2767   2014      PIT  88  74
+2768   2014      SDP  77  85
+2769   2014      SEA  87  75
+2770   2014      SFG  88  74
+2771   2014      STL  90  72
+2772   2014      TBD  77  85
+2773   2014      TEX  67  95
+2774   2014      TOR  83  79
+2775   2014      WSN  96  66
+2776   2015      ARI  79  83
+2777   2015      ATL  67  95
+2778   2015      BAL  81  81
+2779   2015      BOS  78  84
+2780   2015      CHW  76  86
+2781   2015      CHC  97  65
+2782   2015      CIN  64  98
+2783   2015      CLE  81  80
+2784   2015      COL  68  94
+2785   2015      DET  74  87
+2786   2015      HOU  86  76
+2787   2015      KCR  95  67
+2788   2015      ANA  85  77
+2789   2015      LAD  92  70
+2790   2015      FLA  71  91
+2791   2015      MIL  68  94
+2792   2015      MIN  83  79
+2793   2015      NYY  87  75
+2794   2015      NYM  90  72
+2795   2015      OAK  68  94
+2796   2015      PHI  63  99
+2797   2015      PIT  98  64
+2798   2015      SDP  74  88
+2799   2015      SEA  76  86
+2800   2015      SFG  84  78
+2801   2015      STL 100  62
+2802   2015      TBD  80  82
+2803   2015      TEX  88  74
+2804   2015      TOR  93  69
+2805   2015      WSN  83  79
+2806   2016      ARI  69  93
+2807   2016      ATL  68  93
+2808   2016      BAL  89  73
+2809   2016      BOS  93  69
+2810   2016      CHW  78  84
+2811   2016      CHC 103  58
+2812   2016      CIN  68  94
+2813   2016      CLE  94  67
+2814   2016      COL  75  87
+2815   2016      DET  86  75
+2816   2016      HOU  84  78
+2817   2016      KCR  81  81
+2818   2016      ANA  74  88
+2819   2016      LAD  91  71
+2820   2016      FLA  79  82
+2821   2016      MIL  73  89
+2822   2016      MIN  59 103
+2823   2016      NYY  84  78
+2824   2016      NYM  87  75
+2825   2016      OAK  69  93
+2826   2016      PHI  71  91
+2827   2016      PIT  78  83
+2828   2016      SDP  68  94
+2829   2016      SEA  86  76
+2830   2016      SFG  87  75
+2831   2016      STL  86  76
+2832   2016      TBD  68  94
+2833   2016      TEX  95  67
+2834   2016      TOR  89  73
+2835   2016      WSN  95  67
+2836   2017      ARI  93  69
+2837   2017      ATL  72  90
+2838   2017      BAL  75  87
+2839   2017      BOS  93  69
+2840   2017      CHW  67  95
+2841   2017      CHC  92  70
+2842   2017      CIN  68  94
+2843   2017      CLE 102  60
+2844   2017      COL  87  75
+2845   2017      DET  64  98
+2846   2017      HOU 101  61
+2847   2017      KCR  80  82
+2848   2017      ANA  80  82
+2849   2017      LAD 104  58
+2850   2017      FLA  77  85
+2851   2017      MIL  86  76
+2852   2017      MIN  85  77
+2853   2017      NYY  91  71
+2854   2017      NYM  70  92
+2855   2017      OAK  75  87
+2856   2017      PHI  66  96
+2857   2017      PIT  75  87
+2858   2017      SDP  71  91
+2859   2017      SEA  78  84
+2860   2017      SFG  64  98
+2861   2017      STL  83  79
+2862   2017      TBD  80  82
+2863   2017      TEX  78  84
+2864   2017      TOR  76  86
+2865   2017      WSN  97  65
+2866   2018      ARI  82  80
+2867   2018      ATL  90  72
+2868   2018      BAL  47 115
+2869   2018      BOS 108  54
+2870   2018      CHW  62 100
+2871   2018      CHC  95  68
+2872   2018      CIN  67  95
+2873   2018      CLE  91  71
+2874   2018      COL  91  72
+2875   2018      DET  64  98
+2876   2018      HOU 103  59
+2877   2018      KCR  58 104
+2878   2018      ANA  80  82
+2879   2018      LAD  92  71
+2880   2018      FLA  63  98
+2881   2018      MIL  96  67
+2882   2018      MIN  78  84
+2883   2018      NYY 100  62
+2884   2018      NYM  77  85
+2885   2018      OAK  97  65
+2886   2018      PHI  80  82
+2887   2018      PIT  82  79
+2888   2018      SDP  66  96
+2889   2018      SEA  89  73
+2890   2018      SFG  73  89
+2891   2018      STL  88  74
+2892   2018      TBD  90  72
+2893   2018      TEX  67  95
+2894   2018      TOR  73  89
+2895   2018      WSN  82  80
+2896   2019      ARI  85  77
+2897   2019      ATL  97  65
+2898   2019      BAL  54 108
+2899   2019      BOS  84  78
+2900   2019      CHW  72  89
+2901   2019      CHC  84  78
+2902   2019      CIN  75  87
+2903   2019      CLE  93  69
+2904   2019      COL  71  91
+2905   2019      DET  47 114
+2906   2019      HOU 107  55
+2907   2019      KCR  59 103
+2908   2019      ANA  72  90
+2909   2019      LAD 106  56
+2910   2019      FLA  57 105
+2911   2019      MIL  89  73
+2912   2019      MIN 101  61
+2913   2019      NYY 103  59
+2914   2019      NYM  86  76
+2915   2019      OAK  97  65
+2916   2019      PHI  81  81
+2917   2019      PIT  69  93
+2918   2019      SDP  70  92
+2919   2019      SEA  68  94
+2920   2019      SFG  77  85
+2921   2019      STL  91  71
+2922   2019      TBD  96  66
+2923   2019      TEX  78  84
+2924   2019      TOR  67  95
+2925   2019      WSN  93  69
+2926   2020      ARI  25  35
+2927   2020      ATL  35  25
+2928   2020      BAL  25  35
+2929   2020      BOS  24  36
+2930   2020      CHW  35  25
+2931   2020      CHC  34  26
+2932   2020      CIN  31  29
+2933   2020      CLE  35  25
+2934   2020      COL  26  34
+2935   2020      DET  23  35
+2936   2020      HOU  29  31
+2937   2020      KCR  26  34
+2938   2020      ANA  26  34
+2939   2020      LAD  43  17
+2940   2020      FLA  31  29
+2941   2020      MIL  29  31
+2942   2020      MIN  36  24
+2943   2020      NYY  33  27
+2944   2020      NYM  26  34
+2945   2020      OAK  36  24
+2946   2020      PHI  28  32
+2947   2020      PIT  19  41
+2948   2020      SDP  37  23
+2949   2020      SEA  27  33
+2950   2020      SFG  29  31
+2951   2020      STL  30  28
+2952   2020      TBD  40  20
+2953   2020      TEX  22  38
+2954   2020      TOR  32  28
+2955   2020      WSN  26  34
+2956   2021      ARI  52 110
+2957   2021      ATL  88  73
+2958   2021      BAL  52 110
+2959   2021      BOS  92  70
+2960   2021      CHW  93  69
+2961   2021      CHC  71  91
+2962   2021      CIN  83  79
+2963   2021      CLE  80  82
+2964   2021      COL  74  87
+2965   2021      DET  77  85
+2966   2021      HOU  95  67
+2967   2021      KCR  74  88
+2968   2021      ANA  77  85
+2969   2021      LAD 106  56
+2970   2021      FLA  67  95
+2971   2021      MIL  95  67
+2972   2021      MIN  73  89
+2973   2021      NYY  92  70
+2974   2021      NYM  77  85
+2975   2021      OAK  86  76
+2976   2021      PHI  82  80
+2977   2021      PIT  61 101
+2978   2021      SDP  79  83
+2979   2021      SEA  90  72
+2980   2021      SFG 107  55
+2981   2021      STL  90  72
+2982   2021      TBD 100  62
+2983   2021      TEX  60 102
+2984   2021      TOR  91  71
+2985   2021      WSN  65  97
+2986   2022      ARI  74  88
+2987   2022      ATL 101  61
+2988   2022      BAL  83  79
+2989   2022      BOS  78  84
+2990   2022      CHW  81  81
+2991   2022      CHC  74  88
+2992   2022      CIN  62 100
+2993   2022      CLE  92  70
+2994   2022      COL  68  94
+2995   2022      DET  66  96
+2996   2022      HOU 106  56
+2997   2022      KCR  65  97
+2998   2022      ANA  73  89
+2999   2022      LAD 111  51
+3000   2022      FLA  69  93
+3001   2022      MIL  86  76
+3002   2022      MIN  78  84
+3003   2022      NYY  99  63
+3004   2022      NYM 101  61
+3005   2022      OAK  60 102
+3006   2022      PHI  87  75
+3007   2022      PIT  62 100
+3008   2022      SDP  89  73
+3009   2022      SEA  90  72
+3010   2022      SFG  81  81
+3011   2022      STL  93  69
+3012   2022      TBD  86  76
+3013   2022      TEX  68  94
+3014   2022      TOR  92  70
+3015   2022      WSN  55 107</code></pre>
+</div>
+</div>
+</section>
+<section id="step-1-focus-on-the-mets" class="slide level2">
+<h2>Step 1: Focus on the Mets</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">...</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>What function do I use to choose only the rows corresponding to the Mets?</p>
+</section>
+<section id="step-1-focus-on-the-mets-1" class="slide level2">
+<h2>Step 1: Focus on the Mets</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">filter</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   yearID franchID   W   L
+1    1962      NYM  40 120
+2    1963      NYM  51 111
+3    1964      NYM  53 109
+4    1965      NYM  50 112
+5    1966      NYM  66  95
+6    1967      NYM  61 101
+7    1968      NYM  73  89
+8    1969      NYM 100  62
+9    1970      NYM  83  79
+10   1971      NYM  83  79
+11   1972      NYM  83  73
+12   1973      NYM  82  79
+13   1974      NYM  71  91
+14   1975      NYM  82  80
+15   1976      NYM  86  76
+16   1977      NYM  64  98
+17   1978      NYM  66  96
+18   1979      NYM  63  99
+19   1980      NYM  67  95
+20   1981      NYM  41  62
+21   1982      NYM  65  97
+22   1983      NYM  68  94
+23   1984      NYM  90  72
+24   1985      NYM  98  64
+25   1986      NYM 108  54
+26   1987      NYM  92  70
+27   1988      NYM 100  60
+28   1989      NYM  87  75
+29   1990      NYM  91  71
+30   1991      NYM  77  84
+31   1992      NYM  72  90
+32   1993      NYM  59 103
+33   1994      NYM  55  58
+34   1995      NYM  69  75
+35   1996      NYM  71  91
+36   1997      NYM  88  74
+37   1998      NYM  88  74
+38   1999      NYM  97  66
+39   2000      NYM  94  68
+40   2001      NYM  82  80
+41   2002      NYM  75  86
+42   2003      NYM  66  95
+43   2004      NYM  71  91
+44   2005      NYM  83  79
+45   2006      NYM  97  65
+46   2007      NYM  88  74
+47   2008      NYM  89  73
+48   2009      NYM  70  92
+49   2010      NYM  79  83
+50   2011      NYM  77  85
+51   2012      NYM  74  88
+52   2013      NYM  74  88
+53   2014      NYM  79  83
+54   2015      NYM  90  72
+55   2016      NYM  87  75
+56   2017      NYM  70  92
+57   2018      NYM  77  85
+58   2019      NYM  86  76
+59   2020      NYM  26  34
+60   2021      NYM  77  85
+61   2022      NYM 101  61</code></pre>
+</div>
+</div>
+</section>
+<section id="step-2-focus-on-the-mets-between-1998-and-2018" class="slide level2">
+<h2>Step 2: Focus on the Mets between 1998 and 2018</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="fu">filter</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4"></a>         ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>How do I specify the range of years I want?</p>
+</section>
+<section id="step-2-focus-on-the-mets-between-1998-and-2018-1" class="slide level2">
+<h2>Step 2: Focus on the Mets between 1998 and 2018</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>  <span class="fu">filter</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4"></a>         yearID <span class="sc">&gt;=</span> <span class="dv">1998</span>, yearID <span class="sc">&lt;=</span> <span class="dv">2018</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   yearID franchID  W  L
+1    1998      NYM 88 74
+2    1999      NYM 97 66
+3    2000      NYM 94 68
+4    2001      NYM 82 80
+5    2002      NYM 75 86
+6    2003      NYM 66 95
+7    2004      NYM 71 91
+8    2005      NYM 83 79
+9    2006      NYM 97 65
+10   2007      NYM 88 74
+11   2008      NYM 89 73
+12   2009      NYM 70 92
+13   2010      NYM 79 83
+14   2011      NYM 77 85
+15   2012      NYM 74 88
+16   2013      NYM 74 88
+17   2014      NYM 79 83
+18   2015      NYM 90 72
+19   2016      NYM 87 75
+20   2017      NYM 70 92
+21   2018      NYM 77 85</code></pre>
+</div>
+</div>
+</section>
+<section id="step-3-who-was-the-gm" class="slide level2">
+<h2>Step 3: Who was the GM?</h2>
+<ul>
+<li>1998 - 2003: Steve Phillips</li>
+<li>2004: Jim Duquette</li>
+<li>2005 - 2010: Omar Minaya</li>
+<li>2011 - 2018: Sandy Alderson</li>
+</ul>
+<p>How should we add this information to the data?</p>
+</section>
+<section id="step-3-who-was-the-gm-1" class="slide level2">
+<h2>Step 3: Who was the GM?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="fu">filter</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4"></a>         yearID <span class="sc">&gt;=</span> <span class="dv">1998</span>, yearID <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">mutate</span>(<span class="at">gm =</span> <span class="fu">case_when</span>(</span>
+<span id="cb9-6"><a href="#cb9-6"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2003</span> <span class="sc">~</span> <span class="st">"Phillips"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7"></a>    yearID <span class="sc">==</span> <span class="dv">2004</span> <span class="sc">~</span> <span class="st">"Duquette"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2010</span> <span class="sc">~</span> <span class="st">"Minaya"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2018</span> <span class="sc">~</span> <span class="st">"Alderson"</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   yearID franchID  W  L       gm
+1    1998      NYM 88 74 Phillips
+2    1999      NYM 97 66 Phillips
+3    2000      NYM 94 68 Phillips
+4    2001      NYM 82 80 Phillips
+5    2002      NYM 75 86 Phillips
+6    2003      NYM 66 95 Phillips
+7    2004      NYM 71 91 Duquette
+8    2005      NYM 83 79   Minaya
+9    2006      NYM 97 65   Minaya
+10   2007      NYM 88 74   Minaya
+11   2008      NYM 89 73   Minaya
+12   2009      NYM 70 92   Minaya
+13   2010      NYM 79 83   Minaya
+14   2011      NYM 77 85 Alderson
+15   2012      NYM 74 88 Alderson
+16   2013      NYM 74 88 Alderson
+17   2014      NYM 79 83 Alderson
+18   2015      NYM 90 72 Alderson
+19   2016      NYM 87 75 Alderson
+20   2017      NYM 70 92 Alderson
+21   2018      NYM 77 85 Alderson</code></pre>
+</div>
+</div>
+</section>
+<section id="step-4-summarize-performance" class="slide level2">
+<h2>Step 4: Summarize performance</h2>
+<p>How do I calculate performance for <em>each</em> GM?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a>  <span class="fu">filter</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>         yearID <span class="sc">&gt;=</span> <span class="dv">1998</span>, yearID <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>  <span class="fu">mutate</span>(<span class="at">gm =</span> <span class="fu">case_when</span>(</span>
+<span id="cb11-6"><a href="#cb11-6"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2003</span> <span class="sc">~</span> <span class="st">"Phillips"</span>,</span>
+<span id="cb11-7"><a href="#cb11-7"></a>    yearID <span class="sc">==</span> <span class="dv">2004</span> <span class="sc">~</span> <span class="st">"Duquette"</span>,</span>
+<span id="cb11-8"><a href="#cb11-8"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2010</span> <span class="sc">~</span> <span class="st">"Minaya"</span>,</span>
+<span id="cb11-9"><a href="#cb11-9"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2018</span> <span class="sc">~</span> <span class="st">"Alderson"</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a>  <span class="fu">summarize</span>(<span class="at">wpct =</span> <span class="fu">sum</span>(W)<span class="sc">/</span><span class="fu">sum</span>(W <span class="sc">+</span> L))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       wpct
+1 0.5019112</code></pre>
+</div>
+</div>
+</section>
+<section id="step-4-summarize-performance-1" class="slide level2">
+<h2>Step 4: Summarize performance</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">filter</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4"></a>         yearID <span class="sc">&gt;=</span> <span class="dv">1998</span>, yearID <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a>  <span class="fu">mutate</span>(<span class="at">gm =</span> <span class="fu">case_when</span>(</span>
+<span id="cb13-6"><a href="#cb13-6"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2003</span> <span class="sc">~</span> <span class="st">"Phillips"</span>,</span>
+<span id="cb13-7"><a href="#cb13-7"></a>    yearID <span class="sc">==</span> <span class="dv">2004</span> <span class="sc">~</span> <span class="st">"Duquette"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2010</span> <span class="sc">~</span> <span class="st">"Minaya"</span>,</span>
+<span id="cb13-9"><a href="#cb13-9"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2018</span> <span class="sc">~</span> <span class="st">"Alderson"</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a>  <span class="fu">group_by</span>(gm) <span class="sc">|&gt;</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a>  <span class="fu">summarize</span>(<span class="at">wpct =</span> <span class="fu">sum</span>(W)<span class="sc">/</span><span class="fu">sum</span>(W <span class="sc">+</span> L))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 2
+  gm        wpct
+  &lt;chr&gt;    &lt;dbl&gt;
+1 Alderson 0.485
+2 Duquette 0.438
+3 Minaya   0.521
+4 Phillips 0.517</code></pre>
+</div>
+</div>
+</section>
+<section id="finally-arrange-results" class="slide level2">
+<h2>Finally: arrange results</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>Teams <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>  <span class="fu">select</span>(yearID, franchID, W, L) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a>  <span class="fu">filter</span>(franchID <span class="sc">==</span> <span class="st">"NYM"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4"></a>         yearID <span class="sc">&gt;=</span> <span class="dv">1998</span>, yearID <span class="sc">&lt;=</span> <span class="dv">2018</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a>  <span class="fu">mutate</span>(<span class="at">gm =</span> <span class="fu">case_when</span>(</span>
+<span id="cb15-6"><a href="#cb15-6"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2003</span> <span class="sc">~</span> <span class="st">"Phillips"</span>,</span>
+<span id="cb15-7"><a href="#cb15-7"></a>    yearID <span class="sc">==</span> <span class="dv">2004</span> <span class="sc">~</span> <span class="st">"Duquette"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2010</span> <span class="sc">~</span> <span class="st">"Minaya"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9"></a>    yearID <span class="sc">&lt;=</span> <span class="dv">2018</span> <span class="sc">~</span> <span class="st">"Alderson"</span></span>
+<span id="cb15-10"><a href="#cb15-10"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11"></a>  <span class="fu">group_by</span>(gm) <span class="sc">|&gt;</span></span>
+<span id="cb15-12"><a href="#cb15-12"></a>  <span class="fu">summarize</span>(<span class="at">wpct =</span> <span class="fu">sum</span>(W)<span class="sc">/</span><span class="fu">sum</span>(W <span class="sc">+</span> L)) <span class="sc">|&gt;</span></span>
+<span id="cb15-13"><a href="#cb15-13"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(wpct))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 2
+  gm        wpct
+  &lt;chr&gt;    &lt;dbl&gt;
+1 Minaya   0.521
+2 Phillips 0.517
+3 Alderson 0.485
+4 Duquette 0.438</code></pre>
+</div>
+</div>
+</section>
+<section id="class-activity" class="slide level2">
+<h2>Class activity</h2>
+<p><a href="https://sta279-s24.github.io/class_activities/ca_lecture_12.html">https://sta279-s24.github.io/class_activities/ca_lecture_12.html</a></p>
+<div class="footer footer-default">
+
+</div>
+</section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="lecture_12_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="lecture_12_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="lecture_12_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="lecture_12_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="lecture_12_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="lecture_12_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="lecture_12_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="lecture_12_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="lecture_12_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="lecture_12_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'smaller': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button', {
+        text: function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+      });
+      clipboard.on('success', function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      });
+      function tippyHover(el, contentFn) {
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start'
+        };
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          return note.innerHTML;
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>
