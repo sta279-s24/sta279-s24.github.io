@@ -1,0 +1,73 @@
+---
+title: "Class activity solutions"
+format: html
+editor: visual
+author: "Ciaran Evans"
+---
+
+1. 
+
+```{r, message=F, warning=F}
+library(gapminder)
+library(tidyverse)
+
+new_gapminder <- gapminder |>
+  filter(year == 2007, 
+         lifeExp >= 70, 
+         gdpPercap <= 20000)
+```
+
+2. 
+
+```{r}
+gapminder |>
+  filter(year == 2007) |>
+  count(continent)
+```
+
+3.
+
+```{r}
+new_gapminder <- gapminder |>
+  mutate(log_gdp_percap = log(gdpPercap))
+```
+
+4. 
+
+```{r}
+gapminder |>
+  mutate(log_gdp_percap = log(gdpPercap)) |>
+  filter(year == 2007,
+         lifeExp >= 70) |>
+  summarize(med_log_gdp = median(log_gdp_percap))
+```
+
+5. 
+
+```{r}
+gapminder |>
+  mutate(log_gdp_percap = log(gdpPercap)) |>
+  filter(year == 2007,
+         lifeExp >= 70) |>
+  group_by(continent) |>
+  summarize(med_log_gdp = median(log_gdp_percap))
+```
+
+6. It does not matter in questin 5 whether we filter or mutate first.
+
+7. 
+
+```{r}
+gapminder |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(med_life = median(lifeExp),
+            correlation = cor(lifeExp, log(gdpPercap)),
+            N = n())
+```
+
+8. Correlation between life expectancy and log GDP per capita is positive for all continents, and is stronger for the Americas, Asia, and Europe. There are only two countries in Oceania, so correlation is a meaningless statistic for Oceania.
+
+
+
+

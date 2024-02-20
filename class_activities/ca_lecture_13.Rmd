@@ -1,0 +1,56 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** Work with a neighbor to answer the following questions. To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_10_template.qmd) file.
+
+
+## Back to the Gapminder data
+
+In this activity, we will revisit the Gapminder data that we have worked with previously. To load the Gapminder data into Python, run the following code in R:
+
+```{r, message=F, warning=F}
+library(gapminder)
+```
+
+Then run the following code in Python:
+
+```{python, message=F, warning=F}
+import pandas as pd
+import numpy as np
+
+gapminder = r.gapminder
+```
+
+Use Python and pandas to complete the following questions.
+
+1. Choose only the rows in the gapminder data for countries in Asia in 2002.
+
+2. Count the number of countries in each continent for the data in 2002. (*hint*: use the `'count'` function in `agg`)
+
+3. Use the `assign` function to create a new column which contains the natural log of GDP per capita. (You may need to look up pandas documentation for the `assign` function).
+
+4. Create the following table:
+
+```{python, echo=F}
+(gapminder.assign(log_gdp = np.log(gapminder['gdpPercap']))
+  .query('year == 2002')
+  .groupby(by = 'continent')
+  .agg(num_countries = ('country', 'count'), mean_log_gdp = ('log_gdp', 'mean'))
+)
+```
+
+
+
+
+
+
+
+
+

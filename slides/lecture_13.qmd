@@ -1,0 +1,177 @@
+---
+title: "Lecture 13: Data wrangling in Python"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Data wrangling ideas so far
+
+* choose certain rows and columns
+* calculate summary statistics
+* group rows together
+* create new columns
+* apply functions across columns
+* reshape data by pivoting
+
+These ideas are language-agnostic! The implementation is just a bit different
+
+## Titanic data
+
+```{python}
+import pandas as pd
+import numpy as np
+titanic = pd.read_csv("https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/titanic.csv")
+
+titanic
+```
+
+## Basic information
+
+```{python}
+titanic.shape
+```
+
+```{python}
+titanic.columns
+```
+
+## Choosing a column
+
+```{python}
+titanic['Pclass']
+```
+
+## Multiple columns
+
+```{python}
+titanic[['Pclass', 'Survived']]
+```
+
+## Alternative way to choose columns
+
+```{python}
+titanic.filter(['Pclass', 'Survived'])
+```
+
+What would the equivalent R code be?
+
+## Alternative way to choose columns
+
+```{python}
+titanic.filter(['Pclass', 'Survived'])
+```
+
+What would the equivalent R code be?
+
+```{r, eval=F}
+titanic |>
+  select(Pclass, Survived)
+```
+
+## Choosing rows
+
+Suppose we only want the rows for the first-class passengers:
+
+```{python}
+titanic[titanic['Pclass'] == 1]
+```
+
+## Multiple conditions
+
+We can also choose only the first class passengers who survived:
+
+```{python}
+titanic[(titanic['Pclass'] == 1) & (titanic['Survived'] == 1)]
+```
+
+## Alternative syntax
+
+```{python}
+titanic.query('Pclass == 1 & Survived == 1')
+```
+
+What would the equivalent R code be?
+
+## Alternative syntax
+
+```{python}
+titanic.query('Pclass == 1 & Survived == 1')
+```
+
+What would the equivalent R code be?
+
+```{r, eval=F}
+titanic |>
+  filter(Pclass == 1 & Survived == 1)
+```
+
+## Calculating summary statistics
+
+```{python}
+titanic.agg({'Survived': 'mean'})
+
+titanic.agg({'Survived': np.mean})
+```
+
+## Multiple summary statistics
+
+```{python}
+titanic.agg({'Survived': ['mean', 'std']})
+```
+
+## Summary statistics for multiple columns
+
+```{python}
+titanic.agg({'Survived': ['mean', 'std'], 'Age': ['mean', 'std']})
+```
+
+```{python}
+titanic[['Survived', 'Age']].agg(['mean', 'std'])
+```
+
+## Grouping and summarizing
+
+```{python}
+titanic.groupby(by = ['Pclass', 'Sex']).agg({'Survived': 'mean'})
+```
+
+```{python}
+(titanic.groupby(by = ['Pclass', 'Sex'])
+        .agg(survival_rate = ('Survived', 'mean')))
+```
+
+## Note: Splitting longer chains across multiple lines
+
+```{python}
+(titanic.groupby(by = ['Pclass', 'Sex'])
+        .agg(survival_rate = ('Survived', 'mean')))
+```
+
+What would the equivalent R code be?
+
+## Grouping and summarizing
+
+```{python}
+(titanic.groupby(by = ['Pclass', 'Sex'])
+        .agg(survival_rate = ('Survived', 'mean')))
+```
+
+What would the equivalent R code be?
+
+```{r, eval=F}
+titanic |> 
+  group_by(Pclass, Sex) |> 
+  summarize(survival_rate = mean(Survived))
+```
+
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_13.html](https://sta279-s24.github.io/class_activities/ca_lecture_13.html)
+
