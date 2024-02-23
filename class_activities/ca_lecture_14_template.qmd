@@ -1,0 +1,14 @@
+---
+---
+---
+title: "Class activity"
+format: html
+editor: visual
+author: "Your name"
+---
+
+1.  
+
+```{r}
+
+```

@@ -1,0 +1,338 @@
+---
+title: "Lecture 14: Reshaping data"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## So far
+
+* `select`: choose certain columns
+* `filter`: choose certain rows
+* `summarize`: calculate summary statistics
+* `group_by`: group rows together
+* `mutate`: create new columns
+* `count`: count the number of rows
+* `arrange`: re-order the rows
+
+## Do dogs help exam stress?
+
+* Data collected on 284 students at a mid-size Canadian university
+* Students randomly assigned to one of three treatment groups: handler-only contact, indirect contact, and direct contact
+* Well-being and ill-being measures recorded before and after treatment for each student
+* Approach: compare pre/post measures of well-being and ill-being
+
+## Recording well-being and ill-being measures
+
+* Likert items for each well-being / ill-being measure
+* Average the likert items to get a score for each measure
+* E.g.:
+  - Positive affect score is the average of 5 Likert items
+  - Social connectedness is the average of 20 Likert items
+  
+## Example Likert item for social connectedness
+
+"I am able to relate to my peers."
+
+* Strongly disagree (1)
+* Disagree
+* Somewhat disagree
+* Somewhat agree
+* Agree
+* Strongly agree (6)
+
+## The data
+
+```{r, include=F}
+library(tidyverse)
+library(googlesheets4)
+
+raw_data <- read.csv("https://raw.githubusercontent.com/ciaran-evans/dog-data-analysis/main/dog_data_raw.csv")
+
+cleaned_data <- raw_data %>%
+  mutate(across(starts_with("PN"), ~ replace(.x, .x > 5, NA)),
+         across(starts_with("L2"), ~ replace(.x, .x > 4, NA)),
+         across(starts_with("SC"), ~ replace(.x, .x > 6, NA)),
+         across(paste("L1_", c(1, 5, 6, 9, 10, 15, 16, 19, 20), sep=""),
+                function(x){5-x}),
+         across(paste("L2_", c(1, 5, 6, 9, 10, 15, 16, 19, 20), sep=""),
+                function(x){5-x}),
+         across(paste("SC1_", c(3, 6, 7, 9, 11, 13, 15, 17, 18, 20), sep=""),
+                function(x){7-x}),
+         across(paste("SC2_", c(3, 6, 7, 9, 11, 13, 15, 17, 18, 20), sep=""),
+                function(x){7-x}),
+         Engagement1 = 6 - HO1_2,
+         Engagement2 = 6 - HO2_2)
+
+
+cleaned_data <- cleaned_data %>%
+  mutate(pa_pre = rowMeans(select(cleaned_data,
+                                     num_range("PN1_", range = c(3,5,7,8,10))),
+                              na.rm = TRUE),
+         pa_post = rowMeans(select(cleaned_data,
+                                     num_range("PN2_", range = c(3,5,7,8,10))),
+                              na.rm = TRUE), 
+         happiness_pre = rowMeans(select(cleaned_data, num_range("HA1_", range = c(1,2,3))), na.rm = TRUE),
+         happiness_post = rowMeans(select(cleaned_data, num_range("HA2_", range = c(1,2,3))), na.rm = TRUE),
+         sc_pre = rowMeans(select(cleaned_data, starts_with("SC1_")), na.rm = TRUE),
+         sc_post = rowMeans(select(cleaned_data, starts_with("SC2_")), na.rm = TRUE),
+         fs_pre = rowMeans(select(cleaned_data, starts_with("F1_")), na.rm = TRUE),
+         fs_post = rowMeans(select(cleaned_data, starts_with("F2_")), na.rm = TRUE),
+         stress_pre = S1_1,
+         stress_post = S2_1,
+         homesick_pre = HO1_1,
+         homesick_post = HO2_1,
+         lonely_pre = rowMeans(select(cleaned_data, starts_with("L1_")), na.rm = T),
+         lonely_post = rowMeans(select(cleaned_data, starts_with("L2_")), na.rm = T),
+         na_pre = rowMeans(select(cleaned_data,
+                                     num_range("PN1_", range = c(1,2,4,6,9))),
+                              na.rm = TRUE),
+         na_post = rowMeans(select(cleaned_data,
+                                     num_range("PN2_", range = c(1,2,4,6,9))),
+                              na.rm = TRUE)) %>%
+  dplyr::select(RID, GroupAssignment, pa_pre, 
+                pa_post, happiness_pre, happiness_post, 
+                sc_pre, sc_post, fs_pre, fs_post, stress_pre, stress_post,
+                homesick_pre, homesick_post,
+                lonely_pre, lonely_post, na_pre, na_post)
+```
+
+```{r}
+sc_data <- cleaned_data |>
+  select(RID, GroupAssignment, sc_pre, sc_post)
+
+sc_data
+```
+
+**Question:** What if we want to fit a model with this data?
+
+## Fitting a model
+
+Want code that looks like this:
+
+```{r, eval = F}
+lm(score ~ GroupAssignment + stage, data = sc_data)
+```
+
+**Problem:** We don't have a column for stage! Or a column for score!
+
+## `pivot_longer`
+
+```{r}
+sc_data |>
+  pivot_longer(cols = c(sc_pre, sc_post),
+               names_to = "stage",
+               values_to = "score")
+```
+
+## `pivot_longer`
+
+![](https://r4ds.hadley.nz/diagrams/tidy-data/variables.png)
+
+```{r, eval=F}
+df |> 
+  pivot_longer(
+    cols = bp1:bp2,
+    names_to = "measurement",
+    values_to = "value"
+  )
+```
+
+(Image from *R for Data Science*)
+
+## `pivot_longer`
+
+Another example:
+
+```{r, echo=F}
+gs4_deauth()
+litF <- read_sheet("https://docs.google.com/spreadsheets/d/1hDinTIRHQIaZg1RUn6Z_6mo12PtKwEPFIz_mJVF6P5I/pub?gid=0")
+litF
+```
+
+How might we want to restructure this data?
+
+## `pivot_longer`
+
+```{r, echo=F}
+litF
+```
+
+```{r, eval=F}
+litF |>
+  rename(country = starts_with("Adult")) |>
+  pivot_longer(
+    cols = -country,
+    names_to = ...,
+    values_to = ...
+  )
+```
+
+
+## `pivot_longer`
+
+```{r}
+litF |>
+  rename(country = starts_with("Adult")) |>
+  pivot_longer(
+    cols = -country,
+    names_to = "year",
+    values_to = "literacy_rate"
+  ) |>
+  drop_na(literacy_rate)
+```
+
+## `pivot_longer`
+
+```{r}
+litF |>
+  rename(country = starts_with("Adult")) |>
+  pivot_longer(
+    cols = -country,
+    names_to = "year",
+    values_to = "literacy_rate",
+    values_drop_na = T
+  )
+```
+
+## Back to the dog data
+
+```{r}
+sc_data |>
+  pivot_longer(cols = c(sc_pre, sc_post),
+               names_to = "stage",
+               values_to = "score")
+```
+
+Does the `stage` column only contain information about stage?
+
+## Back to the dog data
+
+```{r}
+sc_data |>
+  pivot_longer(cols = c(sc_pre, sc_post),
+               names_to = c("measurement", "stage"),
+               names_sep = "_",
+               values_to = "score")
+```
+
+## Working with all the measurements
+
+```{r}
+cleaned_data |>
+  pivot_longer(cols = -c(RID, GroupAssignment),
+               names_to = c("measurement", "stage"),
+               names_sep = "_",
+               values_to = "score")
+```
+
+## Fitting a model
+
+```{r}
+long_data <- cleaned_data |>
+  pivot_longer(cols = -c(RID, GroupAssignment),
+               names_to = c("measurement", "stage"),
+               names_sep = "_",
+               values_to = "score")
+
+lm(score ~ GroupAssignment + stage, data = long_data)
+```
+
+## Lengthing data in Python
+
+```{python}
+import pandas as pd
+
+df1 = pd.DataFrame({
+  'id' : ['A', 'B', 'C'],
+  'bp1' : [100, 140, 120],
+  'bp2' : [120, 115, 125]
+})
+
+df1
+```
+
+```{python}
+df1.melt(id_vars = 'id', var_name = 'measurement', 
+         value_name = 'value')
+```
+
+
+## Reshaping data in R
+
+```{r}
+litF |>
+  rename(country = starts_with("Adult")) |>
+  pivot_longer(
+    cols = -country,
+    names_to = "year",
+    values_to = "literacy_rate"
+  ) |>
+  drop_na(literacy_rate)
+```
+
+What would the corresponding Python code look like?
+
+## Reshaping data in Python
+
+```{python}
+litF = r.litF
+
+# first, need to rename the first column
+litF.rename(columns={litF.columns[0]: 'Country'})
+```
+
+## Reshaping data in Python
+
+```{python}
+litF = r.litF
+
+# rename the first column
+# then melt to make the data longer
+(litF.rename(columns={litF.columns[0]: 'Country'})
+     .melt(id_vars = 'Country',
+           var_name = 'year',
+           value_name = 'count'))
+```
+
+## Reshaping data in Python
+
+```{python}
+litF = r.litF
+
+# rename the first column
+# then melt to make the data longer
+(litF.rename(columns={litF.columns[0]: 'Country'})
+     .melt(id_vars = 'Country',
+           var_name = 'year',
+           value_name = 'count')
+     .dropna())
+```
+
+What if I want to arrange the rows alphabetically by country?
+
+## Reshaping data in Python
+
+```{python}
+litF = r.litF
+
+# rename the first column
+# then melt to make the data longer
+(litF.rename(columns={litF.columns[0]: 'Country'})
+     .melt(id_vars = 'Country',
+           var_name = 'year',
+           value_name = 'count')
+     .dropna()
+     .sort_values(by = ['Country', 'year']))
+```
+
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_14.html](https://sta279-s24.github.io/class_activities/ca_lecture_14.html)
+

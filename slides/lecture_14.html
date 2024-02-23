@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="lecture_14_files/libs/clipboard/clipboard.min.js"></script>
+<script src="lecture_14_files/libs/quarto-html/tabby.min.js"></script>
+<script src="lecture_14_files/libs/quarto-html/popper.min.js"></script>
+<script src="lecture_14_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="lecture_14_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="lecture_14_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="lecture_14_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="lecture_14_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.3.353">
+
+  <title>Lecture 14: Reshaping data</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="lecture_14_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="lecture_14_files/libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="lecture_14_files/libs/revealjs/dist/theme/quarto.css">
+  <link href="lecture_14_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="lecture_14_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="lecture_14_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="lecture_14_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Lecture 14: Reshaping data</h1>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="so-far" class="slide level2">
+<h2>So far</h2>
+<ul>
+<li><code>select</code>: choose certain columns</li>
+<li><code>filter</code>: choose certain rows</li>
+<li><code>summarize</code>: calculate summary statistics</li>
+<li><code>group_by</code>: group rows together</li>
+<li><code>mutate</code>: create new columns</li>
+<li><code>count</code>: count the number of rows</li>
+<li><code>arrange</code>: re-order the rows</li>
+</ul>
+</section>
+<section id="do-dogs-help-exam-stress" class="slide level2">
+<h2>Do dogs help exam stress?</h2>
+<ul>
+<li>Data collected on 284 students at a mid-size Canadian university</li>
+<li>Students randomly assigned to one of three treatment groups: handler-only contact, indirect contact, and direct contact</li>
+<li>Well-being and ill-being measures recorded before and after treatment for each student</li>
+<li>Approach: compare pre/post measures of well-being and ill-being</li>
+</ul>
+</section>
+<section id="recording-well-being-and-ill-being-measures" class="slide level2">
+<h2>Recording well-being and ill-being measures</h2>
+<ul>
+<li>Likert items for each well-being / ill-being measure</li>
+<li>Average the likert items to get a score for each measure</li>
+<li>E.g.:
+<ul>
+<li>Positive affect score is the average of 5 Likert items</li>
+<li>Social connectedness is the average of 20 Likert items</li>
+</ul></li>
+</ul>
+</section>
+<section id="example-likert-item-for-social-connectedness" class="slide level2">
+<h2>Example Likert item for social connectedness</h2>
+<p>“I am able to relate to my peers.”</p>
+<ul>
+<li>Strongly disagree (1)</li>
+<li>Disagree</li>
+<li>Somewhat disagree</li>
+<li>Somewhat agree</li>
+<li>Agree</li>
+<li>Strongly agree (6)</li>
+</ul>
+</section>
+<section id="the-data" class="slide level2">
+<h2>The data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>sc_data <span class="ot">&lt;-</span> cleaned_data <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>  <span class="fu">select</span>(RID, GroupAssignment, sc_pre, sc_post)</span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a>sc_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    RID GroupAssignment   sc_pre  sc_post
+1     1         Control 3.900000 3.800000
+2     2          Direct 5.150000 5.263158
+3     3        Indirect 4.100000 4.150000
+4     4         Control 4.650000 5.100000
+5     5          Direct 3.650000 3.600000
+6     6        Indirect 4.350000 4.650000
+7     7         Control 4.750000 4.400000
+8     8          Direct 4.600000 4.650000
+9     9        Indirect 4.200000 4.150000
+10   10         Control 5.800000 5.750000
+11   11          Direct 4.400000 4.800000
+12   12        Indirect 4.100000 4.250000
+13   13         Control 5.400000 5.600000
+14   14          Direct 5.250000 5.350000
+15   15        Indirect 5.750000 5.700000
+16   16         Control 3.150000 2.600000
+17   17          Direct 3.500000 3.500000
+18   18        Indirect 5.050000 5.050000
+19   19         Control 5.150000 5.550000
+20   20          Direct 4.550000 4.700000
+21   21        Indirect 1.850000 1.800000
+22   22         Control 5.600000 5.450000
+23   23          Direct 3.300000 3.550000
+24   24        Indirect 3.650000 3.700000
+25   25         Control 4.900000 5.450000
+26   26          Direct 3.750000 4.300000
+27   27        Indirect 4.800000 5.050000
+28   28         Control 4.450000 4.850000
+29   29          Direct 3.750000 3.450000
+30   30        Indirect 4.350000 4.000000
+31   31         Control 3.150000 3.600000
+32   32          Direct 4.750000 4.950000
+33   33        Indirect 3.950000 4.850000
+34   34         Control 4.700000 4.450000
+35   35          Direct 4.650000 5.000000
+36   36        Indirect 4.250000 4.350000
+37   37         Control 3.350000 3.900000
+38   38          Direct 4.450000 4.450000
+39   39        Indirect 5.200000 5.050000
+40   40         Control 4.150000 4.000000
+41   41          Direct 4.550000 4.750000
+42   42        Indirect 3.450000 3.684211
+43   43         Control 5.050000 5.100000
+44   44          Direct 4.100000 4.100000
+45   45        Indirect 5.200000 5.100000
+46   46         Control 3.300000 3.200000
+47   47          Direct 1.800000 2.800000
+48   48        Indirect 3.200000 3.315789
+49   49         Control 3.650000 3.350000
+50   50          Direct 5.200000 5.250000
+51   51        Indirect 3.800000 4.550000
+52   52         Control 3.850000 3.450000
+53   53          Direct 3.650000 4.150000
+54   54        Indirect 4.950000 4.850000
+55   55         Control 5.300000 5.450000
+56   56          Direct 4.900000 5.000000
+57   57        Indirect 3.050000 3.350000
+58   58         Control 3.800000 3.300000
+59   59          Direct 2.400000 2.700000
+60   60        Indirect 5.100000 5.400000
+61   61         Control 5.150000 5.100000
+62   62          Direct 4.700000 4.944444
+63   63        Indirect 4.000000 4.050000
+64   64         Control 3.100000 2.900000
+65   65          Direct 5.100000 5.650000
+66   66        Indirect 4.600000 4.500000
+67   67         Control 5.400000 5.200000
+68   68          Direct 5.200000 5.450000
+69   69        Indirect 5.050000 5.150000
+70   70         Control 3.550000 4.200000
+71   71          Direct 4.450000 4.500000
+72   72        Indirect 3.700000 3.700000
+73   73         Control 4.350000 4.300000
+74   74          Direct 5.400000 5.650000
+75   75        Indirect 5.200000 5.400000
+76   76         Control 5.200000 5.200000
+77   77          Direct 3.850000 4.050000
+78   78        Indirect 4.600000 4.850000
+79   79         Control 4.850000 5.150000
+80   80          Direct 2.150000 2.350000
+81   81        Indirect 3.900000 4.100000
+82   82         Control 5.400000 5.555556
+83   83          Direct 5.150000 5.450000
+84   84        Indirect 3.700000 4.700000
+85   85         Control 4.750000 4.750000
+86   86          Direct 4.800000 5.150000
+87   87        Indirect 4.000000 4.050000
+88   88         Control 5.000000 5.350000
+89   89          Direct 4.400000 4.777778
+90   90        Indirect 5.300000 4.500000
+91   91         Control 5.200000 5.000000
+92   92          Direct 5.150000 5.300000
+93   93        Indirect 3.900000 3.750000
+94   94         Control 4.200000 4.050000
+95   95          Direct 4.800000 5.350000
+96   96        Indirect 4.500000 4.650000
+97   97         Control 3.300000 3.250000
+98   98          Direct 5.550000 5.650000
+99   99        Indirect 5.000000 4.850000
+100 100         Control 3.300000 3.050000
+101 101          Direct 3.850000 3.800000
+102 102        Indirect 2.750000 3.250000
+103 103         Control 3.550000 4.000000
+104 104          Direct 5.450000 5.450000
+105 105        Indirect 5.800000 5.789474
+106 106         Control 4.300000 4.450000
+107 107          Direct 5.800000 5.900000
+108 108        Indirect 4.600000 4.800000
+109 109         Control 4.450000 4.450000
+110 110          Direct 4.550000 4.900000
+111 111        Indirect 2.900000 3.105263
+112 112         Control 5.750000 5.450000
+113 113          Direct 3.600000 3.900000
+114 114        Indirect 5.400000 5.300000
+115 115         Control 5.550000 3.000000
+116 116          Direct 4.150000 4.150000
+117 117        Indirect 5.100000 5.000000
+118 118         Control 4.850000 4.650000
+119 119          Direct 4.700000 4.650000
+120 120        Indirect 3.500000 4.050000
+121 121         Control 5.200000 5.600000
+122 122          Direct 5.300000 5.600000
+123 123        Indirect 4.450000 4.850000
+124 124         Control 4.400000 4.300000
+125 125          Direct 4.500000 4.550000
+126 126        Indirect 4.800000 5.000000
+127 127         Control 5.350000 5.450000
+128 128          Direct 5.200000 5.450000
+129 129        Indirect 4.450000 4.350000
+130 130         Control 3.700000 4.050000
+131 131          Direct 3.550000 3.550000
+132 132        Indirect 4.578947 4.800000
+133 133         Control 4.900000 4.400000
+134 134          Direct 5.150000 5.800000
+135 135        Indirect 5.000000 5.000000
+136 136         Control 3.750000 3.700000
+137 137          Direct 4.450000 4.850000
+138 138        Indirect 3.050000 2.750000
+139 139         Control 5.000000 5.200000
+140 140          Direct 3.000000 5.200000
+141 141        Indirect 4.500000 4.950000
+142 142         Control 4.450000 4.550000
+143 143          Direct 4.600000 4.550000
+144 144        Indirect 4.700000 5.500000
+145 145         Control 3.950000 3.500000
+146 146          Direct 4.050000 4.300000
+147 147        Indirect 4.100000 4.550000
+148 148         Control 3.150000 3.700000
+149 149          Direct 5.250000 5.350000
+150 150        Indirect 4.050000 4.000000
+151 151         Control 4.700000 4.700000
+152 152          Direct 5.050000 5.100000
+153 153        Indirect 5.250000 5.350000
+154 154         Control 5.050000 4.900000
+155 155          Direct 4.750000 4.473684
+156 156        Indirect 4.100000 4.150000
+157 157         Control 2.650000 2.900000
+158 158          Direct 3.800000 4.263158
+159 159        Indirect 3.450000 3.350000
+160 160         Control 4.250000 4.250000
+161 161          Direct 4.700000 5.000000
+162 162        Indirect 3.750000 3.800000
+163 163         Control 2.850000 2.950000
+164 164          Direct 4.650000 5.050000
+165 165        Indirect 4.950000 5.300000
+166 166         Control 4.450000 4.850000
+167 167          Direct 5.050000 5.050000
+168 168        Indirect 5.150000 5.625000
+169 169         Control 3.600000 3.500000
+170 170          Direct 4.600000 4.750000
+171 171        Indirect 3.800000 3.700000
+172 172         Control 3.300000 3.550000
+173 173          Direct 4.950000 5.050000
+174 174        Indirect 4.700000 4.250000
+175 175         Control 3.850000 3.650000
+176 176          Direct 4.750000 4.700000
+177 177        Indirect 5.350000 5.550000
+178 178         Control 3.900000 4.250000
+179 179          Direct 5.100000 5.200000
+180 180        Indirect 4.300000 4.150000
+181 181         Control 5.350000 5.550000
+182 182          Direct 4.750000 4.850000
+183 183        Indirect 5.200000 5.350000
+184 184         Control 4.050000 3.900000
+185 185          Direct 4.850000 5.050000
+186 186        Indirect 5.300000 5.850000
+187 187         Control 3.750000 3.600000
+188 188          Direct 1.600000 3.600000
+189 189        Indirect 5.000000 5.000000
+190 190         Control 4.700000 4.950000
+191 191          Direct 4.550000 4.800000
+192 192        Indirect 4.650000 4.400000
+193 193         Control 4.650000 5.200000
+194 194          Direct 5.450000 5.450000
+195 195        Indirect 4.700000 4.750000
+196 196         Control 4.800000 4.200000
+197 197          Direct 5.050000 5.250000
+198 198        Indirect 4.450000 4.150000
+199 199         Control 4.700000 5.100000
+200 200          Direct 3.900000 3.210526
+201 201        Indirect 3.500000 3.600000
+202 202         Control 4.200000 4.500000
+203 203          Direct 3.850000 3.600000
+204 204        Indirect 2.050000 2.150000
+205 205         Control 3.600000 3.700000
+206 206          Direct 5.050000 5.300000
+207 207        Indirect 4.050000 4.150000
+208 208         Control 4.450000 4.550000
+209 209          Direct 5.157895 5.100000
+210 210        Indirect 5.150000 5.600000
+211 211         Control 4.500000 4.500000
+212 212          Direct 3.950000 4.450000
+213 213        Indirect 5.150000 5.800000
+214 214         Control 3.200000 3.000000
+215 215          Direct 3.050000 3.100000
+216 216        Indirect 3.500000 4.052632
+217 217         Control 4.300000 4.550000
+218 218          Direct 2.250000 3.500000
+219 219        Indirect 3.250000 3.200000
+220 220         Control 5.500000 5.750000
+221 221          Direct 5.900000 6.000000
+222 222        Indirect 5.350000 5.550000
+223 223         Control 5.100000 5.350000
+224 224          Direct 5.150000 5.350000
+225 225        Indirect 3.500000 3.650000
+226 226         Control 5.550000 5.700000
+227 227          Direct 4.400000 4.650000
+228 228        Indirect 3.100000 3.421053
+229 229         Control 5.050000 5.050000
+230 230          Direct 5.200000 5.100000
+231 231        Indirect 4.450000 4.950000
+232 232         Control 4.850000 5.105263
+233 233          Direct 5.300000 5.550000
+234 234        Indirect 4.150000 4.250000
+235 235         Control 5.450000 5.400000
+236 236          Direct 3.450000 4.000000
+237 237        Indirect 5.400000 5.550000
+238 238         Control 2.800000 2.900000
+239 239          Direct 4.050000 3.250000
+240 240        Indirect 4.800000 4.700000
+241 241         Control 3.850000 3.800000
+242 242          Direct 3.500000 4.000000
+243 243        Indirect 3.650000 3.900000
+244 244         Control 4.850000 5.250000
+245 245          Direct 4.750000 5.250000
+246 246        Indirect 4.250000 4.750000
+247 247         Control 5.750000 5.750000
+248 248          Direct 5.800000 5.650000
+249 249        Indirect 5.250000 5.850000
+250 250          Direct 4.350000 4.650000
+251 251        Indirect 5.100000 5.100000
+252 252         Control 3.850000 3.950000
+253 253          Direct 4.550000 4.450000
+254 254        Indirect 4.500000 4.550000
+255 255         Control 3.150000 2.750000
+256 256          Direct 3.900000 4.200000
+257 257        Indirect 5.250000 5.700000
+258 258         Control 5.450000 5.550000
+259 259          Direct 4.894737 5.200000
+260 260        Indirect 4.200000 4.400000
+261 261         Control 5.550000 5.350000
+262 262          Direct 5.400000 5.600000
+263 263        Indirect 4.800000 4.900000
+264 264         Control 5.100000 5.400000
+265 265          Direct 4.200000 4.900000
+266 266        Indirect 3.950000 3.842105
+267 267         Control 4.650000 4.900000
+268 268          Direct 2.350000 2.950000
+269 269        Indirect 3.900000 3.950000
+270 270         Control 4.650000 4.600000
+271 271          Direct 3.600000 3.550000
+272 272        Indirect 3.900000 4.150000
+273 273         Control 5.100000 5.050000
+274 274          Direct 4.250000 4.800000
+275 275        Indirect 5.000000 5.150000
+276 276         Control 4.850000 5.300000
+277 277          Direct 4.450000 4.350000
+278 278        Indirect 4.100000 3.600000
+279 279         Control 5.250000 5.000000
+280 280          Direct 4.500000 4.850000
+281 281        Indirect 5.450000 5.350000
+282 282         Control 5.450000 5.550000
+283 283          Direct 4.650000 4.450000
+284 300        Indirect 4.450000 4.700000</code></pre>
+</div>
+</div>
+<p><strong>Question:</strong> What if we want to fit a model with this data?</p>
+</section>
+<section id="fitting-a-model" class="slide level2">
+<h2>Fitting a model</h2>
+<p>Want code that looks like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">lm</span>(score <span class="sc">~</span> GroupAssignment <span class="sc">+</span> stage, <span class="at">data =</span> sc_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Problem:</strong> We don’t have a column for stage! Or a column for score!</p>
+</section>
+<section id="pivot_longer" class="slide level2">
+<h2><code>pivot_longer</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>sc_data <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(sc_pre, sc_post),</span>
+<span id="cb4-3"><a href="#cb4-3"></a>               <span class="at">names_to =</span> <span class="st">"stage"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4"></a>               <span class="at">values_to =</span> <span class="st">"score"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 568 × 4
+     RID GroupAssignment stage   score
+   &lt;int&gt; &lt;chr&gt;           &lt;chr&gt;   &lt;dbl&gt;
+ 1     1 Control         sc_pre   3.9 
+ 2     1 Control         sc_post  3.8 
+ 3     2 Direct          sc_pre   5.15
+ 4     2 Direct          sc_post  5.26
+ 5     3 Indirect        sc_pre   4.1 
+ 6     3 Indirect        sc_post  4.15
+ 7     4 Control         sc_pre   4.65
+ 8     4 Control         sc_post  5.1 
+ 9     5 Direct          sc_pre   3.65
+10     5 Direct          sc_post  3.6 
+# ℹ 558 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="pivot_longer-1" class="slide level2">
+<h2><code>pivot_longer</code></h2>
+
+<img data-src="https://r4ds.hadley.nz/diagrams/tidy-data/variables.png" class="r-stretch"><div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>df <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb6-3"><a href="#cb6-3"></a>    <span class="at">cols =</span> bp1<span class="sc">:</span>bp2,</span>
+<span id="cb6-4"><a href="#cb6-4"></a>    <span class="at">names_to =</span> <span class="st">"measurement"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>(Image from <em>R for Data Science</em>)</p>
+</section>
+<section id="pivot_longer-2" class="slide level2">
+<h2><code>pivot_longer</code></h2>
+<p>Another example:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 260 × 38
+   Adult (15+) literacy rate …¹ `1975` `1976` `1977` `1978` `1979` `1980` `1981`
+   &lt;chr&gt;                         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+ 1 Afghanistan                      NA     NA     NA     NA   4.99   NA       NA
+ 2 Albania                          NA     NA     NA     NA  NA      NA       NA
+ 3 Algeria                          NA     NA     NA     NA  NA      NA       NA
+ 4 Andorra                          NA     NA     NA     NA  NA      NA       NA
+ 5 Angola                           NA     NA     NA     NA  NA      NA       NA
+ 6 Anguilla                         NA     NA     NA     NA  NA      NA       NA
+ 7 Antigua and Barbuda              NA     NA     NA     NA  NA      NA       NA
+ 8 Argentina                        NA     NA     NA     NA  NA      93.6     NA
+ 9 Armenia                          NA     NA     NA     NA  NA      NA       NA
+10 Aruba                            NA     NA     NA     NA  NA      NA       NA
+# ℹ 250 more rows
+# ℹ abbreviated name: ¹​`Adult (15+) literacy rate (%). Female`
+# ℹ 30 more variables: `1982` &lt;dbl&gt;, `1983` &lt;dbl&gt;, `1984` &lt;dbl&gt;, `1985` &lt;dbl&gt;,
+#   `1986` &lt;dbl&gt;, `1987` &lt;dbl&gt;, `1988` &lt;dbl&gt;, `1989` &lt;dbl&gt;, `1990` &lt;dbl&gt;,
+#   `1991` &lt;dbl&gt;, `1992` &lt;dbl&gt;, `1993` &lt;dbl&gt;, `1994` &lt;dbl&gt;, `1995` &lt;dbl&gt;,
+#   `1996` &lt;dbl&gt;, `1997` &lt;dbl&gt;, `1998` &lt;dbl&gt;, `1999` &lt;dbl&gt;, `2000` &lt;dbl&gt;,
+#   `2001` &lt;dbl&gt;, `2002` &lt;dbl&gt;, `2003` &lt;dbl&gt;, `2004` &lt;dbl&gt;, `2005` &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
+<p>How might we want to restructure this data?</p>
+</section>
+<section id="pivot_longer-3" class="slide level2">
+<h2><code>pivot_longer</code></h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 260 × 38
+   Adult (15+) literacy rate …¹ `1975` `1976` `1977` `1978` `1979` `1980` `1981`
+   &lt;chr&gt;                         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+ 1 Afghanistan                      NA     NA     NA     NA   4.99   NA       NA
+ 2 Albania                          NA     NA     NA     NA  NA      NA       NA
+ 3 Algeria                          NA     NA     NA     NA  NA      NA       NA
+ 4 Andorra                          NA     NA     NA     NA  NA      NA       NA
+ 5 Angola                           NA     NA     NA     NA  NA      NA       NA
+ 6 Anguilla                         NA     NA     NA     NA  NA      NA       NA
+ 7 Antigua and Barbuda              NA     NA     NA     NA  NA      NA       NA
+ 8 Argentina                        NA     NA     NA     NA  NA      93.6     NA
+ 9 Armenia                          NA     NA     NA     NA  NA      NA       NA
+10 Aruba                            NA     NA     NA     NA  NA      NA       NA
+# ℹ 250 more rows
+# ℹ abbreviated name: ¹​`Adult (15+) literacy rate (%). Female`
+# ℹ 30 more variables: `1982` &lt;dbl&gt;, `1983` &lt;dbl&gt;, `1984` &lt;dbl&gt;, `1985` &lt;dbl&gt;,
+#   `1986` &lt;dbl&gt;, `1987` &lt;dbl&gt;, `1988` &lt;dbl&gt;, `1989` &lt;dbl&gt;, `1990` &lt;dbl&gt;,
+#   `1991` &lt;dbl&gt;, `1992` &lt;dbl&gt;, `1993` &lt;dbl&gt;, `1994` &lt;dbl&gt;, `1995` &lt;dbl&gt;,
+#   `1996` &lt;dbl&gt;, `1997` &lt;dbl&gt;, `1998` &lt;dbl&gt;, `1999` &lt;dbl&gt;, `2000` &lt;dbl&gt;,
+#   `2001` &lt;dbl&gt;, `2002` &lt;dbl&gt;, `2003` &lt;dbl&gt;, `2004` &lt;dbl&gt;, `2005` &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>litF <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">rename</span>(<span class="at">country =</span> <span class="fu">starts_with</span>(<span class="st">"Adult"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb9-4"><a href="#cb9-4"></a>    <span class="at">cols =</span> <span class="sc">-</span>country,</span>
+<span id="cb9-5"><a href="#cb9-5"></a>    <span class="at">names_to =</span> ...,</span>
+<span id="cb9-6"><a href="#cb9-6"></a>    <span class="at">values_to =</span> ...</span>
+<span id="cb9-7"><a href="#cb9-7"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="pivot_longer-4" class="slide level2">
+<h2><code>pivot_longer</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>litF <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>  <span class="fu">rename</span>(<span class="at">country =</span> <span class="fu">starts_with</span>(<span class="st">"Adult"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb10-4"><a href="#cb10-4"></a>    <span class="at">cols =</span> <span class="sc">-</span>country,</span>
+<span id="cb10-5"><a href="#cb10-5"></a>    <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="at">values_to =</span> <span class="st">"literacy_rate"</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>  <span class="fu">drop_na</span>(literacy_rate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 571 × 3
+   country     year  literacy_rate
+   &lt;chr&gt;       &lt;chr&gt;         &lt;dbl&gt;
+ 1 Afghanistan 1979           4.99
+ 2 Afghanistan 2011          13   
+ 3 Albania     2001          98.3 
+ 4 Albania     2008          94.7 
+ 5 Albania     2011          95.7 
+ 6 Algeria     1987          35.8 
+ 7 Algeria     2002          60.1 
+ 8 Algeria     2006          63.9 
+ 9 Angola      2001          54.2 
+10 Angola      2011          58.6 
+# ℹ 561 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="pivot_longer-5" class="slide level2">
+<h2><code>pivot_longer</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>litF <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>  <span class="fu">rename</span>(<span class="at">country =</span> <span class="fu">starts_with</span>(<span class="st">"Adult"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb12-4"><a href="#cb12-4"></a>    <span class="at">cols =</span> <span class="sc">-</span>country,</span>
+<span id="cb12-5"><a href="#cb12-5"></a>    <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6"></a>    <span class="at">values_to =</span> <span class="st">"literacy_rate"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7"></a>    <span class="at">values_drop_na =</span> T</span>
+<span id="cb12-8"><a href="#cb12-8"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 571 × 3
+   country     year  literacy_rate
+   &lt;chr&gt;       &lt;chr&gt;         &lt;dbl&gt;
+ 1 Afghanistan 1979           4.99
+ 2 Afghanistan 2011          13   
+ 3 Albania     2001          98.3 
+ 4 Albania     2008          94.7 
+ 5 Albania     2011          95.7 
+ 6 Algeria     1987          35.8 
+ 7 Algeria     2002          60.1 
+ 8 Algeria     2006          63.9 
+ 9 Angola      2001          54.2 
+10 Angola      2011          58.6 
+# ℹ 561 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="back-to-the-dog-data" class="slide level2">
+<h2>Back to the dog data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>sc_data <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(sc_pre, sc_post),</span>
+<span id="cb14-3"><a href="#cb14-3"></a>               <span class="at">names_to =</span> <span class="st">"stage"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4"></a>               <span class="at">values_to =</span> <span class="st">"score"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 568 × 4
+     RID GroupAssignment stage   score
+   &lt;int&gt; &lt;chr&gt;           &lt;chr&gt;   &lt;dbl&gt;
+ 1     1 Control         sc_pre   3.9 
+ 2     1 Control         sc_post  3.8 
+ 3     2 Direct          sc_pre   5.15
+ 4     2 Direct          sc_post  5.26
+ 5     3 Indirect        sc_pre   4.1 
+ 6     3 Indirect        sc_post  4.15
+ 7     4 Control         sc_pre   4.65
+ 8     4 Control         sc_post  5.1 
+ 9     5 Direct          sc_pre   3.65
+10     5 Direct          sc_post  3.6 
+# ℹ 558 more rows</code></pre>
+</div>
+</div>
+<p>Does the <code>stage</code> column only contain information about stage?</p>
+</section>
+<section id="back-to-the-dog-data-1" class="slide level2">
+<h2>Back to the dog data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>sc_data <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(sc_pre, sc_post),</span>
+<span id="cb16-3"><a href="#cb16-3"></a>               <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"measurement"</span>, <span class="st">"stage"</span>),</span>
+<span id="cb16-4"><a href="#cb16-4"></a>               <span class="at">names_sep =</span> <span class="st">"_"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5"></a>               <span class="at">values_to =</span> <span class="st">"score"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 568 × 5
+     RID GroupAssignment measurement stage score
+   &lt;int&gt; &lt;chr&gt;           &lt;chr&gt;       &lt;chr&gt; &lt;dbl&gt;
+ 1     1 Control         sc          pre    3.9 
+ 2     1 Control         sc          post   3.8 
+ 3     2 Direct          sc          pre    5.15
+ 4     2 Direct          sc          post   5.26
+ 5     3 Indirect        sc          pre    4.1 
+ 6     3 Indirect        sc          post   4.15
+ 7     4 Control         sc          pre    4.65
+ 8     4 Control         sc          post   5.1 
+ 9     5 Direct          sc          pre    3.65
+10     5 Direct          sc          post   3.6 
+# ℹ 558 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="working-with-all-the-measurements" class="slide level2">
+<h2>Working with all the measurements</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>cleaned_data <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(RID, GroupAssignment),</span>
+<span id="cb18-3"><a href="#cb18-3"></a>               <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"measurement"</span>, <span class="st">"stage"</span>),</span>
+<span id="cb18-4"><a href="#cb18-4"></a>               <span class="at">names_sep =</span> <span class="st">"_"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5"></a>               <span class="at">values_to =</span> <span class="st">"score"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4,544 × 5
+     RID GroupAssignment measurement stage score
+   &lt;int&gt; &lt;chr&gt;           &lt;chr&gt;       &lt;chr&gt; &lt;dbl&gt;
+ 1     1 Control         pa          pre    3.2 
+ 2     1 Control         pa          post   3.8 
+ 3     1 Control         happiness   pre    2.33
+ 4     1 Control         happiness   post   3.33
+ 5     1 Control         sc          pre    3.9 
+ 6     1 Control         sc          post   3.8 
+ 7     1 Control         fs          pre    6.12
+ 8     1 Control         fs          post   6   
+ 9     1 Control         stress      pre    2   
+10     1 Control         stress      post   2   
+# ℹ 4,534 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="fitting-a-model-1" class="slide level2">
+<h2>Fitting a model</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>long_data <span class="ot">&lt;-</span> cleaned_data <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(RID, GroupAssignment),</span>
+<span id="cb20-3"><a href="#cb20-3"></a>               <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">"measurement"</span>, <span class="st">"stage"</span>),</span>
+<span id="cb20-4"><a href="#cb20-4"></a>               <span class="at">names_sep =</span> <span class="st">"_"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5"></a>               <span class="at">values_to =</span> <span class="st">"score"</span>)</span>
+<span id="cb20-6"><a href="#cb20-6"></a></span>
+<span id="cb20-7"><a href="#cb20-7"></a><span class="fu">lm</span>(score <span class="sc">~</span> GroupAssignment <span class="sc">+</span> stage, <span class="at">data =</span> long_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = score ~ GroupAssignment + stage, data = long_data)
+
+Coefficients:
+            (Intercept)    GroupAssignmentDirect  GroupAssignmentIndirect  
+                3.16307                 -0.10118                 -0.04836  
+               stagepre  
+                0.13805  </code></pre>
+</div>
+</div>
+</section>
+<section id="lengthing-data-in-python" class="slide level2">
+<h2>Lengthing data in Python</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb22-2"><a href="#cb22-2"></a></span>
+<span id="cb22-3"><a href="#cb22-3"></a>df1 <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb22-4"><a href="#cb22-4"></a>  <span class="st">'id'</span> : [<span class="st">'A'</span>, <span class="st">'B'</span>, <span class="st">'C'</span>],</span>
+<span id="cb22-5"><a href="#cb22-5"></a>  <span class="st">'bp1'</span> : [<span class="dv">100</span>, <span class="dv">140</span>, <span class="dv">120</span>],</span>
+<span id="cb22-6"><a href="#cb22-6"></a>  <span class="st">'bp2'</span> : [<span class="dv">120</span>, <span class="dv">115</span>, <span class="dv">125</span>]</span>
+<span id="cb22-7"><a href="#cb22-7"></a>})</span>
+<span id="cb22-8"><a href="#cb22-8"></a></span>
+<span id="cb22-9"><a href="#cb22-9"></a>df1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id  bp1  bp2
+0  A  100  120
+1  B  140  115
+2  C  120  125</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a>df1.melt(id_vars <span class="op">=</span> <span class="st">'id'</span>, var_name <span class="op">=</span> <span class="st">'measurement'</span>, </span>
+<span id="cb24-2"><a href="#cb24-2"></a>         value_name <span class="op">=</span> <span class="st">'value'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id measurement  value
+0  A         bp1    100
+1  B         bp1    140
+2  C         bp1    120
+3  A         bp2    120
+4  B         bp2    115
+5  C         bp2    125</code></pre>
+</div>
+</div>
+</section>
+<section id="reshaping-data-in-r" class="slide level2">
+<h2>Reshaping data in R</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>litF <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2"></a>  <span class="fu">rename</span>(<span class="at">country =</span> <span class="fu">starts_with</span>(<span class="st">"Adult"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb26-4"><a href="#cb26-4"></a>    <span class="at">cols =</span> <span class="sc">-</span>country,</span>
+<span id="cb26-5"><a href="#cb26-5"></a>    <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
+<span id="cb26-6"><a href="#cb26-6"></a>    <span class="at">values_to =</span> <span class="st">"literacy_rate"</span></span>
+<span id="cb26-7"><a href="#cb26-7"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb26-8"><a href="#cb26-8"></a>  <span class="fu">drop_na</span>(literacy_rate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 571 × 3
+   country     year  literacy_rate
+   &lt;chr&gt;       &lt;chr&gt;         &lt;dbl&gt;
+ 1 Afghanistan 1979           4.99
+ 2 Afghanistan 2011          13   
+ 3 Albania     2001          98.3 
+ 4 Albania     2008          94.7 
+ 5 Albania     2011          95.7 
+ 6 Algeria     1987          35.8 
+ 7 Algeria     2002          60.1 
+ 8 Algeria     2006          63.9 
+ 9 Angola      2001          54.2 
+10 Angola      2011          58.6 
+# ℹ 561 more rows</code></pre>
+</div>
+</div>
+<p>What would the corresponding Python code look like?</p>
+</section>
+<section id="reshaping-data-in-python" class="slide level2">
+<h2>Reshaping data in Python</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1"></a>litF <span class="op">=</span> r.litF</span>
+<span id="cb28-2"><a href="#cb28-2"></a></span>
+<span id="cb28-3"><a href="#cb28-3"></a><span class="co"># first, need to rename the first column</span></span>
+<span id="cb28-4"><a href="#cb28-4"></a>litF.rename(columns<span class="op">=</span>{litF.columns[<span class="dv">0</span>]: <span class="st">'Country'</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                          Country  1975  1976  ...  2009  2010      2011
+0                     Afghanistan   NaN   NaN  ...   NaN   NaN  13.00000
+1                         Albania   NaN   NaN  ...   NaN   NaN  95.69148
+2                         Algeria   NaN   NaN  ...   NaN   NaN       NaN
+3                         Andorra   NaN   NaN  ...   NaN   NaN       NaN
+4                          Angola   NaN   NaN  ...   NaN   NaN  58.60846
+..                            ...   ...   ...  ...   ...   ...       ...
+255         Virgin Islands (U.S.)   NaN   NaN  ...   NaN   NaN       NaN
+256  Yemen Arab Republic (Former)   NaN   NaN  ...   NaN   NaN       NaN
+257     Yemen Democratic (Former)   NaN   NaN  ...   NaN   NaN       NaN
+258                    Yugoslavia   NaN   NaN  ...   NaN   NaN       NaN
+259                         Åland   NaN   NaN  ...   NaN   NaN       NaN
+
+[260 rows x 38 columns]</code></pre>
+</div>
+</div>
+</section>
+<section id="reshaping-data-in-python-1" class="slide level2">
+<h2>Reshaping data in Python</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1"></a>litF <span class="op">=</span> r.litF</span>
+<span id="cb30-2"><a href="#cb30-2"></a></span>
+<span id="cb30-3"><a href="#cb30-3"></a><span class="co"># rename the first column</span></span>
+<span id="cb30-4"><a href="#cb30-4"></a><span class="co"># then melt to make the data longer</span></span>
+<span id="cb30-5"><a href="#cb30-5"></a>(litF.rename(columns<span class="op">=</span>{litF.columns[<span class="dv">0</span>]: <span class="st">'Country'</span>})</span>
+<span id="cb30-6"><a href="#cb30-6"></a>     .melt(id_vars <span class="op">=</span> <span class="st">'Country'</span>,</span>
+<span id="cb30-7"><a href="#cb30-7"></a>           var_name <span class="op">=</span> <span class="st">'year'</span>,</span>
+<span id="cb30-8"><a href="#cb30-8"></a>           value_name <span class="op">=</span> <span class="st">'count'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                           Country  year  count
+0                      Afghanistan  1975    NaN
+1                          Albania  1975    NaN
+2                          Algeria  1975    NaN
+3                          Andorra  1975    NaN
+4                           Angola  1975    NaN
+...                            ...   ...    ...
+9615         Virgin Islands (U.S.)  2011    NaN
+9616  Yemen Arab Republic (Former)  2011    NaN
+9617     Yemen Democratic (Former)  2011    NaN
+9618                    Yugoslavia  2011    NaN
+9619                         Åland  2011    NaN
+
+[9620 rows x 3 columns]</code></pre>
+</div>
+</div>
+</section>
+<section id="reshaping-data-in-python-2" class="slide level2">
+<h2>Reshaping data in Python</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1"></a>litF <span class="op">=</span> r.litF</span>
+<span id="cb32-2"><a href="#cb32-2"></a></span>
+<span id="cb32-3"><a href="#cb32-3"></a><span class="co"># rename the first column</span></span>
+<span id="cb32-4"><a href="#cb32-4"></a><span class="co"># then melt to make the data longer</span></span>
+<span id="cb32-5"><a href="#cb32-5"></a>(litF.rename(columns<span class="op">=</span>{litF.columns[<span class="dv">0</span>]: <span class="st">'Country'</span>})</span>
+<span id="cb32-6"><a href="#cb32-6"></a>     .melt(id_vars <span class="op">=</span> <span class="st">'Country'</span>,</span>
+<span id="cb32-7"><a href="#cb32-7"></a>           var_name <span class="op">=</span> <span class="st">'year'</span>,</span>
+<span id="cb32-8"><a href="#cb32-8"></a>           value_name <span class="op">=</span> <span class="st">'count'</span>)</span>
+<span id="cb32-9"><a href="#cb32-9"></a>     .dropna())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   Country  year      count
+30            Burkina Faso  1975   3.182766
+37    Central African Rep.  1975   8.399576
+99                  Kuwait  1975  48.015214
+191                 Turkey  1975  45.098921
+197   United Arab Emirates  1975  38.124870
+...                    ...   ...        ...
+9562               Vanuatu  2011  81.553540
+9564    West Bank and Gaza  2011  92.616180
+9565               Vietnam  2011  91.383460
+9566           Yemen, Rep.  2011  48.539050
+9568              Zimbabwe  2011  80.065659
+
+[571 rows x 3 columns]</code></pre>
+</div>
+</div>
+<p>What if I want to arrange the rows alphabetically by country?</p>
+</section>
+<section id="reshaping-data-in-python-3" class="slide level2">
+<h2>Reshaping data in Python</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1"></a>litF <span class="op">=</span> r.litF</span>
+<span id="cb34-2"><a href="#cb34-2"></a></span>
+<span id="cb34-3"><a href="#cb34-3"></a><span class="co"># rename the first column</span></span>
+<span id="cb34-4"><a href="#cb34-4"></a><span class="co"># then melt to make the data longer</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a>(litF.rename(columns<span class="op">=</span>{litF.columns[<span class="dv">0</span>]: <span class="st">'Country'</span>})</span>
+<span id="cb34-6"><a href="#cb34-6"></a>     .melt(id_vars <span class="op">=</span> <span class="st">'Country'</span>,</span>
+<span id="cb34-7"><a href="#cb34-7"></a>           var_name <span class="op">=</span> <span class="st">'year'</span>,</span>
+<span id="cb34-8"><a href="#cb34-8"></a>           value_name <span class="op">=</span> <span class="st">'count'</span>)</span>
+<span id="cb34-9"><a href="#cb34-9"></a>     .dropna()</span>
+<span id="cb34-10"><a href="#cb34-10"></a>     .sort_values(by <span class="op">=</span> [<span class="st">'Country'</span>, <span class="st">'year'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Country  year      count
+1040  Afghanistan  1979   4.987460
+9360  Afghanistan  2011  13.000000
+6761      Albania  2001  98.252274
+8581      Albania  2008  94.681814
+9361      Albania  2011  95.691480
+...           ...   ...        ...
+7227       Zambia  2002  61.839278
+8527       Zambia  2007  51.786967
+2028     Zimbabwe  1982  71.853928
+4628     Zimbabwe  1992  78.517018
+9568     Zimbabwe  2011  80.065659
+
+[571 rows x 3 columns]</code></pre>
+</div>
+</div>
+</section>
+<section id="class-activity" class="slide level2">
+<h2>Class activity</h2>
+<p><a href="https://sta279-s24.github.io/class_activities/ca_lecture_14.html">https://sta279-s24.github.io/class_activities/ca_lecture_14.html</a></p>
+<div class="footer footer-default">
+
+</div>
+</section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="lecture_14_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="lecture_14_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="lecture_14_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="lecture_14_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="lecture_14_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="lecture_14_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="lecture_14_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="lecture_14_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="lecture_14_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="lecture_14_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'smaller': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button', {
+        text: function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+      });
+      clipboard.on('success', function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      });
+      function tippyHover(el, contentFn) {
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start'
+        };
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          return note.innerHTML;
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

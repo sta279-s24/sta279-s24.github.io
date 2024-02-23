@@ -1,0 +1,73 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** Work with a neighbor to answer the following questions. To get started, download the [class activity template](https://sta279-s24.github.io/class_activities/ca_lecture_14_template.qmd) file.
+
+
+# GDP data
+
+Run the following code to import data on GDP for each country (you may need to install the `googlesheets4` package):
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(googlesheets4)
+gs4_deauth()
+gdp_data <- read_sheet("https://docs.google.com/spreadsheets/d/1RctTQmKB0hzbm1E8rGcufYdMshRdhmYdeL29nXqmvsc/pub?gid=0")
+```
+
+Looking at the data, we can see that there is a column for the GDP in each year, and the first column contains country information:
+
+```{r}
+head(gdp_data)
+```
+
+
+1. Use the `pivot_longer` function to reshape the GDP data so it looks like this:
+
+```{r, echo=F}
+gdp_data |>
+  rename(country = starts_with("Income")) |>
+  pivot_longer(cols = -country,
+               names_to = "year",
+               values_to = "gdp",
+               values_drop_na = T)
+```
+
+* There should be no NAs
+* The first column should be renamed `country`
+* There should be separate columns for `year` and `gdp`
+
+# WHO data
+
+The `tidyr` package contains a dataset called `who2` which contains information on tuberculosis counts for each country in each year, broken down by method of diagnosis, sex, and age group:
+
+```{r}
+who2
+```
+
+Columns like `sp_m_1524` contain the number of tuberculosis cases. The column names contain information about the method of diagnosis (`rel`, `sn`, `sp`, or `ep`), sex (`f` or `m`), and age group (`014` = 0-14 years, `1524` = 15-24 years, etc.).
+
+Ideally, we would like these variables to each have their own column. 
+
+2. Reshape the `who2` data so it looks like this:
+
+```{r, echo=F}
+who2 |>
+  pivot_longer(cols = -c(country, year),
+               names_to = c("diagnosis", "sex", "age_group"),
+               names_sep = "_",
+               values_to = "count",
+               values_drop_na = T)
+```
+
+* There should be no NAs
+* There should be separate columns for `diagnosis`, `sex`, and `age_group`
+* The `count` column contains the number of cases
+

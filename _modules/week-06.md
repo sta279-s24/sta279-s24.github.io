@@ -8,7 +8,8 @@ February 19
 
 February 21
 : Data wrangling in Python
-  : [slides (html)](https://sta279-s24.github.io/slides/lecture_13.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_13.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_13.html)
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_13.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_13.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_13.html), [Class Activity solutions](https://sta279-s24.github.io/class_activities/ca_lecture_13_solutions.html)
 
 February 23
 : Reshaping data
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_14.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_14.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_14.html)

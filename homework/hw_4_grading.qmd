@@ -7,237 +7,183 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-Total: 39 pts
+Total: 46 pts
 
 **General grading notes:** 
 
 * They will write code in many different ways. As long as it works, they can receive credit for the question. If it doesn't work, but they made a reasonable attempt (at least some of the code has the right idea) then they receive partial credit.
 * If code is written particularly inefficiently, you don't need to take off points, but you can leave a comment on how to write it more simply
 
-#### Commenting code (2 pts)
-
-If they made a reasonable effort to comment code on at least some of the questions (particularly the robot battle), then they get the 2 pts for the assignment. Otherwise, they do not receive the 2 pts.
-
-#### Setting a seed (2 pts)
-
-They get the 2 pts if they set a seed at some point before the robot battle simulation. Otherwise, they do not receive the 2 pts.
-
 #### Naming (2 pts)
 
 Check that they used reasonable variable names on the assignment. If the names are generally terrible (e.g., `blah1` and `blah2` instead of `robotA` and `robotB`), they lose these 2 pts.
 
 
+#### Question 1 (4 pts)
 
-#### Question 1 (3 pts)
+```{r, message=F, warning=F}
+library(nycflights13)
+library(tidyverse)
+library(mdsr)
 
-```{python}
-import numpy as np
-
-# create x
-x = np.linspace(0, 1, 11)
-
-# for loop version
-x_square = np.zeros(11)
-for i in range(11):
-  x_square[i] = x[i]**2
-
-x_square
-
-# "vectorized" version
-x_square = x**2
-x_square
-
-# list comprehension version
-x_square = [a**2 for a in x]
-x_square
+flights |>
+  group_by(origin) |>
+  summarize(N = n()) |>
+  arrange(desc(N))
 ```
 
-**Grading:** 1 pt for each iteration method (for loop, vectorized version, list comprehension). Each one needs to return $x^2$
+**Grading:** 2 pts for grouping by origin, 2 pts for correctly summarizing (counting the number of rows with `n()`). Note that the `n()` function does *not* take any arguments.
 
-#### Question 2 (2 pts)
+#### Question 2 (5 pts)
 
-```{python}
-# create x
-x = np.linspace(0, 2, 41)
-
-# for loop version
-x_square = np.zeros(11)
-for i in range(11):
-  x_square[i] = x[i]**2
-
-x_square
-
-# "vectorized" version
-x_square = x**2
-x_square
-
-# list comprehension version
-x_square = [a**2 for a in x]
-x_square
+```{r}
+flights |>
+  group_by(month) |>
+  summarize(prop_cancelled = mean(is.na(dep_time))) |>
+  arrange(desc(prop_cancelled))
 ```
 
-**Grading:** They just need to correctly change the range to 0 to 2, by increments of 0.05.
+**Grading:** 2 pts for grouping by month, 2 pts for correctly summarizing (calculating the fraction of delays using `is.na(dep_time)`), 1 pt for reporting the month with the highest proportion of delayed flights
 
-#### Question 3 (5 pts)
+#### Question 3 (3 pts)
 
-There are two different ways you could approach the problem here (the wording of the problem is slightly ambiguous). *I am fine with either approach*. 
+Two ways of approaching this question: either using `head`, or using `slice_max`:
 
-The simpler approach is to have the robots pull simultaneously, in which case the game is fair (each robot wins 50% of the time):
-
-```{python}
-np.random.seed(321)
-
-nsim = 1000
-results = np.zeros(nsim)
-
-for i in range(nsim):
-  marker = 0
-  
-  while -0.5 < marker < 0.5:
-    robotA = np.random.uniform(0, 0.5)
-    robotB = np.random.uniform(0, 0.5)
-    marker += robotA - robotB
-    
-  results[i] = marker >= 0.5
-
-np.mean(results)
+```{r}
+flights |>
+  count(tailnum) |>
+  arrange(desc(n)) |>
+  head()
 ```
 
-The slightly more complicated approach is to have the robots take *turns* pulling, and update the marker each time. Now there is a distinct advantage to robot A for pulling first.
+```{r}
+flights |>
+  count(tailnum) |>
+  slice_max(order_by = n, 
+            n = 5)
+```
+Answer: tail number N725MQ
 
-**Grading:** 
+**Grading:** 2 pts for counting the number of rows for each plan, 1 pt for reporting the plane with the most flights
 
-* Lose 2 pts if they don't repeat the simulation many times (for loop)
-* Lose 2 pts if they don't have the robots pull until the marker crosses 0.5 or -0.5
-* Lose 1 pt if the robot strengths aren't sampled from a uniform
-* Lose 1 pt for minor errors
+#### Question 4 (7 pts)
 
-#### Question 4 (8 pts)
-
-```{python}
-np.random.seed(111)
-
-n_people = 100 # number of people in the theater
-nsim = 1000 # number of simulations to estimate probability
-results = np.zeros(nsim)
-seats = np.arange(n_people)
-
-for i in range(nsim):
-  taken = np.zeros(n_people)
-  
-  choice = np.random.choice(seats)
-  taken[choice] = 1
-  
-  for j in range(1, n_people - 1):
-    if taken[j] == 0:
-      taken[j] = 1
-    else:
-      choice = np.random.choice(seats[taken == 0])
-      taken[choice] = 1
-  
-  results[i] = taken[n_people-1] == 0
-
-np.mean(results)
+```{r}
+flights |>
+  filter(tailnum == "N725MQ") |>
+  mutate(week = week(time_hour)) |>
+  group_by(week) |>
+  summarize(count = n()) |>
+  ggplot(aes(x = week, y = count)) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  labs(x = "Week", y = "Number of trips")
 ```
 
-**Notes:**
+**Grading:** 1 pt for filtering for the correct plane, 2 pts for calculating the week numbers, 2 pts for calculating the number of flights for each week, 2 pts for the plot
 
-* Make sure to use difference indices for the two `for` loops! Here I have used `i` and `j`
-* There are lots of other ways to code this question (e.g., you could use a counter to record the results, rather than a vector)
-* It is crucial to treat the first person separately from the rest
+#### Question 5 (5 pts)
 
-**Grading:** 
-
-* 2 pts for correctly treating the first person differently than the others
-* 2 pts for correct logic with persons 2 through 99: if their seat is available, take it, otherwise choose a random seat
-* 1 pt for randomly choosing a seat from the *available* seats (e.g. `seats[taken == 0]`)
-* 2 pts for correctly checking whether the final person gets their seat
-* 1 pt for repeating the experiment many times to estimate a probability
-
-
-#### Question 5 (3 pts)
-
-There is a typo in this question. The original question reads
-
-$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2|x| - 1 & \text{if } |x| > a  \end{cases}$$
-
-Here is the code for that (incorrect) version:
-
-```{python}
-def huber(x, a=1):
-  return np.where(x <= a, x**2, 2*abs(x) - 1)
+```{r}
+flights |>
+  group_by(carrier) |>
+  summarize(mean_delay = mean(arr_delay, na.rm=T)) |>
+  arrange(desc(mean_delay))
 ```
 
-The *correct* definition of $\psi_a(x)$ should be
+**Grading:** 1 pt for grouping by carrier, 2 pts for summarizing to calculate mean delay (could be either arrival or departure delay), 1 pt for handling missing values, 1 pt for reporting the carrier with the worst delays
 
-$$\psi_a(x) = \begin{cases} x^2 & \text{if } |x| \leq a \\ 2a|x| - a^2 & \text{if } |x| > a  \end{cases}$$
+#### Question 6 (2 pts)
 
-Here is code for the correct version:
+We *cannot* disentangle bad carriers from bad airports (at least for some carriers), because there are several carriers which only fly from one airport:
 
-```{python}
-def huber(x, a=1):
-  return np.where(x <= a, x**2, 2*a*abs(x) - a**2)
+```{r}
+table(flights$origin, flights$carrier)
+```
+**Grading:** 2 pts for a reasonable interpretation
+
+#### Question 7 (5 pts)
+
+```{r}
+violations_summary <- Violations |>
+  drop_na(zipcode, score, boro) |>
+  filter(boro == "MANHATTAN") |>
+  group_by(zipcode) |>
+  summarize(med_score = median(score),
+            N = n()) |>
+  filter(N >= 50)
 ```
 
-(For this homework assignment, either is ok).
-
-**Grading:** 
-
-* 1 pt for updating the condition to be $|x| \leq a$
-* 1 pt for including `a` as an argument for the function
-* 1 pt for setting `a=1` as the default
-
-#### Question 6 (6 pts)
-
-There are *lots* of ways to approach this problem. For example, you could randomly assign the position of the car, randomly choose your door, etc. And you could store the doors and choices in their own arrays. 
-
-However, perhaps the simplest approach is to fix the door which contains the car (in this case, let's say the third door). The player's initial choice is random. Then, the player will always *switch* doors. This means that the player will win whenever their initial choice was *not* the third door, and lose if their initial choice *was* the third door.
-
-```{python}
-nsim = 1000
-results = np.zeros(nsim)
-
-for i in range(nsim):
-  door_choice = np.random.choice([0, 1, 2])
-  
-  # Always put the car behind door 3
-  # They always switch
-  # If they randomly choose door 3, they lose (bc they switch)
-  # Otherwise they win
-  if door_choice == 2:
-    results[i] = 0
-  else:
-    results[i] = 1
-
-np.mean(results)
-```
-
-**Grading:** 
-
-* 2 points for having *some* random element (either the position of the car, the initial choice of the player, or both)
-* 3 points for correctly implementing the switching (the player must switch every time)
-* 1 pt for repeating the experiment many times to estimate a probability
-
-
-#### Question 7 (2 pts)
-
-Reproducibility is important because it allows other researchers to verify and evaluate computational research. For example, we can see the decisions which were made when cleaning data, when fitting models, when conducting simulations, etc. By reproducing the work ourselves, we can judge whether those decisions were reasonable, or whether different choices should have been made. We can also experiment with making different choices, and see how they would change the conclusions of the research.
-
-**Grading:** Responses may vary. Anything reasonable receives 2 pts.
+**Grading:** 1 pt for removing missing values, 1 pt for keeping only Manhattan, 1 pt for grouping by zipcode, 1 pt for calculating median score in each zipcode, 1 pt for only keeping zipcodes with at least 50 inspections
 
 #### Question 8 (2 pts)
 
-Steps include (but are not limited to) making code and data publicly available, end-to-end scripting of the entire data analysis pipeline, thoroughly commenting and documenting the code and data, and sharing all versions of software used to create the results.
+```{r}
+violations_summary |>
+  ggplot(aes(x = N, y = med_score)) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Number of inspections",
+       y = "Median inspection score")
+```
 
-**Grading:** Responses may vary. At least two steps need to be listed. Lose 1 pt if only 1 step is listed. 
+**Grading:** 2 pts for using a scatterplot with the correct variables
 
-#### Question 9 (2 pts)
+#### Question 9 (3 pts)
 
-* You may switch to a different project, and another employee will need to continue your work
-* Collaborating in a team, you will need to share your work with others
+```{r}
+x <- list(rexp, list(rnorm), list(function(n){return(rchisq(n, 2))}))
+x[[1]](3)
+x[[2]][[1]](3)
+x[[3]][[1]](3)
+```
 
-**Grading:** Responses may vary. Anything reasonable receives 2 pts.
+**Grading:** 
 
+* 1 pt for `x[[1]]` returning `rexp`
+* 1 pt for `x[[2]][[1]]` returning `rnorm`
+* 1 pt for `x[[3]][[1]]` sampling from a $\chi^2_2$
 
+#### Question 10 (2 pts)
 
+```{r}
+library(tidyverse)
+library(Stat2Data)
+data("Kershaw")
 
+log_reg <- glm(Result ~ EndSpeed, family = binomial, data = Kershaw)
+summary(log_reg)
+
+typeof(log_reg)
+```
+
+A list!
+
+**Grading:** 2 pts if correct, otherwise no points
+
+#### Question 11 (2 pts)
+
+```{r}
+length(log_reg)
+```
+
+**Grading:** 2 pts if correct, otherwise no points
+
+#### Question 12 (2 pts)
+
+```{r}
+log_reg[[1]]
+```
+
+The estimated coefficients of the model
+
+**Grading:** 2 pts if correct, otherwise no points. (Other acceptable answers would include "the slope and the intercept" or similar)
+
+#### Question 13 (2 pts)
+
+```{r}
+log_reg$aic
+```
+
+**Grading:** 2 pts if correct, otherwise no points. Other acceptable answers include `log_reg[["aic"]]` or `AIC(log_reg)`

@@ -1,0 +1,61 @@
+---
+title: "Class activity solutions"
+format: html
+editor: visual
+author: "Ciaran Evans"
+---
+
+1.
+
+```{r}
+library(gapminder)
+```
+
+```{python}
+import pandas as pd
+import numpy as np
+
+gapminder = r.gapminder
+```
+
+```{python}
+gapminder.query('continent == "Asia" & year == 2002')
+```
+
+2.
+
+```{python}
+(gapminder.query('year == 2002')
+          .groupby(by = 'continent')
+          .agg(num_countries = ('country', 'count'))
+)
+```
+
+3. 
+
+```{python}
+gapminder.assign(log_gdp = np.log(gapminder['gdpPercap']))
+```
+
+
+4. Here are two ways to create the table. The first way uses `assign` to first create a new column:
+
+```{python}
+(gapminder.assign(log_gdp = np.log(gapminder['gdpPercap']))
+  .query('year == 2002')
+  .groupby(by = 'continent')
+  .agg(num_countries = ('country', 'count'), mean_log_gdp = ('log_gdp', 'mean'))
+)
+```
+
+The second way uses an anonymous function inside `agg`:
+
+```{python}
+(gapminder.query('year == 2002')
+          .groupby(by = 'continent')
+          .agg(num_countries = ('country', 'count'), 
+               mean_log_gdp = ('gdpPercap', lambda x: np.mean(np.log(x))))
+)
+```
+
+
