@@ -1,0 +1,256 @@
+---
+title: "Exam 1 review"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+Below are questions to help you study for Exam 1. These are examples of the kinds of questions I might ask.
+
+* This is not a practice exam. There will be fewer questions on the actual exam.
+* The questions cover most, but not all, possible material for the exam.
+
+## Practice with iteration in R
+
+1. What will the following code return when you run it in R?
+
+```{r, eval=F}
+output <- rep(NA, 10)
+for(i in 1:5){
+  output[i] <- i
+}
+
+output[6]
+```
+
+2. What will the following code return when you run it in R?
+
+```{r, eval=F}
+output <- rep(0, 10)
+for(i in 1:10){
+  output[i] <- i
+}
+
+output[6]
+```
+
+3. What will the following code return when you run it in R?
+
+```{r, eval=F}
+output <- rep(0, 10)
+for(i in 1:10){
+  output[i] <- i
+}
+
+output[11]
+```
+
+4. What will the following code return when you run it in R?
+
+```{r, eval=F}
+output <- rep(1, 10)
+for(i in 2:10){
+  output[i] <- i + output[i-1]
+}
+
+output[5]
+```
+
+5. What will the following code return when you run it in R?
+
+```{r, eval=F}
+output <- rep(1, 10)
+for(i in 2:10){
+  output[i] <- i + output[i+1]
+}
+
+output[5]
+```
+
+
+## Practice with function scoping
+
+6. What will be the output of the following code?
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(x = 11){
+  return(x)
+}
+test_fun()
+x
+```
+
+7. What will be the output of the following code?
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(y = 11){
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+8. What will be the output of the following code?
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(y = 11){
+  x <- x + 1
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+9. What will be the output of the following code?
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(x = 11){
+  x <- x + 1
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+10. What will be the output of the following code?
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(x = 11){
+  x <- x + 1
+  return(x + 1)
+}
+x <- test_fun(x)
+x
+```
+
+## Practice with functions
+
+The *sample standard deviation* of numbers $x_1,...,x_n$ is given by 
+
+$$\widehat{\sigma}^2 = \frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2,$$
+
+where $\bar{x} = \frac{1}{n} \sum \limits_{i=1}^n x_i$.
+
+11. Write a function called `my_sd` which calculates the standard deviation of a vector in R.
+
+12. Write a function called `my_sd` which calculates the standard deviation of a 1-d NumPy array in Python.
+
+The $\ell_p$ norm of a vector $x = (x_1,...,x_k)$ is given by
+
+$$||x||_p = \left( \sum \limits_{i=1}^k |x_i|^p \right)^{1/p}$$
+
+13. Write a function called `p_norm` in R, which takes two inputs: a vector `x`, and `p`, and returns $\ell_p(x)$. Make `p = 2` the default value (this corresponds to the usual Euclidean norm).
+
+14. Write a function called `p_norm` in Python, which takes two inputs: a vector `x`, and `p`, and returns $\ell_p(x)$. Make `p = 2` the default value (this corresponds to the usual Euclidean norm).
+
+## Practice with lists
+
+15. Create a list `x` in R such that:
+
+* `x[[1]]` returns the function `mean`
+* `x[[2]]` returns the function `sd`
+* `x[[3]][[1]]` returns the vector `c(0, 1, 2)`
+* `x[[3]][[2]]` returns an anonymous function which calculates the cube root of a vector
+
+## Practice with probability simulations
+
+Three players enter a room and a red or blue hat is placed on each person’s head.
+The color of each hat is determined by [an independent] coin toss (so, any combination of red and blue hats is possible). No communication of any sort is allowed, except for an initial strategy session before the game begins. Once they have had a chance to look at the other hats [but not their own], the players must *simultaneously* guess the color of their own hats or pass. The players win the game if at least one person guesses correctly, and no one guesses incorrectly.
+
+16. Here is one strategy: one player randomly guesses the color of their hat, while the other two players pass. Write a simulation (in R or Python) to estimate the probability the players win the game (the true probability is 1/2).
+
+17. Here is another strategy: if a player sees the same color on the other two hats, they guess the color they do not see. If a player sees different colors on the other two hats, they pass. For example: If players A, B, and C have hats red, blue, and blue respectively, then player A would guess red, player B would pass, and player C would pass. Write a simulation (in R or Python) to estimate the probability the players win the game with this new strategy (the true probability is 3/4).
+
+**Note:** For the exam, I am more interested in the logic of how you approach the simulation, than in your code syntax being perfect. Your code should be mostly correct, but a few minor errors isn't an issue.
+
+## Practice with statistical simulations
+
+Consider the simple linear regression model:
+
+$$Y_i = 1 + X_i + \varepsilon_i,$$
+
+with $\varepsilon_i \sim N(0, \sigma^2)$. For the purposes of this question, assume that $X_i \sim Uniform(0, 1)$. We observe data $(X_1, Y_1),...,(X_n, Y_n)$, and we want to calculate a 95% confidence interval for the true slope $\beta_1$ (in this case, $\beta_1 = 1$, so we hope that our confidence interval contains 1).
+
+We know from STA 112 that *outliers* can impact the fit of our regression model. Does an outlier impact our ability to estimate $\beta_1$? Suppose that $(X_1, Y_1),...,(X_n, Y_n)$ come from the model above, and $(X_{n+1}, Y_{n+1})$ is an outlier.
+
+18. Design a simulation study to answer this question. You do not need to write code, but you must describe each of the ADEMP steps in enough detail that I could implement your simulation study. Your simulation study should assess:
+
+* How performance changes as $|X_{n+1} - \bar{X}|$ increases
+* How performance changes as $|Y_{n+1} - \bar{Y}|$ increases
+* How performance changes as $n$ increases
+
+## Practice with data wrangling
+
+In each of the questions below, write code (in R or Python) to produce the output from the original data.
+
+19. Original data:
+
+```{r, echo=F, message=F, warning=F}
+library(tidyverse)
+library(palmerpenguins)
+
+sub_data <- penguins |>
+  slice_sample(n=10) |>
+  select(species, island, bill_length_mm, bill_depth_mm)
+
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  count(species, island)
+```
+
+20. Original data:
+
+```{r, echo=F}
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  group_by(island, species) |>
+  summarize(mean_length = mean(bill_length_mm, na.rm=T))
+```
+
+
+21. Original data:
+
+```{r, echo=F}
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  mutate(bill_ratio = bill_length_mm/bill_depth_mm)
+```
+
+
+22. Original data:
+
+```{r, echo=F}
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  filter(species == "Adelie", 
+         island == "Dream")
+```
+
