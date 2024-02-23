@@ -1105,20 +1105,20 @@ Coefficients:
 <span id="cb30-5"><a href="#cb30-5"></a>(litF.rename(columns<span class="op">=</span>{litF.columns[<span class="dv">0</span>]: <span class="st">'Country'</span>})</span>
 <span id="cb30-6"><a href="#cb30-6"></a>     .melt(id_vars <span class="op">=</span> <span class="st">'Country'</span>,</span>
 <span id="cb30-7"><a href="#cb30-7"></a>           var_name <span class="op">=</span> <span class="st">'year'</span>,</span>
-<span id="cb30-8"><a href="#cb30-8"></a>           value_name <span class="op">=</span> <span class="st">'count'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb30-8"><a href="#cb30-8"></a>           value_name <span class="op">=</span> <span class="st">'literacy_rate'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                           Country  year  count
-0                      Afghanistan  1975    NaN
-1                          Albania  1975    NaN
-2                          Algeria  1975    NaN
-3                          Andorra  1975    NaN
-4                           Angola  1975    NaN
-...                            ...   ...    ...
-9615         Virgin Islands (U.S.)  2011    NaN
-9616  Yemen Arab Republic (Former)  2011    NaN
-9617     Yemen Democratic (Former)  2011    NaN
-9618                    Yugoslavia  2011    NaN
-9619                         Åland  2011    NaN
+<pre><code>                           Country  year  literacy_rate
+0                      Afghanistan  1975            NaN
+1                          Albania  1975            NaN
+2                          Algeria  1975            NaN
+3                          Andorra  1975            NaN
+4                           Angola  1975            NaN
+...                            ...   ...            ...
+9615         Virgin Islands (U.S.)  2011            NaN
+9616  Yemen Arab Republic (Former)  2011            NaN
+9617     Yemen Democratic (Former)  2011            NaN
+9618                    Yugoslavia  2011            NaN
+9619                         Åland  2011            NaN
 
 [9620 rows x 3 columns]</code></pre>
 </div>
@@ -1134,21 +1134,21 @@ Coefficients:
 <span id="cb32-5"><a href="#cb32-5"></a>(litF.rename(columns<span class="op">=</span>{litF.columns[<span class="dv">0</span>]: <span class="st">'Country'</span>})</span>
 <span id="cb32-6"><a href="#cb32-6"></a>     .melt(id_vars <span class="op">=</span> <span class="st">'Country'</span>,</span>
 <span id="cb32-7"><a href="#cb32-7"></a>           var_name <span class="op">=</span> <span class="st">'year'</span>,</span>
-<span id="cb32-8"><a href="#cb32-8"></a>           value_name <span class="op">=</span> <span class="st">'count'</span>)</span>
+<span id="cb32-8"><a href="#cb32-8"></a>           value_name <span class="op">=</span> <span class="st">'literacy_rate'</span>)</span>
 <span id="cb32-9"><a href="#cb32-9"></a>     .dropna())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                   Country  year      count
-30            Burkina Faso  1975   3.182766
-37    Central African Rep.  1975   8.399576
-99                  Kuwait  1975  48.015214
-191                 Turkey  1975  45.098921
-197   United Arab Emirates  1975  38.124870
-...                    ...   ...        ...
-9562               Vanuatu  2011  81.553540
-9564    West Bank and Gaza  2011  92.616180
-9565               Vietnam  2011  91.383460
-9566           Yemen, Rep.  2011  48.539050
-9568              Zimbabwe  2011  80.065659
+<pre><code>                   Country  year  literacy_rate
+30            Burkina Faso  1975       3.182766
+37    Central African Rep.  1975       8.399576
+99                  Kuwait  1975      48.015214
+191                 Turkey  1975      45.098921
+197   United Arab Emirates  1975      38.124870
+...                    ...   ...            ...
+9562               Vanuatu  2011      81.553540
+9564    West Bank and Gaza  2011      92.616180
+9565               Vietnam  2011      91.383460
+9566           Yemen, Rep.  2011      48.539050
+9568              Zimbabwe  2011      80.065659
 
 [571 rows x 3 columns]</code></pre>
 </div>
@@ -1165,22 +1165,22 @@ Coefficients:
 <span id="cb34-5"><a href="#cb34-5"></a>(litF.rename(columns<span class="op">=</span>{litF.columns[<span class="dv">0</span>]: <span class="st">'Country'</span>})</span>
 <span id="cb34-6"><a href="#cb34-6"></a>     .melt(id_vars <span class="op">=</span> <span class="st">'Country'</span>,</span>
 <span id="cb34-7"><a href="#cb34-7"></a>           var_name <span class="op">=</span> <span class="st">'year'</span>,</span>
-<span id="cb34-8"><a href="#cb34-8"></a>           value_name <span class="op">=</span> <span class="st">'count'</span>)</span>
+<span id="cb34-8"><a href="#cb34-8"></a>           value_name <span class="op">=</span> <span class="st">'literacy_rate'</span>)</span>
 <span id="cb34-9"><a href="#cb34-9"></a>     .dropna()</span>
 <span id="cb34-10"><a href="#cb34-10"></a>     .sort_values(by <span class="op">=</span> [<span class="st">'Country'</span>, <span class="st">'year'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          Country  year      count
-1040  Afghanistan  1979   4.987460
-9360  Afghanistan  2011  13.000000
-6761      Albania  2001  98.252274
-8581      Albania  2008  94.681814
-9361      Albania  2011  95.691480
-...           ...   ...        ...
-7227       Zambia  2002  61.839278
-8527       Zambia  2007  51.786967
-2028     Zimbabwe  1982  71.853928
-4628     Zimbabwe  1992  78.517018
-9568     Zimbabwe  2011  80.065659
+<pre><code>          Country  year  literacy_rate
+1040  Afghanistan  1979       4.987460
+9360  Afghanistan  2011      13.000000
+6761      Albania  2001      98.252274
+8581      Albania  2008      94.681814
+9361      Albania  2011      95.691480
+...           ...   ...            ...
+7227       Zambia  2002      61.839278
+8527       Zambia  2007      51.786967
+2028     Zimbabwe  1982      71.853928
+4628     Zimbabwe  1992      78.517018
+9568     Zimbabwe  2011      80.065659
 
 [571 rows x 3 columns]</code></pre>
 </div>

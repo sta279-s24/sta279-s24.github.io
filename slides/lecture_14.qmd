@@ -297,7 +297,7 @@ litF = r.litF
 (litF.rename(columns={litF.columns[0]: 'Country'})
      .melt(id_vars = 'Country',
            var_name = 'year',
-           value_name = 'count'))
+           value_name = 'literacy_rate'))
 ```
 
 ## Reshaping data in Python
@@ -310,7 +310,7 @@ litF = r.litF
 (litF.rename(columns={litF.columns[0]: 'Country'})
      .melt(id_vars = 'Country',
            var_name = 'year',
-           value_name = 'count')
+           value_name = 'literacy_rate')
      .dropna())
 ```
 
@@ -326,7 +326,7 @@ litF = r.litF
 (litF.rename(columns={litF.columns[0]: 'Country'})
      .melt(id_vars = 'Country',
            var_name = 'year',
-           value_name = 'count')
+           value_name = 'literacy_rate')
      .dropna()
      .sort_values(by = ['Country', 'year']))
 ```
