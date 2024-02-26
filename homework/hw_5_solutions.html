@@ -3215,7 +3215,7 @@ vertical-align: -.125em;
 <h4 class="anchored" data-anchor-id="question-5">Question 5</h4>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> huber(x, a<span class="op">=</span><span class="dv">1</span>):</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> np.where(x <span class="op">&lt;=</span> a, x<span class="op">**</span><span class="dv">2</span>, <span class="dv">2</span><span class="op">*</span>a<span class="op">*</span><span class="bu">abs</span>(x) <span class="op">-</span> a<span class="op">**</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> np.where(<span class="bu">abs</span>(x) <span class="op">&lt;=</span> a, x<span class="op">**</span><span class="dv">2</span>, <span class="dv">2</span><span class="op">*</span>a<span class="op">*</span><span class="bu">abs</span>(x) <span class="op">-</span> a<span class="op">**</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="question-6" class="level4">

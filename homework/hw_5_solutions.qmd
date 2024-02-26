@@ -121,7 +121,7 @@ np.mean(results)
 
 ```{python}
 def huber(x, a=1):
-  return np.where(x <= a, x**2, 2*a*abs(x) - a**2)
+  return np.where(abs(x) <= a, x**2, 2*a*abs(x) - a**2)
 ```
 
 
