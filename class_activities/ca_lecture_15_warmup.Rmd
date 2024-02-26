@@ -1,0 +1,43 @@
+---
+title: "Warmup"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Question
+
+Consider the data frame below:
+
+```{r, echo=F, message=F, warning=F}
+library(tidyverse)
+
+ex_df <- data.frame(
+  id = c(1, 2, 3),
+  x_1 = c(3, 1, 4),
+  x_2 = c(5, 8, 9),
+  y_1 = c(0, 1, 2),
+  y_2 = c(2, 7, 9)
+)
+```
+
+```{r}
+ex_df
+```
+
+Without using R, write down the data frame that will result from running the following code:
+
+```{r, eval=F}
+ex_df |>
+  pivot_longer(cols = -id, 
+               names_to = c("group", "obs"), 
+               values_to = "value",
+               names_sep = "_")
+```
+
+
+
+

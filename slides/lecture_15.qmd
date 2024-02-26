@@ -1,0 +1,236 @@
+---
+title: "Lecture 15: Reshaping data"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Last time: `pivot_longer`
+
+![](https://r4ds.hadley.nz/diagrams/tidy-data/variables.png)
+
+```{r, eval=F}
+df |> 
+  pivot_longer(
+    cols = bp1:bp2,
+    names_to = "measurement",
+    values_to = "value"
+  )
+```
+
+
+## Warm up
+
+```{r, include=F}
+library(tidyverse)
+
+ex_df <- data.frame(
+  id = c(1, 2, 3),
+  x_1 = c(3, 1, 4),
+  x_2 = c(5, 8, 9),
+  y_1 = c(0, 1, 2),
+  y_2 = c(2, 7, 9)
+)
+```
+
+```{r}
+ex_df
+```
+
+```{r, eval=F}
+ex_df |>
+  pivot_longer(cols = -id, 
+               names_to = c("group", "obs"), 
+               values_to = "value",
+               names_sep = "_")
+```
+
+Write down the data frame that will be returned by the code.
+
+## Warmup
+
+```{r}
+ex_df |>
+  pivot_longer(cols = -id, 
+               names_to = c("group", "obs"), 
+               values_to = "value",
+               names_sep = "_")
+```
+
+## `pivot_longer` in R
+
+Consider the following example data:
+
+```{r, echo=F}
+df2 = data.frame(id = c(1, 2, 3),
+                 bp_1 = c(100, 120, 125),
+                 bp_2 = c(120, 115, 130),
+                 hr_1 = c(60, 75, 80),
+                 hr_2 = c(77, 81, 93))
+df2
+```
+
+What if we want the data to look like this:
+
+```{r, echo=F}
+df2 |>
+  pivot_longer(cols = -id, 
+               names_to = c("measurement", "stage"), 
+               names_sep = "_", 
+               values_to = "value")
+```
+
+## `pivot_longer` in R
+
+```{r}
+df2
+
+df2 |>
+  pivot_longer(cols = -id, 
+               names_to = c("measurement", "stage"), 
+               names_sep = "_", 
+               values_to = "value")
+```
+
+## `pivot_longer` in R
+
+```{r, eval=F}
+df2 |>
+  pivot_longer(cols = -id, 
+               names_to = c("measurement", "stage"), 
+               names_sep = "_", 
+               values_to = "value")
+```
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Step 1:** Pivot 
+
+```{r, echo=F}
+df2 |>
+  pivot_longer(cols = -id, 
+               names_to = "measurement", 
+               values_to = "value") |>
+  head()
+```
+:::
+
+::: {.column width="50%"}
+**Step 2:** Separate columns
+
+```{r, echo=F}
+df2 |>
+  pivot_longer(cols = -id, 
+               names_to = c("measurement", "stage"), 
+               names_sep = "_", 
+               values_to = "value") |>
+  head()
+```
+:::
+
+::::
+
+
+## In Python
+
+**Step 1:** Melt
+
+```{python}
+import pandas as pd
+
+df2 = r.df2
+
+df2_new = df2.melt(id_vars = 'id', 
+                   var_name = 'measurement', 
+                   value_name = 'value')
+df2_new
+```
+
+## In Python
+
+**Step 2:** Separate columns
+
+```{python}
+df2 = r.df2
+
+df2_new = df2.melt(id_vars = 'id', 
+                   var_name = 'measurement', 
+                   value_name = 'value')
+df2_new['measurement'].str.split('_', expand=True)
+```
+
+## In Python
+
+**Step 2:** Separate columns
+
+```{python}
+df2 = r.df2
+
+df2_new = df2.melt(id_vars = 'id', 
+                   var_name = 'measurement', 
+                   value_name = 'value')
+df2_new[['measurement', 'stage']] = (df2_new['measurement']
+                                     .str.split('_', expand=True))
+df2_new
+```
+
+## Going the other way
+
+```{python, echo=F}
+air_quality = pd.read_csv("https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/air_quality_long.csv")
+
+air_quality = (air_quality.query('parameter == "no2"')
+                          .filter(['date.utc', 'location', 'value']))
+```
+
+```{python, eval=F}
+air_quality
+```
+
+```{python, echo=F}
+air_quality.head()
+```
+
+What if I want a separate column for each location?
+
+## Going the other way
+
+```{python}
+air_quality.pivot(index = 'date.utc', 
+                  columns = 'location', 
+                  values = 'value')
+```
+
+## In R
+
+```{r, include=F}
+library(reticulate)
+```
+
+
+```{r}
+air_quality <- py$air_quality
+head(air_quality)
+```
+
+## In R: `pivot_wider`
+
+```{r}
+air_quality |>
+  pivot_wider(id_cols = "date.utc",
+              names_from = "location",
+              values_from = "value")
+```
+
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_15.html](https://sta279-s24.github.io/class_activities/ca_lecture_15.html)
+
