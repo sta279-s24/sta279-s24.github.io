@@ -261,7 +261,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="practice-with-functions" class="level2">
 <h2 class="anchored" data-anchor-id="practice-with-functions">Practice with functions</h2>
 <p>The <em>sample standard deviation</em> of numbers <span class="math inline">\(x_1,...,x_n\)</span> is given by</p>
-<p><span class="math display">\[\widehat{\sigma}^2 = \frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2,\]</span></p>
+<p><span class="math display">\[\widehat{\sigma} = \sqrt{\frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2},\]</span></p>
 <p>where <span class="math inline">\(\bar{x} = \frac{1}{n} \sum \limits_{i=1}^n x_i\)</span>.</p>
 <ol start="11" type="1">
 <li></li>
@@ -349,10 +349,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>x[[1]]</code> returns the function <code>mean</code></li>
 <li><code>x[[2]]</code> returns the function <code>sd</code></li>
 <li><code>x[[3]][[1]]</code> returns the vector <code>c(0, 1, 2)</code></li>
-<li><code>x[[3]][[2]]</code> returns an anonymous function which calculates the cube root of a vector</li>
+<li><code>x[[3]][[2]]</code> returns a function which calculates the cube root of a vector</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">list</span>(mean, sd, <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="cf">function</span>(x){<span class="fu">return</span>(x<span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))}))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>cb_rt <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(x<span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>))</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">list</span>(mean, sd, <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>), cb_rt))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="practice-with-probability-simulations" class="level2">
@@ -404,6 +407,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] 0.751</code></pre>
 </div>
 </div>
+</section>
+<section id="practice-with-statistical-simulations" class="level2">
+<h2 class="anchored" data-anchor-id="practice-with-statistical-simulations">Practice with statistical simulations</h2>
+<p><strong>A:</strong> The aim of this simulation study is to assess the impact of an outlier on the performance of a simple linear regression model.</p>
+<p><strong>D:</strong> We need to generate data <span class="math inline">\((X_1, Y_1),...,(X_n, Y_n)\)</span> from the simple linear regression model, and add an outlier <span class="math inline">\((X_{n+1}, Y_{n+1})\)</span>. For the purposes of this simulation, suppose <span class="math inline">\(X_1,...,X_n \overset{iid}{\sim} Uniform(0, 1)\)</span>, and we generate <span class="math inline">\(Y_1,...,Y_n\)</span> by</p>
+<p><span class="math display">\[Y_i = 1 + X_i + \varepsilon_i,\]</span></p>
+<p>with <span class="math inline">\(\varepsilon_i \overset{iid}{\sim} N(0, 1)\)</span>. For our outlier, we are interested in assessing the impact of <span class="math inline">\(|X_{n+1} - \overline{X}|\)</span> and <span class="math inline">\(|Y_{n+1} - \bar{Y}|\)</span>. So, consider different possible combinations <span class="math inline">\((X_{n+1}, Y_{n+1})\)</span>, such as <span class="math inline">\((0.5, 1.5)\)</span>, <span class="math inline">\((0.5, 3)\)</span>, <span class="math inline">\((1, 2)\)</span>, <span class="math inline">\((2, 3)\)</span>, <span class="math inline">\((1, 4)\)</span>, and <span class="math inline">\((2, -1)\)</span>.</p>
+<p>To assess the impact of <span class="math inline">\(n\)</span>, consider <span class="math inline">\(n = 5, 10, 20, 50, 100\)</span>.</p>
+<p><strong>E:</strong> <span class="math inline">\(\beta_1\)</span></p>
+<p><strong>M:</strong> Fit a linear regression in R with the <code>lm</code> function, and calculate a 95% confidence interval for <span class="math inline">\(\beta_1\)</span></p>
+<p><strong>P:</strong> The empirical coverage of 95% confidence intervals for <span class="math inline">\(\beta_1\)</span>, in many repetitions (e.g.&nbsp;<code>nsim = 1000</code> for each simulation setting)</p>
+</section>
+<section id="data-wrangling" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling">Data wrangling</h2>
 <ol start="19" type="1">
 <li></li>
 </ol>

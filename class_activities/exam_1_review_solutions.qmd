@@ -1,7 +1,7 @@
 ---
 title: "Exam 1 review solutions"
 format: html
-editor: visual
+editor: source
 author: "Ciaran Evans"
 ---
 
@@ -122,7 +122,7 @@ x
 
 The *sample standard deviation* of numbers $x_1,...,x_n$ is given by
 
-$$\widehat{\sigma}^2 = \frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2,$$
+$$\widehat{\sigma} = \sqrt{\frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2},$$
 
 where $\bar{x} = \frac{1}{n} \sum \limits_{i=1}^n x_i$.
 
@@ -190,10 +190,13 @@ p_norm([1, 2, 3], 1)
 -   `x[[1]]` returns the function `mean`
 -   `x[[2]]` returns the function `sd`
 -   `x[[3]][[1]]` returns the vector `c(0, 1, 2)`
--   `x[[3]][[2]]` returns an anonymous function which calculates the cube root of a vector
+-   `x[[3]][[2]]` returns a function which calculates the cube root of a vector
 
 ```{r}
-x <- list(mean, sd, list(c(0, 1, 2), function(x){return(x^(1/3))}))
+cb_rt <- function(x){
+  return(x^(1/3))
+}
+x <- list(mean, sd, list(c(0, 1, 2), cb_rt))
 ```
 
 ## Practice with probability simulations
@@ -241,6 +244,25 @@ for(i in 1:nsim){
 mean(results)
 ```
 
+## Practice with statistical simulations
+
+**A:** The aim of this simulation study is to assess the impact of an outlier on the performance of a simple linear regression model.
+
+**D:** We need to generate data $(X_1, Y_1),...,(X_n, Y_n)$ from the simple linear regression model, and add an outlier $(X_{n+1}, Y_{n+1})$. For the purposes of this simulation, suppose $X_1,...,X_n \overset{iid}{\sim} Uniform(0, 1)$, and we generate $Y_1,...,Y_n$ by
+
+$$Y_i = 1 + X_i + \varepsilon_i,$$
+
+with $\varepsilon_i \overset{iid}{\sim} N(0, 1)$. For our outlier, we are interested in assessing the impact of $|X_{n+1} - \overline{X}|$ and $|Y_{n+1} - \bar{Y}|$. So, consider different possible combinations $(X_{n+1}, Y_{n+1})$, such as $(0.5, 1.5)$, $(0.5, 3)$, $(1, 2)$, $(2, 3)$, $(1, 4)$, and $(2, -1)$.
+
+To assess the impact of $n$, consider $n = 5, 10, 20, 50, 100$.
+
+**E:** $\beta_1$
+
+**M:** Fit a linear regression in R with the `lm` function, and calculate a 95% confidence interval for $\beta_1$
+
+**P:** The empirical coverage of 95% confidence intervals for $\beta_1$, in many repetitions (e.g. `nsim = 1000` for each simulation setting)
+
+## Data wrangling
 
 19. 
 
@@ -268,7 +290,7 @@ sub_data = r.sub_data
          .agg(n = ('bill_length_mm', 'count')))
 ```
 
-20.
+20. 
 
 ```{r}
 sub_data |>
@@ -283,7 +305,7 @@ sub_data |>
          .dropna())
 ```
 
-21.
+21. 
 
 ```{r}
 sub_data |>
@@ -294,7 +316,7 @@ sub_data |>
 sub_data.assign(bill_ratio = sub_data['bill_length_mm']/sub_data['bill_depth_mm'])
 ```
 
-22.
+22. 
 
 ```{r}
 sub_data |>

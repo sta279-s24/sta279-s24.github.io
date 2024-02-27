@@ -135,7 +135,7 @@ x
 
 The *sample standard deviation* of numbers $x_1,...,x_n$ is given by 
 
-$$\widehat{\sigma}^2 = \frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2,$$
+$$\widehat{\sigma} = \sqrt{\frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2},$$
 
 where $\bar{x} = \frac{1}{n} \sum \limits_{i=1}^n x_i$.
 
@@ -158,7 +158,7 @@ $$||x||_p = \left( \sum \limits_{i=1}^k |x_i|^p \right)^{1/p}$$
 * `x[[1]]` returns the function `mean`
 * `x[[2]]` returns the function `sd`
 * `x[[3]][[1]]` returns the vector `c(0, 1, 2)`
-* `x[[3]][[2]]` returns an anonymous function which calculates the cube root of a vector
+* `x[[3]][[2]]` returns a function which calculates the cube root of a vector
 
 ## Practice with probability simulations
 
