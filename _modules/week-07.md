@@ -8,6 +8,7 @@ February 26
 
 February 28
 : Exam 1 review day
+  : [review notes](https://sta279-s24.github.io/slides/exam_1_review_notes.pdf)
 
 March 1
 : Exam 1
