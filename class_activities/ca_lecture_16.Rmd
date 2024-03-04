@@ -1,0 +1,87 @@
+---
+title: "Class Activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** Work with a neighbor to answer the following questions.
+
+
+## Literacy and GDP data
+
+Run the following R code to import data on literacy and GDP for each country:
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(googlesheets4)
+gs4_deauth()
+gdp_data <- read_sheet("https://docs.google.com/spreadsheets/d/1RctTQmKB0hzbm1E8rGcufYdMshRdhmYdeL29nXqmvsc/pub?gid=0")
+lit_data = read_sheet("https://docs.google.com/spreadsheets/d/1hDinTIRHQIaZg1RUn6Z_6mo12PtKwEPFIz_mJVF6P5I/pub?gid=0")
+```
+
+As in previous class activities, we can reshape the datasets:
+
+```{r}
+gdp_data <- gdp_data |>
+  rename(country = starts_with("Income")) |>
+  pivot_longer(-country, names_to = "year", values_to = "gdp",
+               values_drop_na = TRUE)
+
+lit_data <- lit_data |>
+  rename(country = starts_with("Adult")) |>
+  pivot_longer(-country, names_to = "year", values_to = "literacy",
+               values_drop_na = TRUE)
+```
+
+1. Use a join to create a dataset containing both the literacy rate and gdp for countries in each year. Keep only the rows with information on both gdp and literacy rate:
+
+```{r, echo=F}
+lit_data |>
+  inner_join(gdp_data, join_by(country, year)) |>
+  head()
+```
+
+## Air quality
+
+In the next question, we will work with air quality data. There are two tables: the `air_quality` table contains information on different air quality measurements for multiple locations, while the `air_parameters` table contains information on the different air quality measurements.
+
+The datasets can be loaded into R as follows:
+
+```{r}
+air_quality <- read.csv("https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/air_quality_long.csv")
+air_parameters <- read.csv("https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/air_quality_parameters.csv")
+```
+
+
+And loaded into Python as follows:
+
+
+```{python, eval=F}
+import pandas as pd
+
+air_quality = pd.read_csv("https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/air_quality_long.csv")
+air_parameters = pd.read_csv("https://raw.githubusercontent.com/pandas-dev/pandas/main/doc/data/air_quality_parameters.csv")
+```
+
+2. Use a left join to add information about each air quality measurement to the `air_quality` table. Write the code in both R and Python.
+
+## NYC Flights
+
+In the next questions, we will return to data on NYC flights in 2013 from the `nycflights13` package. We will use two tables from the package: the `flights` table, which contains information on each flight, and the `planes` table, which contains information on each plane (uniquely identified by `tailnum`).
+
+3. In R, use a left join to add information about each plane to the `flights` table.
+
+Looking at the results from question 3, you will see that there are *two* year columns in the output of the join. This is because `year` is a column in both `flights` and `planes`. However, we don't want to join on year, because it represents different information (year of the flight, vs. year of manufacture). 
+
+Since we don't join on `year`, and R won't allow multiple columns with the same name in one data frame, then the output has two year columns: `year.x` (from `flights`), and `year.y` (from `planes`). The `year.y` column contains information on date of manufacture.
+
+4. What is the oldest plane (identified by `tailnum`) which flew from NYC airports in 2013?
+
+
+
+
+

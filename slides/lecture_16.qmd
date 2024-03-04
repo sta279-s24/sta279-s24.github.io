@@ -1,0 +1,372 @@
+---
+title: "Lecture 16: Joins"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=F}
+library(nycflights13)
+library(tidyverse)
+```
+
+## Data stored in multiple tables
+
+The `nycflights13` package contains information on flights from NYC airports in 2013. The data is stored across several data frames:
+
+* `airlines`: information on each airline
+* `airports`: information on each airport
+* `flights`: information on each flight
+* `planes`: information on each plane
+* `weather`: hourly weather data
+
+**Question:** What is the advantage of storing this data in multiple tables, instead of one BIG table?
+
+## Data stored in multiple tables
+
+* Databases often contain different tables to store different information
+* For example, a healthcare database could contain the following tables:
+  * `patients`
+  * `doctors`
+  * `offices`
+  * `insurance`
+  
+## Joining tables
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F}
+patients <- data.frame(
+  age = c(23, 47, 38),
+  insurance = c("Aetna", "BCBS", "Medicaid"),
+  provider = c("Dr. Zhang", "Dr. Foyle", "Dr. Zhang")
+)
+
+doctors <- data.frame(
+  provider = c("Dr. Foyle", "Dr. Renard", "Dr. Zhang"),
+  location = c("Greensboro", "Winston-Salem", "Winston-Salem")
+)
+```
+
+```{r}
+patients
+```
+
+
+:::
+
+::: {.column width="50%"}
+```{r}
+doctors
+```
+
+:::
+
+::::
+
+I want to add location information to the `patient` table. What should the resulting table look like?
+
+## Left join
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F}
+patients <- data.frame(
+  age = c(23, 47, 38),
+  insurance = c("Aetna", "BCBS", "Medicaid"),
+  provider = c("Dr. Zhang", "Dr. Foyle", "Dr. Zhang")
+)
+
+doctors <- data.frame(
+  provider = c("Dr. Foyle", "Dr. Renard", "Dr. Zhang"),
+  location = c("Greensboro", "Winston-Salem", "Winston-Salem")
+)
+```
+
+```{r}
+patients
+```
+
+
+:::
+
+::: {.column width="50%"}
+```{r}
+doctors
+```
+
+:::
+
+::::
+
+```{r}
+patients |>
+  left_join(doctors, join_by(provider))
+```
+
+## Left join
+
+```{r}
+patients |>
+  left_join(doctors, join_by(provider))
+```
+
+* Left joins are useful for adding additional information to a table
+* Left joins (generally) keep the same rows as the initial dataframe (`patients`), and add more columns
+* `join_by` specifies how to link the tables
+
+## Left joins in Python
+
+```{python, echo=F}
+doctors = r.doctors
+patients = r.patients
+```
+
+```{python}
+import pandas as pd
+
+pd.merge(patients, doctors, how = 'left',
+         left_on = 'provider', right_on = 'provider')
+```
+
+
+## Joining tables
+
+```{r, include=F}
+
+flights2 <- flights |>
+  select(time_hour, origin, dest, tailnum, carrier)
+```
+
+Flights information:
+
+```{r, echo=F}
+flights2 |>
+  head(3)
+```
+
+Weather information
+
+```{r, echo=F}
+weather |>
+  select(origin, time_hour, temp, wind_speed) |>
+  head(3)
+```
+
+**Question:** What if I want to get information about the weather for each flight?
+
+## Left joins
+
+```{r, eval=F}
+flights |>
+  left_join(weather, join_by(origin, time_hour))
+```
+
+```{r, echo=F}
+flights2 |>
+  left_join(weather |> select(origin, time_hour, temp, wind_speed), 
+            join_by(origin, time_hour)) |>
+  head()
+```
+
+## Joining with different names
+
+Suppose our tables looked like this:
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F}
+patients <- data.frame(
+  age = c(23, 47, 38),
+  insurance = c("Aetna", "BCBS", "Medicaid"),
+  provider = c("Dr. Zhang", "Dr. Foyle", "Dr. Zhang")
+)
+
+doctors <- data.frame(
+  name = c("Dr. Foyle", "Dr. Renard", "Dr. Zhang"),
+  location = c("Greensboro", "Winston-Salem", "Winston-Salem")
+)
+```
+
+```{r}
+patients
+```
+
+
+:::
+
+::: {.column width="50%"}
+```{r}
+doctors
+```
+
+:::
+
+::::
+
+How would we specify the columns to link the tables?
+
+## Joining with different names
+
+Suppose our tables looked like this:
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F}
+patients <- data.frame(
+  age = c(23, 47, 38),
+  insurance = c("Aetna", "BCBS", "Medicaid"),
+  provider = c("Dr. Zhang", "Dr. Foyle", "Dr. Zhang")
+)
+
+doctors <- data.frame(
+  name = c("Dr. Foyle", "Dr. Renard", "Dr. Zhang"),
+  location = c("Greensboro", "Winston-Salem", "Winston-Salem")
+)
+```
+
+```{r}
+patients
+```
+
+
+:::
+
+::: {.column width="50%"}
+```{r}
+doctors
+```
+
+:::
+
+::::
+
+```{r}
+patients |>
+  left_join(doctors, join_by(provider == name))
+```
+
+## In Python
+
+```{python, echo=F}
+doctors = r.doctors
+patients = r.patients
+```
+
+```{python}
+pd.merge(patients, doctors, how = 'left',
+         left_on = 'provider', right_on = 'name')
+```
+
+## Another join
+
+:::: {.columns}
+
+::: {.column width="50%"}
+Patients in the system:
+```{r, echo=F}
+patients <- data.frame(
+  age = c(23, 47, 38, 54),
+  insurance = c("Aetna", "BCBS", "Medicaid", "Humana"),
+  provider = c("Dr. Zhang", "Dr. Foyle", "Dr. Zhang", "Dr. Renard")
+)
+
+insurance <- data.frame(
+  company = c("Anthem", "BCBS", "Kaiser", "Medicaid"),
+  phone = c("800-676-2583", "877-258-3334", "800-810-4766", "877-201-3750")
+)
+```
+
+```{r}
+patients
+```
+
+
+:::
+
+::: {.column width="50%"}
+
+Accepted insurance:
+
+```{r}
+insurance
+```
+
+:::
+
+::::
+
+Suppose I want insurance information only for the patients who have an accepted insurance. What should the final table look like?
+
+## Inner join
+
+:::: {.columns}
+
+::: {.column width="50%"}
+Patients in the system:
+```{r, echo=F}
+patients <- data.frame(
+  age = c(23, 47, 38, 54),
+  insurance = c("Aetna", "BCBS", "Medicaid", "Humana"),
+  provider = c("Dr. Zhang", "Dr. Foyle", "Dr. Zhang", "Dr. Renard")
+)
+
+insurance <- data.frame(
+  company = c("Anthem", "BCBS", "Kaiser", "Medicaid"),
+  phone = c("800-676-2583", "877-258-3334", "800-810-4766", "877-201-3750")
+)
+```
+
+```{r}
+patients
+```
+
+
+:::
+
+::: {.column width="50%"}
+
+Accepted insurance:
+
+```{r}
+insurance
+```
+
+:::
+
+::::
+
+```{r}
+patients |>
+  inner_join(insurance, join_by(insurance == company))
+```
+
+## In Python
+
+```{python, echo=F}
+patients = r.patients
+insurance = r.insurance
+```
+
+```{python}
+pd.merge(patients, insurance, how='inner',
+         left_on = 'insurance', right_on = 'company')
+```
+
+
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_16.html](https://sta279-s24.github.io/class_activities/ca_lecture_16.html)
+
