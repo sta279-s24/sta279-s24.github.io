@@ -1,0 +1,52 @@
+---
+title: "Class activity solutions"
+format: html
+editor: visual
+author: "Ciaran Evans"
+---
+
+```{r message=F, warning=F}
+library(tidyverse)
+library(mdsr)
+library(DBI)
+db <- dbConnect_scidb("airlines")
+```
+
+1.  
+
+```{r}
+query <- "
+SELECT tailnum, year FROM planes LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+2.  
+
+```{r}
+query <- "
+SELECT MIN(year) FROM planes LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+3.  
+
+```{r}
+query <- "
+SELECT tailnum, year FROM planes WHERE year = 1956 LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+4.  
+
+```{r}
+query <- "
+SELECT year, SUM(1) AS N 
+FROM planes 
+WHERE year = (SELECT MAX(year) FROM planes)
+LIMIT 0,10;
+"
+dbGetQuery(db, query)
+```

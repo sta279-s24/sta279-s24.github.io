@@ -1,0 +1,355 @@
+---
+title: "Lecture 17: Overview of SQL"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=F}
+library(nycflights13)
+library(tidyverse)
+```
+
+## Data stored in multiple tables
+
+The `nycflights13` package contains information on flights from NYC airports in 2013. The data is stored across several data frames:
+
+* `airlines`: information on each airline
+* `airports`: information on each airport
+* `flights`: information on each flight
+* `planes`: information on each plane
+* `weather`: hourly weather data
+
+## Limitations
+
+```{r}
+nycflights13::flights |>
+  object.size() |>
+  print(units = "Mb")
+```
+
+* R stores objects in memory (RAM), which can be easily accessed
+* The amount of RAM on your computer is a limit on the possible size of objects
+* Objects larger than a few Gb are generally too big to load
+
+## Full airlines data
+
+The `nycflights13` package contains a small subset of a database on 48 million flights. The `airlines` database includes the following tables:
+
+* `airports`
+* `carriers`
+* `flights`
+* `planes`
+
+This data is too big to store locally, but can be on servers which we can access remotely.
+
+## Connecting to an SQL server
+
+```{r}
+library(tidyverse)
+library(mdsr)
+library(DBI)
+
+db <- dbConnect_scidb("airlines")
+
+query <- "
+  SHOW TABLES;
+"
+dbGetQuery(db, query)
+```
+
+## An example query
+
+```{sql eval=F}
+SELECT 
+  name,
+  SUM(1) AS N, 
+  SUM(arr_delay <= 15) / SUM(1) AS pct_ontime
+FROM flights
+JOIN carriers ON flights.carrier = carriers.carrier
+WHERE year = 2015 AND month = 9
+  AND dest = 'JFK'
+GROUP BY name 
+HAVING N >= 100
+ORDER BY pct_ontime DESC
+LIMIT 0,4;
+```
+
+## Warm-up
+
+What do you think each part of this query is doing?
+
+```{sql eval=F}
+SELECT 
+  name,
+  SUM(1) AS N, 
+  SUM(arr_delay <= 15) / SUM(1) AS pct_ontime
+FROM flights
+JOIN carriers ON flights.carrier = carriers.carrier
+WHERE year = 2015 AND month = 9
+  AND dest = 'JFK'
+GROUP BY name 
+HAVING N >= 100
+ORDER BY pct_ontime DESC
+LIMIT 0,4;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  name,
+  SUM(1) AS N, 
+  SUM(arr_delay <= 15) / SUM(1) AS pct_ontime
+FROM flights
+JOIN carriers ON flights.carrier = carriers.carrier
+WHERE year = 2015 AND month = 9
+  AND dest = 'JFK'
+GROUP BY name 
+HAVING N >= 100
+ORDER BY pct_ontime DESC
+LIMIT 0,4;
+"
+dbGetQuery(db, query)
+```
+
+## General structure of an SQL query
+
+```{sql eval=F}
+SELECT ...
+FROM ...
+JOIN ...
+WHERE ...
+GROUP BY ...
+HAVING ...
+ORDER BY ...
+LIMIT ...
+```
+
+* The SELECT and FROM clauses are *required*
+* Clauses must be written in this order
+
+## SELECT ... FROM
+
+```{sql eval=F}
+SELECT * FROM carriers LIMIT 0, 10;
+```
+
+```{r, echo=F}
+query <- "SELECT * FROM carriers LIMIT 0, 10;"
+dbGetQuery(db, query)
+```
+
+* `SELECT`: the columns to be retrieved
+* `FROM`: the table containing the data
+* `LIMIT`: limit the rows to return
+
+## SELECT ... FROM
+
+```{sql eval=F}
+SELECT ... FROM ... LIMIT 0, 10;
+```
+
+What if I want the `year`, `origin`, `dest`, `dep_delay`, and `arr_delay` columns from the `flights` table?
+
+## SELECT ... FROM
+
+What if I want the `year`, `origin`, `dest`, `dep_delay`, and `arr_delay` columns from the `flights` table?
+
+```{sql eval=F}
+SELECT 
+  year, origin, dest, 
+  dep_delay, arr_delay 
+FROM flights 
+LIMIT 0, 5;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  year, origin, dest, 
+  dep_delay, arr_delay 
+FROM flights 
+LIMIT 0, 5;
+"
+dbGetQuery(db, query)
+```
+
+## SELECT ... FROM
+
+```{sql eval=F}
+SELECT 
+  year, origin, dest, 
+  dep_delay, arr_delay 
+FROM flights 
+LIMIT 0, 5;
+```
+
+What if I also want to calculate the difference between arrival delay and departure delay?
+
+## SELECT ... FROM
+
+What if I also want to calculate the difference between arrival delay and departure delay?
+
+```{sql eval=F}
+SELECT 
+  year, origin, dest, dep_delay, arr_delay, 
+  arr_delay - dep_delay AS delay_diff
+FROM flights 
+LIMIT 0, 3;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  year, origin, dest, dep_delay, arr_delay, 
+  arr_delay - dep_delay AS delay_diff
+FROM flights 
+LIMIT 0, 3;
+"
+dbGetQuery(db, query)
+```
+
+What are the equivalent `dplyr` functions?
+
+## Converting from R to SQL
+
+```{r}
+flights <- tbl(db, "flights")
+
+flights |>
+  select(year, origin, dest, dep_delay, arr_delay) |>
+  mutate(delay_diff = arr_delay - dep_delay) |>
+  head() |>
+  show_query()
+```
+
+
+## Calculating summary statistics
+
+Back to our original SQL query:
+
+```{sql eval=F}
+SELECT 
+  SUM(1) AS N, 
+  SUM(arr_delay <= 15) / SUM(1) AS pct_ontime
+FROM flights
+LIMIT 0, 10;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  SUM(1) AS N, 
+  SUM(arr_delay <= 15) / SUM(1) AS pct_ontime
+FROM flights
+LIMIT 0, 10;
+"
+dbGetQuery(db, query)
+```
+
+## Calculating summary statistics
+
+SELECT can also be used to calculate summary statistics. For example, if we want the average departure delay:
+
+```{sql eval=F}
+SELECT 
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+LIMIT 0, 10;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+LIMIT 0, 10;
+"
+dbGetQuery(db, query)
+```
+
+## WHERE 
+
+Now suppose that I only want the mean departure delay for flights from EWR in 2013:
+
+```{sql eval=F}
+SELECT 
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+WHERE year = 2013 AND origin = 'EWR'
+LIMIT 0, 10;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+WHERE year = 2013 AND origin = 'EWR'
+LIMIT 0, 10;
+"
+dbGetQuery(db, query)
+```
+
+What do you think should I do if I want the mean delay for each airport in November 2013?
+
+## GROUP BY
+
+```{sql eval=F}
+SELECT 
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+WHERE year = 2013 AND month = 11
+GROUP BY origin
+LIMIT 0, 10;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+WHERE year = 2013 AND month = 11
+GROUP BY origin
+LIMIT 0, 10;
+"
+dbGetQuery(db, query)
+```
+
+Do you notice anything about this output?
+
+## GROUP BY
+
+```{sql eval=F}
+SELECT 
+  origin,
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+WHERE year = 2013 AND month = 11
+GROUP BY origin
+LIMIT 0, 10;
+```
+
+```{r, echo=F}
+query <- "
+SELECT 
+  origin,
+  AVG(dep_delay) AS mean_dep_delay
+FROM flights
+WHERE year = 2013 AND month = 11
+GROUP BY origin
+LIMIT 0, 10;
+"
+dbGetQuery(db, query)
+```
+
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_17.html](https://sta279-s24.github.io/class_activities/ca_lecture_17.html)
+

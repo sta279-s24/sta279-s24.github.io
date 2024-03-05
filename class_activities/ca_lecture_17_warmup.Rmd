@@ -1,0 +1,48 @@
+---
+title: "Warm-up"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Airlines data
+
+The `airlines` SQL database contains information on 48 million flights from the Bureau of Transportation Statistics (you have worked with a small subset of this data in the `nycflights13` package). Information from the database can be obtained through SQL queries. For example, the flights contains the following tables:
+
+```{r, include=F}
+library(tidyverse)
+library(mdsr)
+db <- dbConnect_scidb("airlines")
+flights <- tbl(db, "flights")
+carriers <- tbl(db, "carriers")
+```
+
+```{sql connection=db}
+SHOW TABLES;
+```
+
+## An example query
+
+Below is an SQL query on the database, and the output of the query. Working with your neighbor, try to determine what each piece of the query is doing. What would be the equivalent `dplyr` code? 
+
+```{sql connection=db}
+SELECT 
+  name,
+  SUM(1) AS N, 
+  SUM(arr_delay <= 15) / SUM(1) AS pct_ontime
+FROM flights
+JOIN carriers ON flights.carrier = carriers.carrier
+WHERE year = 2015 AND month = 9
+  AND dest = 'JFK'
+GROUP BY name 
+HAVING N >= 100
+ORDER BY pct_ontime DESC
+LIMIT 0,4;
+```
+
+
+
+

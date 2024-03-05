@@ -1,0 +1,136 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Airlines data
+
+The `airlines` SQL database contains information on 48 million flights from the Bureau of Transportation Statistics (you have worked with a small subset of this data in the `nycflights13` package). Information from the database can be obtained through SQL queries. For example, the flights contains the following tables:
+
+```{r, include=F}
+library(tidyverse)
+library(mdsr)
+library(DBI)
+db <- dbConnect_scidb("airlines")
+flights <- tbl(db, "flights")
+carriers <- tbl(db, "carriers")
+planes <- tbl(db, "planes")
+```
+
+```{sql connection=db}
+SHOW TABLES;
+```
+
+## Connecting to the database
+
+Make sure the `mdsr` and `DBI` packages are installed, then run the following code in R:
+
+```{r}
+library(tidyverse)
+library(mdsr)
+library(DBI)
+db <- dbConnect_scidb("airlines")
+```
+
+Let's try a quick query to see that it works:
+
+```{r}
+query <- "
+SELECT name FROM carriers LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+Here, we are querying SQL through R. We store the query in a string, and then use the `dbGetQuery` function to send that query to the database and return the results.
+
+
+1. Fill in the query below to select the `tailnum` and `year` columns from the `planes` table. For safety, we are only going to return the first 5 rows.
+
+```{r, eval=F}
+query <- "
+SELECT ... FROM ... LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+```{r, eval=F, echo=F}
+query <- "
+SELECT tailnum, year FROM planes LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+2. Using the `MIN()` function, find the oldest date of manufacture (`year`) in the `planes` table.
+
+```{r, eval=F}
+query <- "
+SELECT ... FROM ... LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+```{r, eval=F, echo=F}
+query <- "
+SELECT tailnum, MIN(year) FROM planes LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+3. Using `WHERE`, find the `tailnum` of the oldest plane in the `planes` table.
+
+```{r, eval=F}
+query <- "
+SELECT ... 
+FROM ... 
+WHERE ...
+LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+```{r, eval=F, echo=F}
+query <- "
+SELECT tailnum, year FROM planes WHERE year = 1956 LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+Questions 2 and 3 required two separate queries: first to find the oldest plane, then to find the tail number. We can be more efficient by using a *subquery* to choose only the years equal to the smallest year
+
+```{r}
+query <- "
+SELECT tailnum, year 
+FROM planes 
+WHERE year = (SELECT MIN(year) FROM planes)
+LIMIT 0,5;
+"
+dbGetQuery(db, query)
+```
+
+4. Modify the above code to find the *newest* manufacturing date, and calculate the number of planes which share the newest manufacturing date. You can use `SUM(1)` or `COUNT(...)` to count rows.
+
+```{r, echo=F, eval=F}
+query <- "
+SELECT year, SUM(1) AS N 
+FROM planes 
+WHERE year = (SELECT MAX(year) FROM planes)
+LIMIT 0,10;
+"
+dbGetQuery(db, query)
+```
+
+```{r, echo=F, eval=F}
+query <- "
+SELECT year, COUNT(year) AS N 
+FROM planes 
+WHERE year = (SELECT MAX(year) FROM planes)
+LIMIT 0,10;
+"
+dbGetQuery(db, query)
+```
+
