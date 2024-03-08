@@ -200,7 +200,7 @@ Which airport had the highest average arrival delay time in 2014?
 :::{.question}
 #### Question 8
 
-Re-do Question 2, but this time display the full name of each airport in the output. (Hint: use a JOIN)
+Re-do Question 7, but this time display the full name of each airport in the output. (Hint: use a JOIN)
 
 :::
 
