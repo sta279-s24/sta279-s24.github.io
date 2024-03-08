@@ -7,11 +7,11 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday, October 20, 11:00am on Canvas
+**Due:** Friday, March 22, 2:00pm on Canvas
 
 **Instructions:** 
 
-* Download the [HW 6 template](https://sta279-f23.github.io/homework/hw_6_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Download the [HW 6 template](https://sta279-s24.github.io/homework/hw_6_template.qmd), and open the template (a Quarto document) in RStudio. 
 * Put your name in the file header
 * Click `Render`
 * Type all code and answers in the document (using `###` for section headings and `####` for question headings)
@@ -32,6 +32,8 @@ link-citations: yes
 
 * [Chapter 4](https://mdsr-book.github.io/mdsr3e/04-dataI.html) and [Chapter 6](https://mdsr-book.github.io/mdsr3e/06-dataII.html) in *Modern Data Science with R*
 * [Chapter 4](https://r4ds.hadley.nz/data-transform) and [Chapter 6](https://r4ds.hadley.nz/data-tidy) in *R for Data Science* (2nd edition)
+* [Chapter 15](https://mdsr-book.github.io/mdsr3e/15-sqlI.html) in *Modern Data Science with R*
+* [Chapter 22.5](https://r4ds.hadley.nz/databases#sql) in *R for Data Science* (2nd edition)
 
 
 
@@ -159,111 +161,54 @@ df2 |>
 :::
 
 
-## Analyzing simulation results
+# Practice with SQL
 
-Your friend ran simulations to compare three different methods for calculating 95% confidence intervals for $\beta_1$ in a linear regression model. Their data is store in the file `sim_results.csv`, which can be imported into R as follows:
+In the second part of this assignment, you will continue practicing data wrangling with SQL. You will already be familiar with all of the ideas needed to complete these questions, but you might not have seen all of them for SQL. The book chapters listed above will be helpful.
 
-```{r}
-sim_results <- read.csv("https://sta279-f23.github.io/homework/sim_results.csv")
+To practice with SQL, we will return to the `airlines` database we used in class.  Connect to the database and send a short query:
+
+```{r, eval=F}
+library(tidyverse)
+library(mdsr)
+library(DBI)
+
+db <- dbConnect_scidb("airlines")
+
+query <- "
+  SHOW TABLES;
+"
+dbGetQuery(db, query)
 ```
 
+**Important note:** Make sure to always LIMIT the number of rows you return from your queries!
 
-The `sim_results` dataset is organized as follows:
-
-* The first column, `n`, records the sample size
-* For each method and sample size, your friend simulated 100 datasets and calculated a confidence interval. The results for method 1 are stored in columns `method1_1`, `method1_2`, ..., `method1_100` (with similar columns for methods 2 and 3). A 1 in a column indicates that the confidence interval captured $\beta_1$, while a 2 indicates the confidence interval did not capture $\beta_1$.
 
 :::{.question}
 #### Question 6
 
-Plot the observed coverage for each method (the fraction of times the confidence interval contained $\beta_1$) as a function of sample size. Your final plot should look as close as possible to this:
-
-```{r, echo=F}
-sim_results |>
-  mutate(across(-n, function(x) {2 - x})) |>
-  rowwise() |>
-  mutate(method1 = mean(c_across(contains("method1"))),
-         method2 = mean(c_across(contains("method2"))),
-         method3 = mean(c_across(contains("method3")))) |>
-  select(n, method1, method2, method3) |>
-  pivot_longer(-n, 
-               names_to = "method",
-               values_to = "coverage") |>
-  ggplot(aes(x = n, y = coverage, color = method)) +
-  geom_point() +
-  geom_line() +
-  labs(x = "Sample size (n)",
-       y = "Coverage",
-       color = "Method") +
-  theme_classic()
-```
-
-You will likely need to use some combination of the following functions: `pivot_longer`, `mutate`, `select`, `across`, `c_across`, `rowwise`
+Of all the destinations from Chicago O’Hare (ORD), which were the most common in 2014?
 
 :::
-
-
-## Fitting linear regression models
-
-The following code generates data $X_i \sim N(0, 1)$, $\varepsilon_i \sim N(0, 1)$, and 
-
-$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
-
-with $\beta_0 = \beta_1 = 1$.
-
-```{r}
-n <- 100
-x <- rnorm(n)
-noise <- rnorm(n)
-y <- 1 + x + noise
-```
-
-To estimate $\beta_0$ and $\beta_1$, we can use the `lm` function:
-
-```{r}
-lm(y ~ x)
-```
-
-How are these estimated coefficients calculated? Mathematically, the vector of estimated coefficients $\widehat{\beta}$ is given by
-
-$$\widehat{\beta} = (X^T X)^{-1} X^T Y$$
-where $X$ is the *design matrix* and $Y$ is the vector of observed responses. For the model above,
-
-$$\widehat{\beta} = \begin{bmatrix}
-\widehat{\beta}_0 \\
-\widehat{\beta}_1
-\end{bmatrix} \hspace{0.5cm} X = \begin{bmatrix}
-1 & x_1 \\
-1 & x_2 \\
-1 & x_3 \\
-\vdots & \vdots \\
-1 & x_n
-\end{bmatrix} \hspace{0.5cm} Y = \begin{bmatrix}
-y_1 \\
-y_2 \\
-y_3 \\
-\vdots \\
-y_n
-\end{bmatrix}$$
-
-How would we do this math in R? Since $X$ is a matrix, and $\widehat{\beta}$ and $Y$ are both vectors, we want to work with *matrices* and *vectors* in R!
-
-* The vector `y` generated above already represents $Y$ (by default, vectors in R are column vectors)
-* We need to create the design matrix $X$, by adding a column of 1s to the `x` simulated above. The following code creates $X$:
-
-```{r, eval=F}
-X_mat <- cbind(1, x)
-```
-
-* Matrix multiplication in R is done with `%*%`. For example, if `A` and `B` are conformal matrices/vectors, then $AB$ would be calculated with `A %*% B`
-* Transposes are calculated with `t()`. E.g., $A^T$ is given by `t(A)`
-* Matrix inverses are calculated with `solve()`. E.g., $A^{-1}$ is given by `solve(A)`
-
 
 :::{.question}
 #### Question 7
 
-Using this information, write a function called `my_lm` which will calculate the estimated coefficients $\widehat{\beta}$ given a vector of responses `y` and a design matrix `X_mat`.
+Which airport had the highest average arrival delay time in 2014?
+
+:::
+
+:::{.question}
+#### Question 8
+
+Re-do Question 2, but this time display the full name of each airport in the output. (Hint: use a JOIN)
+
+:::
+
+:::{.question}
+#### Question 9
+
+Find all flights between JFK and SFO in 2014. How many were canceled? What percentage of the these flights were canceled?
+
 :::
 
 

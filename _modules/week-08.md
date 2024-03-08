@@ -14,3 +14,4 @@ March 8
 : Lab day
 
 : **Homework 6 released**{: .label .label-yellow }
+  : [HW 6](https://sta279-s24.github.io/homework/hw_6.html)
