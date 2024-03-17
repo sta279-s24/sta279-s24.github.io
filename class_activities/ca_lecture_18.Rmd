@@ -1,0 +1,26 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Web scraping Taskmaster data
+
+In this class activity, you will practice some web scraping Taskmaster data. You will need to load the `rvest` and `tidyverse` packages.
+
+1. Following the class example of scraping Charlotte Ritchie's birthday, scrape the Series 15 champion from [https://taskmaster.fandom.com/wiki/Series_15](https://taskmaster.fandom.com/wiki/Series_15)
+
+2. Write a `for` loop to create a vector containing the champion from each series (1 -- 16). You can create a vector of urls for the different series with
+
+```{r, eval=F}
+paste0("https://taskmaster.fandom.com/wiki/Series_", 1:16)
+```
+
+
+3. Alex Horne is the creator of Taskmaster. Scrape Alex Horne's twitter url from [https://taskmaster.fandom.com/wiki/Alex_Horne](https://taskmaster.fandom.com/wiki/Alex_Horne).
+
+
