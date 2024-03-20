@@ -1,0 +1,49 @@
+---
+title: "Class activity solutions"
+format: html
+editor: source
+author: "Ciaran Evans"
+---
+
+```{r, message=F, warning=F}
+library(rvest)
+library(tidyverse)
+```
+
+1.
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_15") |>
+  html_element("[data-source^='champion'] > .pi-font") |>
+  html_text2()
+```
+
+2.
+
+```{r}
+urls <- paste0("https://taskmaster.fandom.com/wiki/Series_", 1:16)
+champions <- rep(NA, 16)
+for(i in 1:16){
+  champions[i] <- read_html(urls[i]) |>
+  html_element("[data-source^='champion'] > .pi-font") |>
+  html_text2()
+}
+champions
+```
+
+3.
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Alex_Horne") |>
+  html_element("[data-source^='twitter'] > div > a") |>
+  html_attr("href")
+```
+
+
+
+
+
+
+
+
+

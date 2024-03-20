@@ -1,0 +1,306 @@
+---
+title: "Lecture 19: Web scraping and data wrangling"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Motivation: Taskmaster
+
+![](https://deadline.com/wp-content/uploads/2022/03/Taskmaster-Series-11-Group-Shot.jpeg)
+
+## Last time:
+
+* `read_html` to import web page
+* `html_elements` to extract elements of interest
+* `html_table` to extract tabular data
+* `html_text2` to extract text data
+
+## Accessing HTML attributes
+
+![](taskmaster_hyperlinks.png)
+
+## Accessing HTML attributes
+
+![](taskmaster_hyperlinks.png)
+
+![](taskmaster_hyperlink_selector.png)
+
+## Accessing HTML attributes
+
+```{r, include=F}
+library(rvest)
+library(tidyverse)
+library(data.table)
+```
+
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_elements("td")
+```
+
+## Accessing HTML attributes
+
+![](taskmaster_hyperlink_selector.png)
+
+## Accessing HTML attributes
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_elements("td[align='center']")
+```
+
+## Accessing HTML attributes
+
+![](taskmaster_hyperlink_selector.png)
+
+## Accessing HTML attributes
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_elements("td[align='center'] > span")
+```
+
+## Accessing HTML attributes
+
+![](taskmaster_hyperlink_selector.png)
+
+## Accessing HTML attributes
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_elements("td[align='center'] > span > a")
+```
+
+## Accessing HTML attributes
+
+![](taskmaster_hyperlink_selector.png)
+
+## Accessing HTML attributes
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_elements("td[align='center'] > span > a") |>
+  html_attr("href")
+```
+
+## Last time: Taskmaster data
+
+```{r, eval=F}
+https://taskmaster.fandom.com/wiki/Series_11
+```
+
+![](taskmaster_11.png)
+
+## Scraping the tabular data
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table()
+```
+
+## Wrangling
+
+Here's what we have so far:
+
+```{r, eval=F}
+  Task             Description `Charlotte Ritchie` `Jamali Maddix` `Lee Mack` ...
+ Episode 1: It's… Episode 1:… Episode 1: It's no… Episode 1: It'… Episode 1…
+ 1                Prize: Bes… 1                   2               4         
+ 2                Do the mos… 2                   3[1]            3         
+ 3                Catch the … DQ                  1               5         
+ 4                Deliver al… 2                   1               5         
+ 5                Live: Stac… 0                   0               0         
+ Total            Total       5                   7               17        
+ Episode 2: The … Episode 2:… Episode 2: The Lur… Episode 2: The… Episode 2…
+ 1                Prize: Bes… 5                   1               2         
+ 2                Make the b… 0                   5               0   
+```
+
+What changes do you think we should make to this format?
+
+## Wrangling
+
+What we ultimately want:
+
+```{r, eval=F}
+   Task  Description     episode episode_name air_date contestant score series
+ 1 1     Prize: Best th… 1       "It's not y… 18 Marc… Charlotte… 1         11
+ 2 1     Prize: Best th… 1       "It's not y… 18 Marc… Jamali Ma… 2         11
+ 3 1     Prize: Best th… 1       "It's not y… 18 Marc… Lee Mack   4         11
+ 4 1     Prize: Best th… 1       "It's not y… 18 Marc… Mike Wozn… 5         11
+ 5 1     Prize: Best th… 1       "It's not y… 18 Marc… Sarah Ken… 3         11
+ 6 2     Do the most im… 1       "It's not y… 18 Marc… Charlotte… 2         11
+ 7 2     Do the most im… 1       "It's not y… 18 Marc… Jamali Ma… 3         11
+ 8 2     Do the most im… 1       "It's not y… 18 Marc… Lee Mack   3         11
+ 9 2     Do the most im… 1       "It's not y… 18 Marc… Mike Wozn… 5         11
+10 2     Do the most im… 1       "It's not y… 18 Marc… Sarah Ken… 4         11
+```
+
+colnames: Task, Description, episode, episode_name, air_date, contestant, score, series
+
+
+## Wrangling
+
+Intermediate step:
+
+```{r, eval=F}
+   Task  Description         episode   contestant score series
+  1     Prize: Best thing…  Episode 1… Charlotte… 1         11
+  1     Prize: Best thing…  Episode 1… Jamali Ma… 2         11
+  1     Prize: Best thing…  Episode 1… Lee Mack   4         11
+  1     Prize: Best thing…  Episode 1… Mike Wozn… 5         11
+  1     Prize: Best thing…  Episode 1… Sarah Ken… 3         11
+  2     Do the most…        Episode 1… Charlotte… 2         11
+  2     Do the most…        Episode 1… Jamali Ma… 3         11
+  2     Do the most…        Episode 1… Lee Mack   3         11
+  2     Do the most…        Episode 1… Mike Wozn… 5         11
+  2     Do the most…        Episode 1… Sarah Ken… 4         11
+```
+
+## Wrangling
+
+Here's what we have so far:
+
+```{r, eval=F}
+  Task             Description `Charlotte Ritchie` `Jamali Maddix` `Lee Mack` ...
+ Episode 1: It's… Episode 1:… Episode 1: It's no… Episode 1: It'… Episode 1…
+ 1                Prize: Bes… 1                   2               4         
+ 2                Do the mos… 2                   3[1]            3         
+ 3                Catch the … DQ                  1               5         
+ 4                Deliver al… 2                   1               5         
+ 5                Live: Stac… 0                   0               0         
+ Total            Total       5                   7               17        
+ Episode 2: The … Episode 2:… Episode 2: The Lur… Episode 2: The… Episode 2…
+ 1                Prize: Bes… 5                   1               2         
+ 2                Make the b… 0                   5               0   
+```
+
+
+What wrangling steps do we need to take?
+
+## Wrangling
+
+Step 1: create a separate column for episode:
+
+```{r, eval=F}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA))
+```
+
+```{r, echo=F}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA)) |>
+  select(Task, episode)
+```
+
+## Wrangling
+
+Step 2: fill in the episodes
+
+```{r, eval=F}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA)) |>
+  fill(episode, .direction = "down")
+```
+
+```{r, eval=F}
+   Task                            episode        
+   Episode 1: It's...             Episode 1: It'…
+   1                              Episode 1: It'…
+   2                              Episode 1: It'…
+   3                              Episode 1: It'…
+   4                              Episode 1: It'…
+   5                              Episode 1: It'…
+   Total                          Episode 1: It'…
+   Episode 2: The Lure of...      Episode 2: The…
+   1                              Episode 2: The…
+   2                              Episode 2: The…
+```
+
+
+## Wrangling
+
+Step 3: remove the "Total" and "Episode" rows in the Task column
+
+```{r, eval=F}
+   Task                            episode        
+   Episode 1: It's...             Episode 1: It'…
+   1                              Episode 1: It'…
+   2                              Episode 1: It'…
+   3                              Episode 1: It'…
+   4                              Episode 1: It'…
+   5                              Episode 1: It'…
+   Total                          Episode 1: It'…
+   Episode 2: The Lure of...      Episode 2: The…
+   1                              Episode 2: The…
+   2                              Episode 2: The…
+```
+
+What R code would we use to remove these rows?
+
+## Wrangling
+
+Step 3: remove the "Total" and "Episode" rows in the Task column
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA)) |>
+  fill(episode, .direction = "down") |>
+  filter(!startsWith(Task, "Episode"), 
+         !(Task %in% c("Total", "Grand Total")))
+```
+
+## Wrangling 
+
+Step 4: Pivot
+
+```{r, echo=F}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA)) |>
+  fill(episode, .direction = "down") |>
+  filter(!startsWith(Task, "Episode"), !(Task %in% c("Total", "Grand Total")))
+```
+
+How should we pivot this data?
+
+## Wrangling
+
+Step 4: Pivot
+
+```{r}
+read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA)) |>
+  fill(episode, .direction = "down") |>
+  filter(!startsWith(Task, "Episode"), 
+         !(Task %in% c("Total", "Grand Total"))) |>
+  pivot_longer(cols = -c(Task, Description, episode),
+               names_to = "contestant",
+               values_to = "score") |>
+  mutate(series = 11)
+```
+
+## Next steps
+
+* Separate episode info into episode number, episode name, and air date columns
+* Combine data from multiple series
