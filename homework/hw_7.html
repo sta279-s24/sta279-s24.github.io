@@ -1646,18 +1646,18 @@ margin-left: 0 !important;
         </ul>
         <nav role="navigation" id="toc">
           <ul>
-          <li><a href="#reshaping-data-in-python" id="toc-reshaping-data-in-python">Reshaping data in Python</a>
-          <ul>
-          <li><a href="#practice-pivoting" id="toc-practice-pivoting">Practice pivoting</a></li>
-          <li><a href="#analyzing-simulation-results" id="toc-analyzing-simulation-results">Analyzing simulation
-          results</a></li>
-          </ul></li>
-          <li><a href="#a-very-brief-intro-to-web-scraping" id="toc-a-very-brief-intro-to-web-scraping">A (very brief)
-          intro to web scraping</a>
+          <li><a href="#web-scraping-with-nba-data" id="toc-web-scraping-with-nba-data">Web scraping with NBA
+          data</a>
           <ul>
           <li><a href="#reading-the-html-file" id="toc-reading-the-html-file">Reading the html file</a></li>
           <li><a href="#iterating-over-multiple-months" id="toc-iterating-over-multiple-months">Iterating over
           multiple months</a></li>
+          </ul></li>
+          <li><a href="#web-scraping-with-the-great-british-bake-off" id="toc-web-scraping-with-the-great-british-bake-off">Web
+          scraping with the Great British Bake Off</a>
+          <ul>
+          <li><a href="#getting-the-contestants" id="toc-getting-the-contestants">Getting the
+          contestants</a></li>
           </ul></li>
           </ul>
         </nav>
@@ -1683,10 +1683,10 @@ margin-left: 0 !important;
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<p><strong>Due:</strong> Friday, October 27, 11:00am on Canvas</p>
+<p><strong>Due:</strong> Friday, March 29, 2:00pm on Canvas</p>
 <p><strong>Instructions:</strong></p>
 <ul>
-<li>Download the <a href="https://sta279-f23.github.io/homework/hw_7_template.qmd">HW 7
+<li>Download the <a href="https://sta279-s24.github.io/homework/hw_7_template.qmd">HW 7
 template</a>, and open the template (a Quarto document) in RStudio.</li>
 <li>Put your name in the file header</li>
 <li>Click <code>Render</code></li>
@@ -1713,230 +1713,13 @@ function</li>
 <p><strong>Resources:</strong> In addition to the class notes and
 activities, I recommend reading the following resources:</p>
 <ul>
-<li><a href="https://mdsr-book.github.io/mdsr3e/04-dataI.html">Chapter
-4</a> and <a href="https://mdsr-book.github.io/mdsr3e/06-dataII.html">Chapter 6</a>
-in <em>Modern Data Science with R</em></li>
-<li><a href="https://r4ds.hadley.nz/data-transform">Chapter 4</a> and <a href="https://r4ds.hadley.nz/data-tidy">Chapter 6</a> in <em>R for Data
-Science</em> (2nd edition)</li>
+<li><a href="https://r4ds.hadley.nz/regexps">Chapter 16</a> in <em>R for
+Data Science</em> (2nd edition)</li>
+<li><a href="https://r4ds.hadley.nz/webscraping">Chapter 25</a> in <em>R
+for Data Science</em> (2nd edition)</li>
 </ul>
-<div id="reshaping-data-in-python" class="section level1">
-<h1>Reshaping data in Python</h1>
-<p>The R code below creates a data frame called <code>df1</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">grp =</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;B&quot;</span>),</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">sex =</span> <span class="fu">c</span>(<span class="st">&quot;F&quot;</span>, <span class="st">&quot;M&quot;</span>, <span class="st">&quot;F&quot;</span>, <span class="st">&quot;M&quot;</span>),</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">meanL =</span> <span class="fu">c</span>(<span class="fl">0.225</span>, <span class="fl">0.47</span>, <span class="fl">0.325</span>, <span class="fl">0.547</span>),</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">sdL =</span> <span class="fu">c</span>(<span class="fl">0.106</span>, <span class="fl">0.325</span>, <span class="fl">0.106</span>, <span class="fl">0.308</span>),</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="at">meanR =</span> <span class="fu">c</span>(<span class="fl">0.34</span>, <span class="fl">0.57</span>, <span class="fl">0.4</span>, <span class="fl">0.647</span>),</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="at">sdR =</span> <span class="fu">c</span>(<span class="fl">0.0849</span>, <span class="fl">0.325</span>, <span class="fl">0.0707</span>, <span class="fl">0.274</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>)</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>df1</span></code></pre></div>
-<pre><code>##   grp sex meanL   sdL meanR    sdR
-## 1   A   F 0.225 0.106 0.340 0.0849
-## 2   A   M 0.470 0.325 0.570 0.3250
-## 3   B   F 0.325 0.106 0.400 0.0707
-## 4   B   M 0.547 0.308 0.647 0.2740</code></pre>
-<p>Load the data into Python:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>df1 <span class="op">=</span> r.df1</span></code></pre></div>
-<div id="question-1" class="section level4 question">
-<h4>Question 1</h4>
-<p>Using <code>melt</code> and <code>pivot</code>, reshape
-<code>df1</code> to produce the following output:</p>
-<pre><code>## sex       F      M      F      M     F      M       F      M
-## stat  meanL  meanL    sdL    sdL meanR  meanR     sdR    sdR
-## grp                                                         
-## A     0.225  0.470  0.106  0.325  0.34  0.570  0.0849  0.325
-## B     0.325  0.547  0.106  0.308  0.40  0.647  0.0707  0.274</code></pre>
-</div>
-<div id="practice-pivoting" class="section level2">
-<h2>Practice pivoting</h2>
-<p>The R code below creates a data frame called <code>df2</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="dv">2</span>),</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                  <span class="at">group =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;T&quot;</span>, <span class="st">&quot;C&quot;</span>), <span class="at">each=</span><span class="dv">3</span>),</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                  <span class="at">vals =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">10</span>))</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>df2</span></code></pre></div>
-<pre><code>##   id group vals
-## 1  1     T    4
-## 2  2     T    6
-## 3  3     T    8
-## 4  1     C    5
-## 5  2     C    6
-## 6  3     C   10</code></pre>
-<p>Import the data into Python:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>df2 <span class="op">=</span> r.df2</span></code></pre></div>
-<div id="question-2" class="section level4 question">
-<h4>Question 2</h4>
-<p>Use <code>pivot</code> and <code>assign</code> to reshape the data
-into the following (you may need to create an intermediate data frame,
-rather than doing all steps in a single chain):</p>
-<pre><code>## group     C    T  diff
-## id                    
-## 1.0     5.0  4.0  -1.0
-## 2.0     6.0  6.0   0.0
-## 3.0    10.0  8.0  -2.0</code></pre>
-</div>
-</div>
-<div id="analyzing-simulation-results" class="section level2">
-<h2>Analyzing simulation results</h2>
-<p>Your friend ran simulations to compare three different methods for
-calculating 95% confidence intervals for <span class="math inline">\(\beta_1\)</span> in a linear regression model.
-Their data is store in the file <code>sim_results.csv</code>, which can
-be imported into Python as follows:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>sim_results <span class="op">=</span> pd.read_csv(<span class="st">&quot;https://sta279-f23.github.io/homework/sim_results.csv&quot;</span>)</span></code></pre></div>
-<p>The <code>sim_results</code> dataset is organized as follows:</p>
-<ul>
-<li>The first column, <code>n</code>, records the sample size</li>
-<li>For each method and sample size, your friend simulated 100 datasets
-and calculated a confidence interval. The results for method 1 are
-stored in columns <code>method1_1</code>, <code>method1_2</code>, …,
-<code>method1_100</code> (with similar columns for methods 2 and 3). A 1
-in a column indicates that the confidence interval captured <span class="math inline">\(\beta_1\)</span>, while a 2 indicates the
-confidence interval did not capture <span class="math inline">\(\beta_1\)</span>.</li>
-</ul>
-<p>Just like in the previous assignment, we want to plot coverage for
-each method as a function of sample size. The following questions will
-help guide you through one possible way of doing this in Python.</p>
-<div id="question-3" class="section level4 question">
-<h4>Question 3</h4>
-<p>Use the <code>melt</code> function to reshape the
-<code>sim_results</code> data into the following form:</p>
-<pre><code>##         n       method  result
-## 0       5    method1_1       1
-## 1      10    method1_1       1
-## 2      20    method1_1       1
-## 3      50    method1_1       1
-## 4     100    method1_1       1
-## ...   ...          ...     ...
-## 1495    5  method3_100       2
-## 1496   10  method3_100       1
-## 1497   20  method3_100       1
-## 1498   50  method3_100       1
-## 1499  100  method3_100       1
-## 
-## [1500 rows x 3 columns]</code></pre>
-</div>
-<div id="question-4" class="section level4 question">
-<h4>Question 4</h4>
-<p>Next, use <code>str.split</code> to split the <code>method</code>
-column from Question 3 into two columns (see the slides and class
-activities for examples):</p>
-<pre><code>##         n   method  result iteration
-## 0       5  method1       1         1
-## 1      10  method1       1         1
-## 2      20  method1       1         1
-## 3      50  method1       1         1
-## 4     100  method1       1         1
-## ...   ...      ...     ...       ...
-## 1495    5  method3       2       100
-## 1496   10  method3       1       100
-## 1497   20  method3       1       100
-## 1498   50  method3       1       100
-## 1499  100  method3       1       100
-## 
-## [1500 rows x 4 columns]</code></pre>
-</div>
-<div id="question-5" class="section level4 question">
-<h4>Question 5</h4>
-<p>Next, use <code>groupby</code> and <code>agg</code> to calculate
-coverage for each method, for each sample size:</p>
-<pre><code>##              coverage
-## n   method           
-## 5   method1      0.44
-##     method2      0.45
-##     method3      0.25
-## 10  method1      0.72
-##     method2      0.70
-##     method3      0.82
-## 20  method1      0.84
-##     method2      0.80
-##     method3      0.93
-## 50  method1      0.95
-##     method2      0.93
-##     method3      0.94
-## 100 method1      0.96
-##     method2      0.92
-##     method3      0.96</code></pre>
-<p><em>Hint:</em> In <code>agg</code>, you can pass user-defined
-functions. Consider a function that converts the results into 0s and 1s,
-and then takes the mean.</p>
-</div>
-<div id="plotting-the-results" class="section level3">
-<h3>Plotting the results</h3>
-<p>Finally, we want to plot the results! But before we do, we need to do
-just a bit more reformatting.</p>
-<p>Currently, your results should look like this:</p>
-<pre><code>##              coverage
-## n   method           
-## 5   method1      0.44
-##     method2      0.45
-##     method3      0.25
-## 10  method1      0.72
-##     method2      0.70
-##     method3      0.82
-## 20  method1      0.84
-##     method2      0.80
-##     method3      0.93
-## 50  method1      0.95
-##     method2      0.93
-##     method3      0.94
-## 100 method1      0.96
-##     method2      0.92
-##     method3      0.96</code></pre>
-<p>Let’s suppose this new data frame is called <code>sim_res_new</code>,
-and we want to extract the sample sizes. Normally we would do
-<code>sim_res_new[&#39;n&#39;]</code>. But see what happens when we try
-that:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>sim_res_new[<span class="st">&#39;n&#39;</span>]</span></code></pre></div>
-<p>We get an error! Why? Because when we grouped and aggregated above,
-the columns that we grouped by became the <em>index</em> for our data
-frame. All pandas data frames have an index, though we haven’t used it
-so far.</p>
-<p>For now, let’s get rid of <code>n</code> and <code>method</code> as
-the index. One way is to add <code>as_index = False</code> to your
-<code>groupby</code> call. Another way is to add
-<code>.reset_index()</code> at the very end of your chain.</p>
-<div id="question-6" class="section level4 question">
-<h4>Question 6</h4>
-<p>Modify your code so the output now looks like this:</p>
-<pre><code>##       n   method  coverage
-## 0     5  method1      0.44
-## 1     5  method2      0.45
-## 2     5  method3      0.25
-## 3    10  method1      0.72
-## 4    10  method2      0.70
-## 5    10  method3      0.82
-## 6    20  method1      0.84
-## 7    20  method2      0.80
-## 8    20  method3      0.93
-## 9    50  method1      0.95
-## 10   50  method2      0.93
-## 11   50  method3      0.94
-## 12  100  method1      0.96
-## 13  100  method2      0.92
-## 14  100  method3      0.96</code></pre>
-</div>
-<p>Finally, we can create a plot. We will use the <code>seaborn</code>
-and <code>matplotlib</code> libraries to create a line plot like in the
-previous homework.</p>
-<div id="question-7" class="section level4 question">
-<h4>Question 7</h4>
-<p>Use the following code to create the plot:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>plt.figure()</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>sns.lineplot(x<span class="op">=</span><span class="st">&quot;n&quot;</span>, y<span class="op">=</span><span class="st">&quot;coverage&quot;</span>, data<span class="op">=</span>sim_res_new, hue<span class="op">=</span><span class="st">&quot;method&quot;</span>, marker <span class="op">=</span><span class="st">&#39;o&#39;</span>)</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>plt.show()</span></code></pre></div>
-</div>
-</div>
-</div>
-</div>
-<div id="a-very-brief-intro-to-web-scraping" class="section level1">
-<h1>A (very brief) intro to web scraping</h1>
+<div id="web-scraping-with-nba-data" class="section level1">
+<h1>Web scraping with NBA data</h1>
 <p>So far in this course, we have worked with data that we have
 generated ourselves (e.g. through simulations), or that other people
 have collected. But sometimes, that data isn’t in a nice format for us
@@ -1957,11 +1740,11 @@ package).</p>
 <div id="reading-the-html-file" class="section level2">
 <h2>Reading the html file</h2>
 <p>Run the following code in R to read the html file from the url:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>december <span class="ot">&lt;-</span> <span class="fu">read_html</span>(<span class="st">&quot;https://www.basketball-reference.com/leagues/NBA_2021_games-december.html&quot;</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>december</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>december <span class="ot">&lt;-</span> <span class="fu">read_html</span>(<span class="st">&quot;https://www.basketball-reference.com/leagues/NBA_2021_games-december.html&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>december</span></code></pre></div>
 <pre><code>## {html_document}
 ## &lt;html data-version=&quot;klecko-&quot; data-root=&quot;/home/bbr/build&quot; lang=&quot;en&quot; class=&quot;no-js&quot;&gt;
 ## [1] &lt;head&gt;\n&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8 ...
@@ -1971,9 +1754,9 @@ Fortunately, we know what we want: a table! We can use the
 <code>html_element</code> function to extract any tables from the file,
 and then convert it to a data frame with the <code>html_table</code>
 function:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>december <span class="sc">|&gt;</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>  <span class="fu">html_element</span>(<span class="st">&quot;table&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>  <span class="fu">html_table</span>(<span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>december <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="fu">html_element</span>(<span class="st">&quot;table&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">html_table</span>(<span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 67 × 11
 ##    Date    `Start (ET)` `Visitor/Neutral`   PTS `Home/Neutral`   PTS ``    ``   
 ##    &lt;chr&gt;   &lt;chr&gt;        &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;          &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
@@ -1991,9 +1774,9 @@ function:</p>
 ## # ℹ 3 more variables: Attend. &lt;chr&gt;, Arena &lt;chr&gt;, Notes &lt;lgl&gt;</code></pre>
 <p>Now, what if we wanted to extract a <em>different</em> month? No
 problem! Just change the url:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">read_html</span>(<span class="st">&quot;https://www.basketball-reference.com/leagues/NBA_2021_games-january.html&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  <span class="fu">html_element</span>(<span class="st">&quot;table&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="fu">html_table</span>(<span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">read_html</span>(<span class="st">&quot;https://www.basketball-reference.com/leagues/NBA_2021_games-january.html&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">html_element</span>(<span class="st">&quot;table&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="fu">html_table</span>(<span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 222 × 11
 ##    Date    `Start (ET)` `Visitor/Neutral`   PTS `Home/Neutral`   PTS ``    ``   
 ##    &lt;chr&gt;   &lt;chr&gt;        &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;          &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
@@ -2014,33 +1797,33 @@ problem! Just change the url:</p>
 <h2>Iterating over multiple months</h2>
 <p>Instead of doing each month by hand, let’s use a <code>for</code>
 loop to iterate over multiple months.</p>
-<div id="question-8" class="section level4 question">
-<h4>Question 8</h4>
+<div id="question-1" class="section level4 question">
+<h4>Question 1</h4>
 <p>Create a vector, <code>months</code>, containing the months from
 December to July, in lower case:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>months</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>months</span></code></pre></div>
 <pre><code>## [1] &quot;december&quot; &quot;january&quot;  &quot;february&quot; &quot;march&quot;    &quot;april&quot;    &quot;may&quot;      &quot;june&quot;    
 ## [8] &quot;july&quot;</code></pre>
 <p>You can do this manually, but the <code>month</code> function in the
 <code>lubridate</code> package might be easier.</p>
 </div>
-<div id="question-9" class="section level4 question">
-<h4>Question 9</h4>
+<div id="question-2" class="section level4 question">
+<h4>Question 2</h4>
 <p>Next, we want to make a vector containing all of the urls. This means
 we need to insert each month into the url in turn. We will use the
 <code>paste0</code> function in R:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>urls <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;https://www.basketball-reference.com/leagues/NBA_2021_games-&quot;</span>,</span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>               months, <span class="st">&quot;.html&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>urls <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;https://www.basketball-reference.com/leagues/NBA_2021_games-&quot;</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>               months, <span class="st">&quot;.html&quot;</span>)</span></code></pre></div>
 <p>Run the code to create the vector of urls.</p>
 </div>
 <p>Now that we have our urls, let’s iterate.</p>
-<div id="question-10" class="section level4 question">
-<h4>Question 10</h4>
+<div id="question-3" class="section level4 question">
+<h4>Question 3</h4>
 <p>Use a <code>for</code> loop to extract the results for each month
 from BasketballReference.com, and store each resulting dataframe in a
 list.</p>
 <p>For example, your output might look like this:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>df_list[[<span class="dv">1</span>]]</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>df_list[[<span class="dv">1</span>]]</span></code></pre></div>
 <pre><code>## # A tibble: 67 × 11
 ##    Date    `Start (ET)` `Visitor/Neutral`   PTS `Home/Neutral`   PTS ``    ``   
 ##    &lt;chr&gt;   &lt;chr&gt;        &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;          &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
@@ -2056,7 +1839,7 @@ list.</p>
 ## 10 Wed, D… 8:00p        San Antonio Spurs   131 Memphis Grizz…   119 Box … &quot;&quot;   
 ## # ℹ 57 more rows
 ## # ℹ 3 more variables: Attend. &lt;chr&gt;, Arena &lt;chr&gt;, Notes &lt;lgl&gt;</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>df_list[[<span class="dv">2</span>]]</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>df_list[[<span class="dv">2</span>]]</span></code></pre></div>
 <pre><code>## # A tibble: 222 × 11
 ##    Date    `Start (ET)` `Visitor/Neutral`   PTS `Home/Neutral`   PTS ``    ``   
 ##    &lt;chr&gt;   &lt;chr&gt;        &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;          &lt;int&gt; &lt;chr&gt; &lt;chr&gt;
@@ -2073,50 +1856,146 @@ list.</p>
 ## # ℹ 212 more rows
 ## # ℹ 3 more variables: Attend. &lt;chr&gt;, Arena &lt;chr&gt;, Notes &lt;lgl&gt;</code></pre>
 </div>
-<div id="question-11" class="section level4 question">
-<h4>Question 11</h4>
+<div id="question-4" class="section level4 question">
+<h4>Question 4</h4>
 <p>Finally, let’s combine all the data frames in our list into a single
 data frame:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>nba <span class="ot">&lt;-</span> <span class="fu">rbindlist</span>(df_list)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>nba <span class="ot">&lt;-</span> <span class="fu">rbindlist</span>(df_list)</span></code></pre></div>
 </div>
 <p>Now, looking at our output, we can see that there are <em>two</em>
 columns with the name <code>PTS</code>:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="fu">colnames</span>(nba)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">colnames</span>(nba)</span></code></pre></div>
 <pre><code>##  [1] &quot;Date&quot;            &quot;Start (ET)&quot;      &quot;Visitor/Neutral&quot; &quot;PTS&quot;            
 ##  [5] &quot;Home/Neutral&quot;    &quot;PTS&quot;             &quot;V1&quot;              &quot;V2&quot;             
 ##  [9] &quot;Attend.&quot;         &quot;Arena&quot;           &quot;Notes&quot;</code></pre>
 <p>We will need to rename the columns to prevent issues in R:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="fu">colnames</span>(nba) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;date&quot;</span>, <span class="st">&quot;start&quot;</span>, <span class="st">&quot;visitor&quot;</span>, <span class="st">&quot;visitor_pts&quot;</span>, <span class="st">&quot;home&quot;</span>, <span class="st">&quot;home_pts&quot;</span>,</span>
-<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>                   <span class="st">&quot;v1&quot;</span>, <span class="st">&quot;v2&quot;</span>, <span class="st">&quot;attend&quot;</span>, <span class="st">&quot;arena&quot;</span>, <span class="st">&quot;notes&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">colnames</span>(nba) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;date&quot;</span>, <span class="st">&quot;start&quot;</span>, <span class="st">&quot;visitor&quot;</span>, <span class="st">&quot;visitor_pts&quot;</span>, <span class="st">&quot;home&quot;</span>, <span class="st">&quot;home_pts&quot;</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>                   <span class="st">&quot;v1&quot;</span>, <span class="st">&quot;v2&quot;</span>, <span class="st">&quot;attend&quot;</span>, <span class="st">&quot;arena&quot;</span>, <span class="st">&quot;notes&quot;</span>)</span></code></pre></div>
 <p>I have kept the names of a couple of the columns as <code>v1</code>
 and <code>v2</code> for now, since we will drop those columns
 anyway.</p>
 <p>Now that we have our data, let’s start to analyze it. We would like
 to know whether having more fans in attendance gives the home team an
 advantage. However, there is another issue to fix:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="fu">class</span>(nba<span class="sc">$</span>attend)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">class</span>(nba<span class="sc">$</span>attend)</span></code></pre></div>
 <pre><code>## [1] &quot;character&quot;</code></pre>
 <p>Currently, attendance is a character! We need to make it a number
 before we can do statistics. This requires two steps: removing the
 commas from the attendances (R won’t understand them), then converting
 the attendances to a numeric vector:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>nba <span class="ot">&lt;-</span> nba <span class="sc">|&gt;</span></span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">attend =</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>, attend)))</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>nba <span class="ot">&lt;-</span> nba <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">attend =</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>, attend)))</span></code></pre></div>
 <p>Finally, let’s calculate some summary statistics and make some
 plots.</p>
-<div id="question-12" class="section level4 question">
-<h4>Question 12</h4>
+<div id="question-5" class="section level4 question">
+<h4>Question 5</h4>
 <p>Create a plot showing the relationship between attendance and the
 difference in scores between the home team and the visiting team (we may
 hypothesize that when the crowd is bigger, the home team will perform
 better).</p>
 </div>
-<div id="question-13" class="section level4 question">
-<h4>Question 13</h4>
+<div id="question-6" class="section level4 question">
+<h4>Question 6</h4>
 <p>Create a plot showing how the fraction of games with 0 attendees
 changed over the course of the season.</p>
+</div>
+</div>
+</div>
+<div id="web-scraping-with-the-great-british-bake-off" class="section level1">
+<h1>Web scraping with the Great British Bake Off</h1>
+<p>The Great British Bake Off (called the Great British Baking Show in
+the US because of trademark issues with Pillsbury – yes, really) is a
+British competition baking show. Each episode involves three challenges:
+a signature bake, a technical challenge, and a showstopper, all centered
+around a theme (bread week, cake week, pastry week, etc.). The
+participant who performs worst is eliminated (with a couple rare
+exceptions), and the participant who performs best is awarded “star
+baker” for the week.</p>
+<p>The goal of this assignment is to use web scraping and data wrangling
+(including working with strings) to collect and analyze data about the
+show. We will scrape the data from Wikipedia articles about the
+show.</p>
+<div id="getting-the-contestants" class="section level2">
+<h2>Getting the contestants</h2>
+<p>We will begin with series 2 (series 1 had a slightly different
+format, so we will ignore it for now). The Wikipedia article on series 2
+can be found at:</p>
+<p><a href="https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)">https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)</a></p>
+<p>Now let’s scrape some of the tabular data. Each series has a
+Wikipedia page, and these pages contain several tables. The first table
+is information about each baker, and then there are tables with the
+results for each episode.</p>
+<div id="question-7" class="section level4 question">
+<h4>Question 7</h4>
+<p>Use the <code>Inspect</code> tool in Chrome to find the selector for
+these tables on the series 2 page. There should be one selector that
+will identify all the tables we want: using the
+<code>html_elements</code> function with this selector, and then the
+<code>html_table</code> function, will produce a list of data frames.
+There should be 9 tables for series 2 (one table for the contestants,
+and 8 tables for the episodes).</p>
+</div>
+<div id="question-8" class="section level4 question">
+<h4>Question 8</h4>
+<p>Look at the first table, which contains contestant information. How
+many contestants appeared on series 2?</p>
+</div>
+<div id="question-9" class="section level4 question">
+<h4>Question 9</h4>
+<p>Repeat question 7 for series 5. What do you notice about the name of
+the “Baker” column?</p>
+</div>
+<p>Footnotes like this can cause a problem when we want to combine
+information across the series. Let’s sanitize the names of the tables to
+make sure the information can be combined.</p>
+<div id="question-10" class="section level4 question">
+<h4>Question 10</h4>
+<p>Use the <code>rename</code> and <code>starts_with</code> functions to
+rename the <code>Baker[3]</code> column <code>baker</code> in Series
+5.</p>
+</div>
+<div id="question-11" class="section level4 question">
+<h4>Question 11</h4>
+<p>Iterate over series 2 – 13, extracting the contestant table for each
+series, and combine the results into a single data frame (you can remove
+the <code>Links</code> column). The results should look like this:</p>
+<pre><code>##                              baker age                        occupation
+##   1:                    Ben Frazer  31                  Graphic Designer
+##   2:                    Holly Bell  31             Advertising executive
+##   3:                  Ian Vallance  40   Fundraiser for English Heritage
+##   4:                    Janet Basu  63       Teacher of Modern Languages
+##   5:                   Jason White  19         Civil Engineering Student
+##  ---                                                                    
+## 142: Marie-Therese &quot;Maxy&quot; Maligisa  29           Architectural assistant
+## 143:      Rebecca &quot;Rebs&quot; Lightbody  23                   Masters student
+## 144:  Nelsandro &quot;Sandro&quot; Farmhouse  30                             Nanny
+## 145:                Syabira Yusoff  32 Cardiovascular research associate
+## 146:                  Will Hawkins  45           Former charity director
+##                     hometown series
+##   1:             Northampton      2
+##   2:               Leicester      2
+##   3: Dunstable, Bedfordshire      2
+##   4:       Formby, Liverpool      2
+##   5:                 Croydon      2
+##  ---                               
+## 142:                  London     13
+## 143:           County Antrim     13
+## 144:                  London     13
+## 145:                  London     13
+## 146:                  London     13</code></pre>
+</div>
+<p>Using your data from question 11, answer the following questions
+about the contestants over the course of the show.</p>
+<div id="question-12" class="section level4 question">
+<h4>Question 12</h4>
+<p>How many contestants participated in each series?</p>
+</div>
+<div id="question-13" class="section level4 question">
+<h4>Question 13</h4>
+<p>Have the contestant ages changed over the show? Calculate relevant
+summary statistics and create a plot to address the question.</p>
 </div>
 </div>
 </div>

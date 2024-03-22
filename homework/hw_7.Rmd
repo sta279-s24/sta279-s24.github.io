@@ -7,11 +7,11 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday, October 27, 11:00am on Canvas
+**Due:** Friday, March 29, 2:00pm on Canvas
 
 **Instructions:** 
 
-* Download the [HW 7 template](https://sta279-f23.github.io/homework/hw_7_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Download the [HW 7 template](https://sta279-s24.github.io/homework/hw_7_template.qmd), and open the template (a Quarto document) in RStudio. 
 * Put your name in the file header
 * Click `Render`
 * Type all code and answers in the document (using `###` for section headings and `####` for question headings)
@@ -30,195 +30,11 @@ link-citations: yes
   
 **Resources:** In addition to the class notes and activities, I recommend reading the following resources:
 
-* [Chapter 4](https://mdsr-book.github.io/mdsr3e/04-dataI.html) and [Chapter 6](https://mdsr-book.github.io/mdsr3e/06-dataII.html) in *Modern Data Science with R*
-* [Chapter 4](https://r4ds.hadley.nz/data-transform) and [Chapter 6](https://r4ds.hadley.nz/data-tidy) in *R for Data Science* (2nd edition)
+* [Chapter 16](https://r4ds.hadley.nz/regexps) in *R for Data Science* (2nd edition)
+* [Chapter 25](https://r4ds.hadley.nz/webscraping) in *R for Data Science* (2nd edition)
 
 
-# Reshaping data in Python
-
-The R code below creates a data frame called `df1`:
-
-```{r}
-df1 <- data.frame(
-  grp = c("A", "A", "B", "B"),
-  sex = c("F", "M", "F", "M"),
-  meanL = c(0.225, 0.47, 0.325, 0.547),
-  sdL = c(0.106, 0.325, 0.106, 0.308),
-  meanR = c(0.34, 0.57, 0.4, 0.647),
-  sdR = c(0.0849, 0.325, 0.0707, 0.274)
-)
-
-df1
-```
-
-Load the data into Python:
-
-```{python}
-import pandas as pd
-
-df1 = r.df1
-```
-
-
-:::{.question}
-#### Question 1
-
-Using `melt` and `pivot`, reshape `df1` to produce the following output:
-
-```{python, echo=F}
-(df1.melt(id_vars = ['grp', 'sex'], var_name = 'stat')
-    .pivot(columns = ['sex', 'stat'], values = 'value',
-           index = 'grp'))
-```
-:::
-
-## Practice pivoting
-
-The R code below creates a data frame called `df2`:
-
-```{r}
-df2 <- data.frame(id = rep(c(1, 2, 3), 2),
-                  group = rep(c("T", "C"), each=3),
-                  vals = c(4, 6, 8, 5, 6, 10))
-
-df2
-```
-
-Import the data into Python:
-
-```{python}
-df2 = r.df2
-```
-
-
-:::{.question}
-#### Question 2
-
-Use `pivot` and `assign` to reshape the data into the following (you may need to create an intermediate data frame, rather than doing all steps in a single chain):
-
-```{python, echo=F}
-df2_new = df2.pivot(index = 'id', columns = 'group', values = 'vals')
-df2_new = df2_new.assign(diff = df2_new['T'] - df2_new['C'])
-df2_new
-```
-
-:::
-
-
-## Analyzing simulation results
-
-Your friend ran simulations to compare three different methods for calculating 95% confidence intervals for $\beta_1$ in a linear regression model. Their data is store in the file `sim_results.csv`, which can be imported into Python as follows:
-
-```{python}
-sim_results = pd.read_csv("https://sta279-f23.github.io/homework/sim_results.csv")
-```
-
-
-The `sim_results` dataset is organized as follows:
-
-* The first column, `n`, records the sample size
-* For each method and sample size, your friend simulated 100 datasets and calculated a confidence interval. The results for method 1 are stored in columns `method1_1`, `method1_2`, ..., `method1_100` (with similar columns for methods 2 and 3). A 1 in a column indicates that the confidence interval captured $\beta_1$, while a 2 indicates the confidence interval did not capture $\beta_1$.
-
-Just like in the previous assignment, we want to plot coverage for each method as a function of sample size. The following questions will help guide you through one possible way of doing this in Python.
-
-:::{.question}
-#### Question 3
-
-Use the `melt` function to reshape the `sim_results` data into the following form:
-
-```{python, echo=F}
-sim_results.melt(id_vars = 'n', var_name = 'method', value_name = 'result')
-```
-
-:::
-
-
-:::{.question}
-#### Question 4
-
-Next, use `str.split` to split the `method` column from Question 3 into two columns (see the slides and class activities for examples):
-
-```{python, echo=F}
-sim_res_new = sim_results.melt(id_vars = 'n', var_name = 'method', value_name = 'result')
-sim_res_new[['method', 'iteration']] = sim_res_new['method'].str.split('_', expand=True)
-sim_res_new
-```
-
-:::
-
-
-:::{.question}
-#### Question 5
-
-Next, use `groupby` and `agg` to calculate coverage for each method, for each sample size:
-
-```{python, echo=F}
-import numpy as np
-
-(sim_res_new.groupby(by=['n', 'method'])
-            .agg(coverage = ('result', lambda x: np.mean(2 - x))))
-```
-
-*Hint:* In `agg`, you can pass user-defined functions. Consider a function that converts the results into 0s and 1s, and then takes the mean.
-
-:::
-
-### Plotting the results
-
-Finally, we want to plot the results! But before we do, we need to do just a bit more reformatting.
-
-Currently, your results should look like this:
-
-```{python, echo=F}
-sim_res_new = (sim_res_new.groupby(by=['n', 'method'])
-            .agg(coverage = ('result', lambda x: np.mean(2 - x))))
-sim_res_new
-```
-
-Let's suppose this new data frame is called `sim_res_new`, and we want to extract the sample sizes. Normally we would do `sim_res_new['n']`. But see what happens when we try that:
-
-```{python, eval=F}
-sim_res_new['n']
-```
-
-We get an error! Why? Because when we grouped and aggregated above, the columns that we grouped by became the *index* for our data frame. All pandas data frames have an index, though we haven't used it so far.
-
-For now, let's get rid of `n` and `method` as the index. One way is to add `as_index = False` to your `groupby` call. Another way is to add `.reset_index()` at the very end of your chain.
-
-
-
-:::{.question}
-#### Question 6
-
-Modify your code so the output now looks like this:
-
-```{python, echo=F}
-sim_res_new = sim_res_new.reset_index()
-sim_res_new
-```
-
-:::
-
-Finally, we can create a plot. We will use the `seaborn` and `matplotlib` libraries to create a line plot like in the previous homework.
-
-:::{.question}
-#### Question 7
-
-Use the following code to create the plot:
-
-```{python, eval=F}
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-plt.figure()
-sns.lineplot(x="n", y="coverage", data=sim_res_new, hue="method", marker ='o')
-plt.show()
-```
-
-:::
-
-
-# A (very brief) intro to web scraping
+# Web scraping with NBA data
 
 So far in this course, we have worked with data that we have generated ourselves (e.g. through simulations), or that other people have collected. But sometimes, that data isn't in a nice format for us to work with.
 
@@ -264,7 +80,7 @@ Instead of doing each month by hand, let's use a `for` loop to iterate over mult
 
 
 :::{.question}
-#### Question 8
+#### Question 1
 
 Create a vector, `months`, containing the months from December to July, in lower case:
 
@@ -283,7 +99,7 @@ You can do this manually, but the `month` function in the `lubridate` package mi
 
 
 :::{.question}
-#### Question 9
+#### Question 2
 
 Next, we want to make a vector containing all of the urls. This means we need to insert each month into the url in turn. We will use the `paste0` function in R:
 
@@ -300,7 +116,7 @@ Now that we have our urls, let's iterate.
 
 
 :::{.question}
-#### Question 10
+#### Question 3
 
 Use a `for` loop to extract the results for each month from BasketballReference.com, and store each resulting dataframe in a list.
 
@@ -325,7 +141,7 @@ df_list[[2]]
 
 
 :::{.question}
-#### Question 11
+#### Question 4
 
 Finally, let's combine all the data frames in our list into a single data frame:
 
@@ -367,13 +183,13 @@ nba <- nba |>
 Finally, let's calculate some summary statistics and make some plots.
 
 :::{.question}
-#### Question 12
+#### Question 5
 
 Create a plot showing the relationship between attendance and the difference in scores between the home team and the visiting team (we may hypothesize that when the crowd is bigger, the home team will perform better).
 :::
 
 :::{.question}
-#### Question 13
+#### Question 6
 
 Create a plot showing how the fraction of games with 0 attendees changed over the course of the season.
 :::
@@ -401,7 +217,108 @@ nba |>
 ```
 
 
+# Web scraping with the Great British Bake Off
 
+The Great British Bake Off (called the Great British Baking Show in the US because of trademark issues with Pillsbury -- yes, really) is a British competition baking show. Each episode involves three challenges: a signature bake, a technical challenge, and a showstopper, all centered around a theme (bread week, cake week, pastry week, etc.). The participant who performs worst is eliminated (with a couple rare exceptions), and the participant who performs best is awarded "star baker" for the week. 
+
+The goal of this assignment is to use web scraping and data wrangling (including working with strings) to collect and analyze data about the show. We will scrape the data from Wikipedia articles about the show.
+
+
+## Getting the contestants
+
+We will begin with series 2 (series 1 had a slightly different format, so we will ignore it for now). The Wikipedia article on series 2 can be found at:
+
+[https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)](https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2))
+
+Now let's scrape some of the tabular data. Each series has a Wikipedia page, and these pages contain several tables. The first table is information about each baker, and then there are tables with the results for each episode.
+
+
+:::{.question}
+#### Question 7
+
+Use the `Inspect` tool in Chrome to find the selector for these tables on the series 2 page. There should be one selector that will identify all the tables we want: using the `html_elements` function with this selector, and then the `html_table` function, will produce a list of data frames. There should be 9 tables for series 2 (one table for the contestants, and 8 tables for the episodes).
+
+```{r, include=F}
+table_list <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements("table.wikitable.sortable") |>
+  html_table()
+```
+
+:::
+
+:::{.question}
+#### Question 8
+
+Look at the first table, which contains contestant information. How many contestants appeared on series 2?
+
+:::
+
+:::{.question}
+#### Question 9
+
+Repeat question 7 for series 5. What do you notice about the name of the "Baker" column?
+
+:::
+
+Footnotes like this can cause a problem when we want to combine information across the series. Let's sanitize the names of the tables to make sure the information can be combined. 
+
+:::{.question}
+#### Question 10
+
+Use the `rename` and `starts_with` functions to rename the `Baker[3]` column `baker` in Series 5.
+
+:::
+
+:::{.question}
+#### Question 11
+
+Iterate over series 2 -- 13, extracting the contestant table for each series, and combine the results into a single data frame (you can remove the `Links` column). The results should look like this:
+
+```{r, echo=F}
+urls <- paste0("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_", 
+               2:13, ")")
+contestants <- list()
+for(i in 2:13){
+  contestants[[i-1]] <- read_html(urls[i-1]) |>
+    html_element("table.wikitable.sortable") |>
+    html_table() |>
+    rename(baker = starts_with("Baker"),
+           age = starts_with("Age"),
+           occupation = starts_with("occupation"),
+           hometown = starts_with("hometown")) |>
+    select(baker, age, occupation, hometown) |>
+    mutate(series = i)
+}
+
+contestants <- rbindlist(contestants)
+contestants
+```
+
+:::
+
+Using your data from question 11, answer the following questions about the contestants over the course of the show.
+
+:::{.question}
+#### Question 12
+
+How many contestants participated in each series?
+
+:::
+
+:::{.question}
+#### Question 13
+
+Have the contestant ages changed over the show? Calculate relevant summary statistics and create a plot to address the question.
+
+:::
+
+```{r, include=F}
+contestants |>
+  group_by(series) |>
+  mutate(mean_age = mean(age)) |>
+  ggplot(aes(x = series, y = mean_age)) +
+  geom_point()
+```
 
 
 

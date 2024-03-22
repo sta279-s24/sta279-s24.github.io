@@ -1,11 +1,87 @@
 ---
-title: "Homework 8 solutions"
+title: "Homework 6 solutions"
 format: 
   html:
     embed-resources: true
 editor: source
 author: "Ciaran Evans"
 ---
+
+1.
+
+```{r, message=F, warning=F}
+library(Lahman)
+library(tidyverse)
+
+Teams |>
+  filter(teamID == "CHN") |>
+  select(yearID, HR, HRA) |>
+  pivot_longer(-yearID,
+               names_to = "team",
+               values_to = "runs") |>
+  mutate(team = ifelse(team == "HR", "Cubs", "Opponent")) |>
+  ggplot(aes(x = yearID, y = runs, color = team)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Year", y = "Runs", color = "Team") +
+  theme_bw()
+```
+
+2.
+
+```{r}
+df1 <- data.frame(
+  grp = c("A", "A", "B", "B"),
+  sex = c("F", "M", "F", "M"),
+  meanL = c(0.225, 0.47, 0.325, 0.547),
+  sdL = c(0.106, 0.325, 0.106, 0.308),
+  meanR = c(0.34, 0.57, 0.4, 0.647),
+  sdR = c(0.0849, 0.325, 0.0707, 0.274)
+)
+
+df1 |>
+  pivot_longer(-c(grp, sex),
+               names_to = "stat", values_to = "value") |>
+  pivot_wider(id_cols = grp,
+              names_from = c(sex, stat),
+              names_sep = ".",
+              values_from = value)
+```
+
+
+3.
+
+```{r}
+df2 <- data.frame(id = rep(c(1, 2, 3), 2),
+                  group = rep(c("T", "C"), each=3),
+                  vals = c(4, 6, 8, 5, 6, 10))
+
+Treat <- filter(df2, group == "T")
+Control <- filter(df2, group == "C")
+all <- mutate(Treat, diff = Treat$vals - Control$vals)
+all
+```
+
+4.
+
+```{r}
+df2 |>
+  group_by(id) |>
+  summarize(diff = vals[group == "T"] - vals[group == "C"])
+```
+
+
+5.
+
+```{r}
+df2 |>
+  pivot_wider(id_cols = id,
+              names_from = group,
+              values_from = vals) |>
+  mutate(diff = T - C)
+```
+
+6.
 
 ```{r}
 library(tidyverse)
@@ -20,123 +96,53 @@ query <- "
 dbGetQuery(db, query)
 ```
 
-1.
 
 ```{sql connection=db}
 SELECT 
   dest, SUM(1) as N
 FROM flights
-WHERE origin = 'ORD' AND year = 2010
+WHERE origin = 'ORD' AND year = 2014
 GROUP BY dest
 ORDER BY N DESC
 LIMIT 0, 5;
 ```
 
-2.
+7.
 
 ```{sql connection=db}
 SELECT 
   dest, AVG(arr_delay) as mean_arr_delay
 FROM flights
-WHERE year = 2010
+WHERE year = 2014
 GROUP BY dest
 ORDER BY mean_arr_delay DESC
 LIMIT 0, 5;
 ```
 
-3.
+8.
 
 ```{sql connection=db}
 SELECT 
   name, AVG(arr_delay) as mean_arr_delay
 FROM flights
 JOIN airports ON flights.dest = airports.faa
-WHERE year = 2010
+WHERE year = 2014
 GROUP BY dest
 ORDER BY mean_arr_delay DESC
 LIMIT 0, 5;
 ```
 
-4.
+9.
 
 ```{sql connection=db}
 SELECT 
   SUM(cancelled) as N,
   SUM(cancelled)/SUM(1) AS prop_cancelled
 FROM flights
-WHERE year = 2010 AND 
+WHERE year = 2014 AND 
   ((origin = 'JFK' AND dest = 'SFO') OR 
   (origin = 'SFO' AND dest = 'JFK'))
 LIMIT 0, 5;
-```
-
-5. This one is a bit more open-ended
-
-6.
-
-```{r}
-my_kmeans <- function(dat, k, max_iter){
-  
-  n <- nrow(dat) # number of observations
-  
-  # choose the initial means
-  means <- dat[sample(1:n, k),]
-  
-  # calculate distances to the initial means
-  dists <- matrix(nrow = n, ncol = k)
-  for(i in 1:k){
-    dists[,i] <- rowSums((sweep(as.matrix(dat), 2, as.matrix(means)[i,]))^2)
-  }
-  
-  # initialize groups
-  groups <- apply(dists, 1, which.min)
-  
-  # track the number of iterations and whether the groups have changed
-  cur_iter <- 0
-  group_change <- 1
-  
-  while(group_change > 0 & cur_iter < max_iter){
-    
-    # update the means
-    for(i in 1:k){
-      means[i,] <- colMeans(dat[groups == i,])
-    }
-    
-    # update the distances
-    dists <- matrix(nrow = n, ncol = k)
-    for(i in 1:k){
-      dists[,i] <- rowSums((sweep(dat, 2, means[i,]))^2)
-    }
-    
-    # update the groups
-    new_groups <- apply(dists, 1, which.min)
-    
-    cur_iter <- cur_iter + 1
-    group_change <- sum(groups != new_groups)
-    groups <- new_groups
-  }
-  
-  return(list(means, groups))
-}
-```
-
-
-```{r}
-library(palmerpenguins)
-
-clustering <- penguins |>
-  select(flipper_length_mm, bill_length_mm) |>
-  drop_na() |>
-  as.matrix() |>
-  my_kmeans(k=3, max_iter = 100)
-
-penguins |>
-  select(flipper_length_mm, bill_length_mm) |>
-  drop_na() |>
-  mutate(group = as.factor(clustering[[2]])) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = group)) +
-  geom_point()
-
 ```
 
 
