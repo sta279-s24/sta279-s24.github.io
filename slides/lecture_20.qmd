@@ -1,0 +1,433 @@
+---
+title: "Lecture 20: Intro to regular expressions"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=F}
+library(rvest)
+library(tidyverse)
+library(data.table)
+```
+
+## Last time: scraping and wrangling Taskmaster data
+
+What we ultimately want:
+
+```{r, eval=F}
+   Task  Description     episode episode_name air_date contestant score series
+ 1 1     Prize: Best th… 1       "It's not y… 18 Marc… Charlotte… 1         11
+ 2 1     Prize: Best th… 1       "It's not y… 18 Marc… Jamali Ma… 2         11
+ 3 1     Prize: Best th… 1       "It's not y… 18 Marc… Lee Mack   4         11
+ 4 1     Prize: Best th… 1       "It's not y… 18 Marc… Mike Wozn… 5         11
+ 5 1     Prize: Best th… 1       "It's not y… 18 Marc… Sarah Ken… 3         11
+ 6 2     Do the most im… 1       "It's not y… 18 Marc… Charlotte… 2         11
+ 7 2     Do the most im… 1       "It's not y… 18 Marc… Jamali Ma… 3         11
+ 8 2     Do the most im… 1       "It's not y… 18 Marc… Lee Mack   3         11
+ 9 2     Do the most im… 1       "It's not y… 18 Marc… Mike Wozn… 5         11
+10 2     Do the most im… 1       "It's not y… 18 Marc… Sarah Ken… 4         11
+```
+
+colnames: Task, Description, episode, episode_name, air_date, contestant, score, series
+
+## Last time: scraping and wrangling Taskmaster data
+
+```{r, eval=F}
+results <- read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA)) |>
+  fill(episode, .direction = "down") |>
+  filter(!startsWith(Task, "Episode"), 
+         !(Task %in% c("Total", "Grand Total"))) |>
+  pivot_longer(cols = -c(Task, Description, episode),
+               names_to = "contestant",
+               values_to = "score") |>
+  mutate(series = 11)
+```
+
+## What we have so far
+
+```{r, eval=F}
+   Task  Description         episode   contestant score series
+  1     Prize: Best thing…  Episode 1… Charlotte… 1         11
+  1     Prize: Best thing…  Episode 1… Jamali Ma… 2         11
+  1     Prize: Best thing…  Episode 1… Lee Mack   4         11
+  1     Prize: Best thing…  Episode 1… Mike Wozn… 5         11
+  1     Prize: Best thing…  Episode 1… Sarah Ken… 3         11
+  2     Do the most…        Episode 1… Charlotte… 2         11
+  2     Do the most…        Episode 1… Jamali Ma… 3[1]      11
+  2     Do the most…        Episode 1… Lee Mack   3         11
+  2     Do the most…        Episode 1… Mike Wozn… 5         11
+  2     Do the most…        Episode 1… Sarah Ken… 4         11
+```
+
+Currently, the episode column contains entries like
+
+```{r, eval=F}
+"Episode 1: It's not your fault. (18 March 2021)"
+```
+
+## Next steps
+
+1. Separate episode info into episode number, episode name, and air date columns
+2. Clean up the score column
+3. Combine data from multiple series
+
+Goal for today: start learning some tools for 1. and 2.
+
+## Cleaning the score column
+
+```{r, include=F}
+results <- read_html("https://taskmaster.fandom.com/wiki/Series_11") |>
+  html_element(".tmtable") |> 
+  html_table() |>
+  mutate(episode = ifelse(startsWith(Task, "Episode"), Task, NA)) |>
+  fill(episode, .direction = "down") |>
+  filter(!startsWith(Task, "Episode"), 
+         !(Task %in% c("Total", "Grand Total"))) |>
+  pivot_longer(cols = -c(Task, Description, episode),
+               names_to = "contestant",
+               values_to = "score") |>
+  mutate(series = 11)
+```
+
+
+```{r}
+table(results$score)
+```
+
+How do we want to clean these scores? How should the scores be stored?
+
+## Extracting numeric information
+
+Suppose we have the following string:
+
+```{r, eval=F}
+"3[1]"
+```
+
+And we want to extract just the number "3":
+
+```{r}
+str_extract("3[1]", "3")
+```
+
+
+## Extracting numeric information
+
+Suppose we have the following string:
+
+```{r, eval=F}
+"3[1]"
+```
+
+What if we don't know which number to extract?
+
+```{r}
+str_extract("3[1]", "\\d")
+```
+
+```{r}
+str_extract("4[1]", "\\d")
+```
+
+```{r}
+str_extract("DQ", "\\d")
+```
+
+## Regular expressions
+
+A *regular expression* is a pattern used to find matches in text.
+
+The simplest regular expressions match a specific character or sequence of characters:
+
+```{r}
+str_extract("My cat is 3 years old", "cat")
+```
+
+```{r}
+str_extract("My cat is 3 years old", "3")
+```
+
+## Matching multiple options
+
+We can also provide multiple options for the match
+
+```{r}
+str_extract("My cat is 3 years old", "cat|dog")
+```
+
+```{r, eval=F}
+str_extract("My dog is 10 years old", "cat|dog")
+```
+
+## Matching multiple options
+
+We can also provide multiple options for the match
+
+```{r}
+str_extract("My cat is 3 years old", "cat|dog")
+str_extract("My dog is 10 years old", "cat|dog")
+```
+
+```{r, eval=F}
+str_extract("My dog is 10 years old, my cat is 3 years old", 
+            "cat|dog")
+```
+
+
+## Matching multiple options
+
+We can also provide multiple options for the match
+
+```{r}
+str_extract("My cat is 3 years old", "cat|dog")
+str_extract("My dog is 10 years old", "cat|dog")
+str_extract("My dog is 10 years old, my cat is 3 years old", 
+            "cat|dog")
+str_extract_all("My dog is 10 years old, my cat is 3 years old", 
+                "cat|dog")
+```
+
+## Matching groups of characters
+
+What if I want to extract a *number*?
+
+```{r}
+str_extract("My cat is 3 years old", "\\d")
+```
+
+What do you think will happen when I run the following code?
+
+```{r, eval=F}
+str_extract("My dog is 10 years old", "\\d")
+```
+
+## Matching groups of characters
+
+What if I want to extract a *number*?
+
+```{r}
+str_extract("My cat is 3 years old", "\\d")
+```
+
+What do you think will happen when I run the following code?
+
+```{r}
+str_extract("My dog is 10 years old", "\\d")
+```
+
+## Matching groups of characters
+
+The `+` symbol in a regular expression means "repeated one or more times"
+
+```{r}
+str_extract("My dog is 10 years old", "\\d+")
+```
+
+## Extracting from multiple strings
+
+```{r}
+strings <- c("My cat is 3 years old", "My dog is 10 years old")
+str_extract(strings, "\\d+")
+```
+
+## Extracting episode information
+
+Currently, the `episode` column contains entries like:
+
+```{r, eval=F}
+"Episode 2: The pie whisperer. (4 August 2015)"
+```
+
+How would I extract just the episode number?
+
+## Extracting episode information
+
+Currently, the `episode` column contains entries like:
+
+```{r, eval=F}
+"Episode 2: The pie whisperer. (4 August 2015)"
+```
+
+How would I extract just the episode number?
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", "\\d+")
+```
+
+## Extracting episode information
+
+Currently, the `episode` column contains entries like:
+
+```{r, eval=F}
+"Episode 2: The pie whisperer. (4 August 2015)"
+```
+
+How would I extract the episode name?
+
+## Extracting episode information
+
+```{r, eval=F}
+"Episode 2: The pie whisperer. (4 August 2015)"
+```
+
+Pattern to match: *anything* that starts with a `:`, ends with a `.`
+
+**Note:** The `.` character in a regex means "any character"
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", ".")
+```
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", ".+")
+```
+
+## Extracting episode information
+
+**Note:** The `.` character in a regex means "any character"
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", ".")
+```
+
+We use an *escape character* when we actually want to choose a period:
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", "\\.")
+```
+
+## Extracting episode information
+
+Getting everything between the `:` and the `.`
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", 
+            ":.+\\.")
+```
+
+## Extracting episode information
+
+Getting everything between the `:` and the `.`
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", 
+            "(?<=: ).+(?=\\.)")
+```
+
+## Lookbehinds
+
+`(?<=)` is a *positive lookbehind*. It is used to identify expressions which are *preceded* by a particular expression.
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", 
+            "(?<=: ).+")
+```
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", 
+            "(?<=\\. ).+")
+```
+
+## Lookaheads
+
+`(?=)` is a *positive lookahead*. It is used to identify expressions which are *followed* by a particular expression.
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", 
+            ".+(?=\\.)")
+```
+
+```{r}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", 
+            ".+(?=:)")
+```
+
+## Extracting air date
+
+I want to extract just the air date. What pattern do I want to match?
+
+```{r, eval=F}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", )
+```
+
+## Extracting air date
+
+```{r, eval=F}
+str_extract("Episode 2: The pie whisperer. (4 August 2015)", 
+            "(?<=\\().+(?=\\))")
+```
+
+
+## Wrangling the episode info
+
+Currently:
+
+```{r, echo=F}
+results |>
+  select(episode)
+```
+
+## Wrangling the episode info
+
+One option:
+
+```{r, eval=F}
+results |>
+  mutate(episode_name = str_extract(episode,
+                                    "(?<=: ).+(?=\\.)"),
+         air_date = str_extract(episode, "(?<=\\().+(?=\\))"),
+         episode = str_extract(episode, "\\d+"))
+```
+
+```{r, echo=F}
+results |>
+  select(episode) |>
+  mutate(episode_name = str_extract(episode,
+                                    "(?<=: ).+(?=\\.)"),
+         air_date = str_extract(episode, "(?<=\\().+(?=\\))"),
+         episode = str_extract(episode, "\\d+"))
+```
+
+
+
+
+## Wrangling the episode info
+
+Another option:
+
+```{r, eval=F}
+results |>
+  separate_wider_regex(episode, 
+                       patterns = c(".+ ", 
+                                    episode = "\\d+", 
+                                    ": ", 
+                                    episode_name = ".+", 
+                                    "\\. \\(", 
+                                    air_date = ".+", 
+                                    "\\)"))
+```
+
+```{r, echo=F}
+results |>
+  select(episode) |>
+  separate_wider_regex(episode, 
+                       patterns = c(".+ ", 
+                                    episode = "\\d+", 
+                                    ": ", 
+                                    episode_name = ".+", 
+                                    "\\. \\(", 
+                                    air_date = ".+", 
+                                    "\\)"))
+```
+
+
+
