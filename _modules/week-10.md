@@ -8,6 +8,7 @@ March 25
   
 March 27
 : Regular expressions
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_21.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_21.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_21.html)
 
 March 29
 : Lab day

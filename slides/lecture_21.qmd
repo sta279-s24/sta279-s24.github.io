@@ -1,0 +1,487 @@
+---
+title: "Lecture 21: Strings and regular expressions"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=F}
+library(tidyverse)
+```
+
+## Recap: regular expressions
+
+A *regular expression* is a pattern used to find matches in text.
+
+**Example:** suppose I want to extract just the lecture number from the following file name. How would I do that?
+
+```{r, eval=F}
+"teaching/sta279-f23/slides/lecture_22.qmd"
+```
+
+## Recap: regular expressions
+
+A *regular expression* is a pattern used to find matches in text.
+
+**Example:** suppose I want to extract just the lecture number from the following file name. How would I do that?
+
+```{r}
+str_extract("teaching/sta279-f23/slides/lecture_22.qmd", "\\d+")
+```
+
+```{r}
+str_extract("teaching/sta279-f23/slides/lecture_22.qmd", "_\\d+")
+```
+
+```{r}
+str_extract("teaching/sta279-f23/slides/lecture_22.qmd", 
+            "(?<=_)\\d+")
+```
+
+## Recap: regular expressions
+
+Last time, we learned the following regular expression tools:
+
+* `\d` matches any digit (in R, have to type `\\d` because we write the regex in a string)
+* `.` matches any character (except `\n`)
+* `+` means "at least once"
+* `(?<=)` and `(?=)` are positive lookbehinds and lookaheads
+* `|` is alternation (one pattern or another)
+
+## Recap: tools for working with strings
+
+So far, we have learned the following:
+
+* `str_extract` extracts the first match
+
+```{r}
+str_extract("teaching/sta279-f23/slides/lecture_22.qmd", "\\d+")
+```
+
+* `str_exctract_all` extracts all matches
+
+```{r}
+str_extract_all("teaching/sta279-f23/slides/lecture_22.qmd", "\\d+")
+```
+
+Goal for today: learn more string and regex tools!
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+I want to identify the files in the `research` folder. What pattern would I want to match?
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+I want to identify the files in the `research` folder. What pattern would I want to match?
+
+```{r}
+str_detect(file_names, "research")
+```
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+I want to identify the files in the `research` folder. What pattern would I want to match?
+
+```{r}
+str_subset(file_names, "research")
+```
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+I want to identify the files in the `research` folder. What pattern would I want to match?
+
+```{r}
+str_view(file_names, "research")
+```
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+How would I select only the csv files?
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+How would I select only the csv files?
+
+```{r}
+str_subset(file_names, "csv")
+```
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "research/project2/sim_output.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+How would I select only the csv files in the `research` directory?
+
+## Some helpful string functions
+
+**Example:** Suppose I have the following file names:
+
+```{r}
+file_names <- c("research/project1/code.R", 
+                "research/project1/data.csv",
+                "research/project2/sim_output.csv",
+                "teaching/sta279/lecture1.qmd",
+                "teaching/sta279/example_data.csv")
+```
+
+How would I select only the csv files in the `research` directory?
+
+```{r}
+str_subset(file_names, "research.+csv")
+```
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select just `raspberry` and `blackberry`?
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select just `raspberry` and `blackberry`?
+
+```{r}
+str_view(strings, "berry")
+```
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select "raspberry", "blackberry", "grrreat", and "random"?
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select "raspberry", "blackberry", "grrreat", and "random"?
+
+```{r}
+str_view(strings, "r")
+```
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select just "raspberry", "blackberry", and "grrreat"?
+
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select just "raspberry", "blackberry", and "grrreat"?
+
+```{r}
+str_view(strings, "rr+")
+```
+
+```{r}
+str_view(strings, "r{2,}")
+```
+
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select just "grrreat"?
+
+```{r}
+str_view(strings, "r{3}")
+```
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select "apple", "raspberry", or "blackberry"?
+
+## More regular expressions
+
+```{r}
+strings <- c("apple", "banana", "raspberry", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select "apple", "raspberry", or "blackberry"?
+
+```{r}
+str_view(strings, "(.)\\1{1}")
+```
+## More regular expressions
+
+```{r}
+strings <- c("papa", "banana", "memento", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select "papa", "banana", and "memento"?
+
+## More regular expressions
+
+```{r}
+strings <- c("papa", "banana", "memento", 
+             "blackberry", "grrreat", "random")
+```
+
+How would I select "papa", "banana", and "memento"?
+
+```{r}
+str_view(strings, "(..)\\1{1}")
+```
+
+```{r}
+str_view(strings, "(..)+")
+```
+
+## More regular expressions
+
+```{r}
+strings <- c("papa", "banana", "memento", 
+             "blackberry", "toboggan", "random")
+```
+
+How would I select "banana" and "blackberry"?
+
+## More regular expressions
+
+```{r}
+strings <- c("papa", "banana", "memento", 
+             "blackberry", "toboggan", "random")
+```
+
+How would I select "banana" and "blackberry"?
+
+```{r}
+str_view(strings, "^b")
+```
+
+## More regular expressions
+
+```{r}
+strings <- c("papa", "banana", "memento", 
+             "blackberry", "toboggan", "random")
+```
+
+How would I select "papa" and "banana"?
+
+## More regular expressions
+
+```{r}
+strings <- c("papa", "banana", "memento", 
+             "blackberry", "toboggan", "random")
+```
+
+How would I select "papa" and "banana"?
+
+```{r}
+str_view(strings, "a$")
+```
+
+
+## More regular expressions
+
+```{r, eval=F}
+"The mean $\\mu$ is defined by $\\mu = \\frac{1}{n} \\sum_i x_i$"
+```
+
+How would I extract `$\mu$` and `$\mu = \frac{1}{n} \sum_i x_i$`?
+
+## More regular expressions
+
+```{r, eval=F}
+"The mean $\\mu$ is defined by $\\mu = \\frac{1}{n} \\sum_i x_i$"
+```
+
+How would I extract `$\mu$` and `$\mu = \frac{1}{n} \sum_i x_i$`?
+
+```{r}
+str_extract("The mean $\\mu$ is defined by $\\mu = \\frac{1}{n} \\sum_i x_i$",
+            "\\$.+\\$")
+```
+
+
+## More regular expressions
+
+```{r, eval=F}
+"The mean $\\mu$ is defined by $\\mu = \\frac{1}{n} \\sum_i x_i$"
+```
+
+How would I extract `$\mu$` and `$\mu = \frac{1}{n} \sum_i x_i$`?
+
+```{r}
+str_extract_all("The mean $\\mu$ is defined by $\\mu = \\frac{1}{n} \\sum_i x_i$",
+            "\\$[^\\$]+\\$")
+```
+
+
+## More regular expressions
+
+```{r, eval=F}
+"The current date (today) is November 3 [2007]."
+```
+
+How would I extract "(today)" and "[2007]"?
+
+
+## More regular expressions
+
+```{r, eval=F}
+"The current date (today) is November 3 [2007]."
+```
+
+How would I extract "(today)" and "[2007]"?
+
+```{r}
+str_extract_all("The current date (today) is November 3 [2007].",
+                "[\\(\\[][^\\)\\]]+[\\)\\]]")
+```
+
+What if I just want "today" and "2007"?
+
+## More regular expressions
+
+```{r, eval=F}
+"The current date (today) is November 3 [2007]."
+```
+
+```{r}
+str_extract_all("The current date (today) is November 3 [2007].",
+                "(?<=[\\(\\[])[^\\)\\]]+(?=[\\)\\]])")
+```
+
+
+## More regular expressions
+
+```{r, eval=F}
+"The current date (today) is November 3 [2007]."
+```
+
+What if I only want the words?
+
+```{r}
+str_extract_all("The current date (today) is November 3 [2007].",
+                "\\w+")
+```
+
+## More regular expressions
+
+```{r, eval=F}
+"The current date (today) is November 3 [2007]."
+```
+
+What if I only want the words?
+
+```{r}
+str_replace_all("The current date (today) is November 3 [2007].",
+                "[^\\w\\s]", "")
+```
+
+
+## A list of some other useful tools
+
+* `*` means "appears 0 or more times"
+* `{m}` means "appears $m$ times"
+* `\b` is a word boundary (use `\\b` in R)
+* `\w` is any alphanumeric character, or underscore (use `\\w` in R)
+* `( )` is a capture group
+* `[ ]` is a set of characters
+* `\s` denotes spaces (use `\\s` in R)
+* `^` anchors at the beginning, `$` anchors at the end
+
+
+

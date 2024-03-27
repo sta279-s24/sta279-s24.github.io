@@ -1,0 +1,14 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Practice with regular expressions
+
+Regular expressions are an important tool for extracting information from strings and text data. For further practice with the concepts we discussed in class, try the activities at [https://regexone.com/](https://regexone.com/)
+
