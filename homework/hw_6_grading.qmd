@@ -7,7 +7,7 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-Total: 34 pts
+Total: 43 pts
 
 **General grading notes:** 
 
@@ -114,66 +114,97 @@ df2 |>
 
 **Grading:** 1 pt for correct output, 2 pts for using `pivot_wider` and `mutate`
 
-#### Question 6 (8 pts)
+```{r, eval=F}
+library(tidyverse)
+library(mdsr)
+library(DBI)
 
-```{r}
-sim_results <- read.csv("https://sta279-f23.github.io/homework/sim_results.csv")
+db <- dbConnect_scidb("airlines")
 
-sim_results |>
-  mutate(across(-n, function(x) {2 - x})) |>
-  rowwise() |>
-  mutate(method1 = mean(c_across(contains("method1"))),
-         method2 = mean(c_across(contains("method2"))),
-         method3 = mean(c_across(contains("method3")))) |>
-  select(n, method1, method2, method3) |>
-  pivot_longer(-n, 
-               names_to = "method",
-               values_to = "coverage") |>
-  ggplot(aes(x = n, y = coverage, color = method)) +
-  geom_point() +
-  geom_line() +
-  labs(x = "Sample size (n)",
-       y = "Coverage",
-       color = "Method") +
-  theme_classic()
+query <- "
+  SHOW TABLES;
+"
+dbGetQuery(db, query)
 ```
 
-**Grading:** This can be done in several different ways. What is most important is that they produce the correct output.
 
-* 4 pts for correctly calculating the coverage for each method, for each sample size
-* 1 pt for sample size on x-axis
-* 1 pt for coverage on y-axis
-* 1 pt for coloring by method (they don't have to use the same colors)
-* 1 pt for labels (methods and axes)
+#### Question 6 (6 pts)
 
-#### Question 7 (7 pts)
-
-```{r}
-# fit a linear regression model and return estimated coefficients
-# X_mat: design matrix for the model
-# y: vector of observed responses
-my_lm <- function(X_mat, y){
-  return(solve(t(X_mat) %*% X_mat) %*% t(X_mat) %*% y)
-}
-
-# simulate some data
-set.seed(45)
-n <- 100
-x <- rnorm(n)
-noise <- rnorm(n)
-y <- 1 + x + noise
-
-# fit the regression model with the lm function
-lm(y ~ x)
-
-# compare the output with our function
-X_mat <- cbind(1, x)
-my_lm(X_mat, y)
+```
+SELECT 
+  dest, SUM(1) as N
+FROM flights
+WHERE origin = 'ORD' AND year = 2014
+GROUP BY dest
+ORDER BY N DESC
+LIMIT 0, 5;
 ```
 
-**Grading:**
+**Grading:** 
 
-* 2 pts for writing a function (lose these points if they don't put their code in a function)
-* 2 pts for taking the correct arguments: must be two arguments, the design matrix and the response vector
-* 3 pts for correctly calculating the estimated coefficients in the function
+* 1 pt for counting the number of flights
+* 1 pt for grouping by destination
+* 1 pt for displaying both the count and the destination in the output
+* 1 pt for descending order
+* 2 pts for choosing ORD and 2014
 
+#### Question 7 (5 pts)
+
+```
+SELECT 
+  dest, AVG(arr_delay) as mean_arr_delay
+FROM flights
+WHERE year = 2014
+GROUP BY dest
+ORDER BY mean_arr_delay DESC
+LIMIT 0, 5;
+```
+
+**Grading:** 
+
+* 1 pt for calculating mean arrival delay
+* 1 pt for grouping by destination
+* 1 pt for displaying both the delay and the destination in the output
+* 1 pt for descending order
+* 1 pts for choosing 2014
+
+#### Question 8 (7 pts)
+
+```
+SELECT 
+  name, AVG(arr_delay) as mean_arr_delay
+FROM flights
+JOIN airports ON flights.dest = airports.faa
+WHERE year = 2014
+GROUP BY dest
+ORDER BY mean_arr_delay DESC
+LIMIT 0, 5;
+```
+
+**Grading:** 
+
+* 1 pt for calculating mean arrival delay
+* 1 pt for grouping by destination
+* 1 pt for displaying both the delay and the destination in the output
+* 1 pt for descending order
+* 1 pts for choosing 2010
+* 2 pts for joining on dest = faa
+
+#### Question 9 (6 pts)
+
+```
+SELECT 
+  SUM(cancelled) as N,
+  SUM(cancelled)/SUM(1) AS prop_cancelled
+FROM flights
+WHERE year = 2014 AND 
+  ((origin = 'JFK' AND dest = 'SFO') OR 
+  (origin = 'SFO' AND dest = 'JFK'))
+LIMIT 0, 5;
+```
+
+**Grading:** 
+
+* 1 pt for calculating number of cancelled flights
+* 1 pt for calculating proportion of cancelled flights
+* 4 pt for year = 2010, AND correctly identifying flights between JFK and SFO (either JFK is origin and SFO is dest, or JFK is dest and SFO is origin)
