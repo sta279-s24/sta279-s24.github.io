@@ -1,0 +1,131 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+# Beatles songs!
+
+In this class activity, you will work with data on Beatles songs. Our goal is to analyze patterns in the songwriters, vocals, and themes.
+
+The data is available in a table at
+
+[http://en.wikipedia.org/wiki/List_of_songs_recorded_by_the_Beatles](http://en.wikipedia.org/wiki/List_of_songs_recorded_by_the_Beatles)
+
+1. Scrape the table of Beatles songs from the Wikipedia article, and store it as a data frame called `songs` in R. You can ignore the "Other released songs" on the Wikipedia page.
+
+```{r, include=F}
+library(tidyverse)
+library(rvest)
+url <- "http://en.wikipedia.org/wiki/List_of_songs_recorded_by_the_Beatles"
+songs <- read_html(url) |>
+  html_element(".wikitable.sortable") |>
+  html_table()
+```
+
+2. Now let's cleanup the names of some of the columns. Rename the columns and select only the song name, album, writers, vocals, and year columns, so the output looks something like this:
+
+
+```{r, include=F}
+songs <- songs |>
+  rename(vocals = starts_with("Lead"),
+         album = starts_with("Core"),
+         writers = 'Songwriter(s)') |>
+  select(Song, album, writers, vocals, Year)
+```
+
+```{r}
+songs
+```
+
+One of our goals is to examine the Beatles song titles. Before we do, however, we need to clean up the song titles. Right now, our titles look like this:
+
+```{r}
+head(songs$Song)
+```
+
+We want to remove the quotes (the `\"`) and the footnotes and links (`[f]`, `#`, etc.).
+
+3. Use the `str_remove_all` function to remove all of the quotes `\"` from the song titles. Then use the `str_extract_all` function (with a judiciously chosen regular expression) to extract the portion of the song titles you want to keep (omitting the footnotes, links, etc). Think carefully about what to keep in the titles -- generally, the words in parentheses are part of the title!
+
+To create the correct regular expression, you may find that `.+?` is useful. In a regular expression, `.+` is *greedy*: it will take the longest substring that matches. In contrast, `.+?` is *reluctant*: it will take the shortest substring that matches. For example:
+
+```{r}
+str_extract("I want you (she's so heavy) (5)", ".+?(?= \\()")
+```
+
+```{r}
+str_extract("I want you (she's so heavy) (5)", ".+(?= \\()")
+```
+
+
+```{r, include=F}
+songs <- songs |>
+  mutate(Song = str_remove_all(Song, '\\"'),
+         Song = str_extract(Song, ".+?(?=( #|[\\[]|$))"))
+```
+
+Now that we have cleaned up the song titles, let's look at the words in those titles. The first thing we want to do is extract each of the individual words from each title. This is called *tokenizing*, and can be done with the `unnest_tokens` function in the `tidytext` package. 
+
+4. Run the following code to extract each word from each song title. What does a row in the resulting data frame represent?
+
+```{r}
+library(tidytext)
+songs |>
+  unnest_tokens(word, Song, drop=F)
+```
+
+Once we've tokenized the song names, we notice that there are a lot of *stop words* in the titles, like `the`, `a`, `and`, `to`, etc. To remove these stop words, we will use the `get_stopwords` function in the `tidytext` package, which loads a set of stop words that we can ignore using an anti-join.
+
+5. Run the following code to remove stopwords from the tokenized song titles:
+
+```{r}
+song_words <- songs |>
+  unnest_tokens(word, Song, drop=F) |>
+  anti_join(get_stopwords(), join_by("word"))
+
+song_words
+```
+
+
+Ok, now we've got the words we want! 
+
+6. What are the most common words that appear in Beatles song titles? Can you get a sense for what themes they tend to sing about?
+
+We can do more analysis than just looking at the words. One approach to text analysis is *sentiment analysis*. In a sentiment analysis, each word is given a *sentiment score* (e.g., how positve or negative that word is).
+
+The key to sentiment analysis are what are called *lexicons*: lists of English words, with each word assigned a numeric value identifying how positive or negative that word is. The lexicon we will use is the AFINN lexicon. To load this lexicon into R, use the following:
+
+```{r}
+library(textdata)
+afinn <- get_sentiments("afinn")
+head(afinn)
+```
+
+The AFINN lexicon assigns words a score between -5 and 5. Negative scores indicate a negative sentiment and positive scores indicate a positive sentiment. The closer to 0 that a word is scored, the more neutral the word.
+
+7. Use a join to combine the `afinn` lexicon with your data frame containing all the song title words.
+
+8. On average, are Beatles song titles positive or negative?
+
+9. Calculate a sentiment score for each song by summing the sentiment scores for the words in the song title. Then plot a distribution of the sentiment scores for each song.
+
+```{r, include=F}
+song_words |>
+  inner_join(afinn, join_by("word")) |>
+  group_by(Song) |>
+  summarize(score = sum(value)) |>
+  ggplot(aes(x = score)) +
+  geom_histogram() +
+  theme_bw()
+```
+
+
+10. Which songs have the most positive titles? The most negative? 
+
+If you happen to be familiar with the Beatles discography: do songs with positive titles also have positive lyrics?
+

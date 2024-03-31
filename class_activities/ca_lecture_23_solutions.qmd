@@ -1,0 +1,70 @@
+---
+title: "Class activity solutions"
+format: html
+editor: source
+author: "Ciaran Evans"
+---
+
+```{r, message=F, warning=F}
+library(rvest)
+library(tidyverse)
+library(tidytext)
+library(textdata)
+```
+
+1.
+
+```{r}
+url <- "http://en.wikipedia.org/wiki/List_of_songs_recorded_by_the_Beatles"
+songs <- read_html(url) |>
+  html_element(".wikitable.sortable") |>
+  html_table()
+```
+
+2.
+
+```{r}
+songs <- songs |>
+  rename(vocals = starts_with("Lead"),
+         album = starts_with("Core"),
+         writers = 'Songwriter(s)') |>
+  select(Song, album, writers, vocals, Year)
+```
+
+3.
+
+```{r}
+songs <- songs |>
+  mutate(Song = str_remove_all(Song, '\\"'),
+         Song = str_extract(Song, ".+?(?=( #|[\\[]|$))"))
+```
+
+5.
+
+```{r}
+song_words <- songs |>
+  unnest_tokens(word, Song, drop=F) |>
+  anti_join(get_stopwords(), join_by("word"))
+
+song_words
+```
+
+6.
+
+```{r}
+afinn <- get_sentiments("afinn")
+head(afinn)
+```
+
+7,9.
+
+```{r}
+song_words |>
+  inner_join(afinn, join_by("word")) |>
+  group_by(Song) |>
+  summarize(score = sum(value)) |>
+  ggplot(aes(x = score)) +
+  geom_histogram() +
+  theme_bw()
+```
+
