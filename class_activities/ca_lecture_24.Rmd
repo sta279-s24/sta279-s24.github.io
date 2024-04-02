@@ -1,0 +1,198 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+# Profiling and benchmarking
+
+In this class activity, you will use profile and benchmarking tools to identify bottlenecks in your code, and find alternative solutions which are more efficient.
+
+Before you begin the activity, you will need to install the `profvis` and `bench` packages.
+
+## A linear model simulation
+
+Throughout this course, we have used simulations to explore statistical questions. Below is a short simulation which simulates data, fits a simple linear regression model, and stores the estimated slopes:
+
+```{r, eval=F}
+nsim <- 10000
+n <- 100
+beta0 <- 1
+beta1 <- 0.5
+
+save <- vector()
+
+for (i in 1:nsim) {
+  x <- rnorm(n)
+  y <- beta0 + beta1*x + rnorm(n)
+  
+  coef <- lm(y ~ x)$coef[2]
+  save <- c(save, coef)
+}
+save <- data.frame(save)
+```
+
+In this activity, we will try to make the simulation more efficient.
+
+## Initial performance
+
+1. Run the code below to time the simulation. How long does it take to run?
+
+```{r, eval=F}
+system.time({
+  nsim <- 500
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector()
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save <- c(save, coef)
+  }
+  save <- data.frame(save)
+})
+```
+
+## Profiling
+
+The `system.time` function used in question 1 gives us a rough idea of how long the simulation takes (if you run it again, you will get a slightly different result, and there are other timing functions which are more precise). However, just timing the code doesn't tell us which *parts* of the code are taking the most time. Is it simulating the data? Fitting the model? etc.
+
+To analyze how each part of the code contributes to the overall time, we can use **profiling**. The `profvis` package provides a function (also called `profvis`) which visualizes the time and memory usage of each portion of the code.
+
+2. Run the following code to profile the simulation with `profvis`:
+
+```{r, eval=F}
+library(profvis)
+profvis({
+  nsim <- 500
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector()
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save <- c(save, coef)
+  }
+  save <- data.frame(save)
+})
+```
+
+Running the `profvis` function will generate an interactive profile. The top panel shows the source code, and its contribution to memory and execution time. The bottom panel shows more details on timing for each piece. We will focus on the top panel for now.
+
+3. Looking at the profiling results, which part of the code appears to be taking the most time?
+
+So far, we have tried 500 simulations, but this is a pretty small number. Let's change the number of simulations, and see how the profiling changes.
+
+4. Run the following code, which uses 10000 simulations. Which parts of the code now take the most time?
+
+
+```{r, eval=F}
+profvis({
+  nsim <- 10000
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector()
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save <- c(save, coef)
+  }
+  save <- data.frame(save)
+})
+```
+
+## Don't grow vectors!
+
+After increasing the number of simulations, storing the estimated coefficients (`save <- c(save, coef)`) now takes a much greater proportion of the execution time! 
+
+Let's think about why that happens. We take the existing vector `save`, add `coef` to the end, and then re-store the new `save` vector. This means we have to access and re-allocate the full vector *every time we go through the loop*. When we have many simulations, that vector gets long, and it takes a lot more time to access and store the vector!
+
+Notice that `save <- c(save, coef)` is different from the syntax we have used throughout the course. In general, it is *bad practice* to grow vectors like this. Instead, we should allocated a vector of the size we want before beginning the loop, and then fill in the `i`th entry at each iteration.
+
+5. Modify the code so that you are not growing the `save` vector, and profile the modified code. The modified code should take less time to run, and storing the estimated slopes should be much more efficient.
+
+```{r, eval=F, include=F}
+profvis({
+  nsim <- 10000
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector(length = nsim)
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save[i] <- coef
+  }
+  save <- data.frame(save)
+})
+```
+
+## Benchmarking the `lm` function
+
+Now the part of our code that takes the most time to run is the `lm` function. If we want to speed up our code, we should try to make the `lm` function more efficient!
+
+Now, the `lm` function in R is already very optimized (of course statisticians would want linear models to run quickly!). So how could we speed up the code? The key is that the `lm` function doesn't *just* fit the linear model. It also parses formulas, checks for errors, and makes the output look pretty.
+
+6. Run the following in your R console to see the source code for the `lm` function. Skim through the source code, and identify some of the other tasks performed by the function (beyond just estimating the model coefficients).
+
+```{r, eval=F}
+lm
+```
+
+Below is a function that just calculates coefficients for the linear regression model (and even this could be optimized more):
+
+```{r, eval=F}
+my_lm <- function(X, y){
+  return(c(solve(t(X) %*% X) %*% t(X) %*% y))
+}
+```
+
+Clearly there is no error checking, data conversion, hypothesis testing, etc. in this function. Perhaps that means it will run faster than the `lm` function? To compare performance of the two functions, we can use **microbenchmarking**. Microbenchmarking involves running a small piece of code many times, and timing the results, to analyze its performance. We will use the `mark` function from the `bench` package, which evaluates both memory usage and execution time.
+
+7. Run the following code to benchmark the `lm` function against the `my_lm` function. Which function is faster (has more iterations per second)? Which function uses more memory?
+
+```{r, eval=F}
+n <- 100
+beta0 <- 1
+beta1 <- 0.5
+x <- rnorm(n)
+y <- beta0 + beta1*x + rnorm(n)
+X <- cbind(1, x)
+
+lb <- bench::mark(
+  coef <- lm(y ~ x)$coef[2],
+  coef <- my_lm(X, y)[2],
+  check = F
+)
+
+lb
+plot(lb, type="boxplot")
+```
+
+## Putting it all together
+
+8. Time the simulation code using the two changes we have made (no growing the vector, and `my_lm` instead of `lm`). How much faster is the code with these changes?
+

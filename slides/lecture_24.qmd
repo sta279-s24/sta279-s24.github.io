@@ -1,0 +1,166 @@
+---
+title: "Lecture 24: Profiling and microbenchmarking"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## An order of operations for programming
+
+1. Make it run
+2. Make it right
+3. Make it fast
+
+## When speed matters
+
+* You are working with very large data
+* You are running a process (a simulation, a data analysis, etc.) many times
+* A piece of code will be called many times (e.g., choosing a split in a decision tree)
+
+## Goals
+
+* Learn how to identify bottlenecks in code
+* Learn approaches for more efficient code in R
+* Time permitting: learn how to use C++ to make code faster
+
+## Example: timing code
+
+Suppose we want to compute the mean of each column of a data frame:
+
+```{r, eval=F}
+n <- 100000
+cols <- 150
+data_mat <- matrix(rnorm(n * cols, mean = 5), ncol = cols)
+data <- as.data.frame(data_mat)
+
+means <- rep(NA, cols)
+for(i in 1:cols){
+  means[i] <- mean(data[,i])
+}
+```
+
+## Example: timing code
+
+Suppose we want to compute the mean of each column of a data frame:
+
+```{r}
+n <- 100000
+cols <- 150
+data_mat <- matrix(rnorm(n * cols, mean = 5), ncol = cols)
+data <- as.data.frame(data_mat)
+
+system.time({
+  means <- rep(NA, cols)
+  for(i in 1:cols){
+    means[i] <- mean(data[,i])
+  }
+})
+```
+
+## Alternatives
+
+```{r, eval=F}
+means <- rep(NA, cols)
+for(i in 1:cols){
+  means[i] <- mean(data[,i])
+}
+```
+
+What are the alternatives to this for-loop approach?
+
+## Alternatives
+
+```{r, message=F}
+# Option 1: for loop
+for_loop_means <- function(data){
+  cols <- ncol(data)
+  means <- rep(NA, cols)
+  for(i in 1:cols){
+    means[i] <- mean(data[,i])
+  }
+  return(means)
+}
+means <- for_loop_means(data)
+
+# Option 2: apply
+means <- apply(data, 2, mean)
+
+# Option 3: colMeans
+means <- colMeans(data)
+```
+
+## Comparing performance
+
+**Microbenchmarking:** Evaluating the performance of a small piece of code
+
+```{r}
+bench::mark(
+  means <- for_loop_means(data),
+  means <- apply(data, 2, mean),
+  means <- colMeans(data),
+  check = F
+)
+```
+
+## Profiling
+
+```{r, eval=F}
+library(profvis)
+profvis({
+  means <- for_loop_means(data)
+  means <- apply(data, 2, mean)
+  means <- colMeans(data)
+})
+```
+
+![](profiling_colmeans.png)
+
+## Space for efficiency increases?
+
+```{r}
+colMeans
+```
+
+## Increase efficiency by avoiding extraneous steps
+
+```{r}
+n <- 100000
+cols <- 150
+data_mat <- matrix(rnorm(n * cols, mean = 5), ncol = cols)
+data <- as.data.frame(data_mat)
+
+bench::mark(
+  means <- colMeans(data_mat),
+  means <- colMeans(data),
+  check = F
+)
+```
+
+## Profiling
+
+```{r, eval=F}
+profvis({
+  means <- for_loop_means(data_mat)
+  means <- apply(data_mat, 2, mean)
+  means <- colMeans(data_mat)
+})
+```
+
+![](profiling_colmeans_mat.png)
+
+## Profiling
+
+![](profiling_colmeans.png)
+
+![](profiling_colmeans_mat.png)
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_24.html](https://sta279-s24.github.io/class_activities/ca_lecture_24.html)
+
+

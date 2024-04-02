@@ -1,0 +1,474 @@
+---
+title: "Exam 2 review"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=F)
+knitr::opts_chunk$set(warning=F)
+```
+
+Below are questions to help you study for Exam 2. These are examples of the kinds of questions I might ask.
+
+* This is not a practice exam. 
+* The questions cover most, but not all, possible material for the exam.
+
+
+# Wrangling and regular expressions
+
+## Practice with data wrangling
+
+In each of the questions below, write code (in R, Python, or SQL) to produce the output from the original data.
+
+1. Original data:
+
+```{r, echo=F, message=F, warning=F}
+library(tidyverse)
+library(palmerpenguins)
+
+sub_data <- penguins |>
+  slice_sample(n=10) |>
+  select(species, sex, island, bill_length_mm, bill_depth_mm)
+
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  count(species, sex)
+```
+
+2. Original data:
+
+```{r, echo=F}
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  group_by(island, sex) |>
+  summarize(mean_length = mean(bill_length_mm, na.rm=T))
+```
+
+
+3. Original data:
+
+```{r, echo=F}
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  mutate(bill_ratio = bill_length_mm/bill_depth_mm)
+```
+
+
+4. Original data:
+
+```{r, echo=F}
+sub_data
+```
+
+Output:
+
+```{r, echo=F}
+sub_data |>
+  filter(species == "Gentoo", 
+         island == "Biscoe")
+```
+
+
+5. Original data:
+
+```{r, echo=F}
+ex_df <- data.frame(
+  id = c(1, 2, 3),
+  x_1 = c(3, 1, 4),
+  x_2 = c(5, 8, 9),
+  y_1 = c(0, 1, 2),
+  y_2 = c(2, 7, 9)
+)
+
+ex_df
+```
+
+Output:
+
+```{r, echo=F}
+ex_df |>
+  pivot_longer(cols = -id, names_to = c("group", "obs"), names_sep = "_")
+```
+
+6. Original data:
+
+```{r, echo=F}
+ex_df <- data.frame(
+  id = c(1, 1, 2, 2, 3, 3),
+  group = c("x", "y", "x", "y", "x", "y"),
+  value = sample(1:6, replace=T)
+)
+
+ex_df
+```
+
+Output:
+
+```{r, echo=F}
+ex_df |>
+  pivot_wider(id_cols = id, names_from = group, values_from = value)
+```
+
+
+## Joins
+
+In each of the following questions, write code to produce the desired output from the two input datasets. The code may involve additional wrangling steps, beyond a join.
+
+7.
+
+```{r, echo=F}
+df1 <- data.frame(
+  id = c(1, 2, 3),
+  x = c(7, 9, 13)
+)
+
+df2 <- data.frame(
+  id = c(1, 2, 4),
+  y = c(10, 12, 14)
+)
+```
+
+```{r}
+df1
+
+df2
+```
+
+
+Output:
+
+```{r, echo=F}
+df1 |>
+  left_join(df2, join_by(id))
+```
+
+
+8.
+
+```{r}
+df1
+
+df2
+```
+
+
+Output:
+
+```{r, echo=F}
+df1 |>
+  inner_join(df2, join_by(id))
+```
+
+9.
+
+```{r, echo=F}
+df1 = data.frame(
+  a_x = 1,
+  a_y = 2,
+  b_x = 2,
+  b_y = 3
+)
+
+df2 = data.frame(
+  id = c("a", "b"),
+  z = c(4, 5)
+)
+```
+
+```{r}
+df1
+
+df2
+```
+
+
+```{r, echo=F}
+df1 |> 
+  pivot_longer(cols = -c(), names_to = c("id", ".value"), names_sep = "_") |>
+  left_join(df2, join_by(id))
+```
+
+
+## Regular expressions
+
+Consider the following strings:
+
+```{r, echo=F}
+strings <- c(
+  "George Washington: February 22, 1732",
+  "Thomas Jefferson: April 13, 1743",
+  "Abraham Lincoln: February 12, 1809",
+  "Theodore Roosevelt: October 27, 1858"
+)
+
+strings
+```
+
+For each question below, fill in the R code to produce the desired output.
+
+10.
+
+```{r, eval=F}
+str_extract(strings, ...)
+```
+
+```{r, echo=F}
+str_extract(strings, ".+(?=:)")
+```
+
+11.
+
+
+```{r, eval=F}
+str_extract(strings, ...)
+```
+
+```{r, echo=F}
+str_extract(strings, "(?<=: ).+")
+```
+
+12.
+
+```{r, eval=F}
+str_extract(strings, ...)
+```
+
+```{r, echo=F}
+str_extract(strings, "(?<=\\s).+(?=:)")
+```
+
+13.
+
+```{r, eval=F}
+str_extract(strings, ...)
+```
+
+```{r, echo=F}
+str_extract(strings, "(?<=, ).+")
+```
+
+## More regular expressions
+
+Consider the following strings:
+
+```{r, echo=F}
+strings <- c("apple", "banana", "canteloupe", "durian",
+             "eggplant", "french fries", "goat cheese",
+             "pizza", "99 red balloons", "101 dalmatians",
+             "route 66")
+```
+
+```{r}
+strings
+```
+
+
+For each question below, fill in the R code to produce the desired output.
+
+14.
+
+```{r, eval=F}
+str_subset(strings, ...)
+```
+
+```{r, echo=F}
+str_subset(strings, "\\d+")
+```
+
+15.
+
+```{r, eval=F}
+str_subset(strings, ...)
+```
+
+```{r, echo=F}
+str_subset(strings, "^\\d+")
+```
+
+16.
+
+```{r, eval=F}
+str_subset(strings, ...)
+```
+
+```{r, echo=F}
+str_subset(strings, "a")
+```
+
+17.
+
+```{r, eval=F}
+str_subset(strings, ...)
+```
+
+```{r, echo=F}
+str_subset(strings, "\\s")
+```
+
+18.
+
+```{r, eval=F}
+str_subset(strings, ...)
+```
+
+```{r, echo=F}
+str_subset(strings, "(.)\\1{1}")
+```
+
+
+
+# Reading code
+
+For each of the following questions, either write the output of the code, or explain why it gives an error. (Some questions will run correctly, others will cause errors)
+
+19.
+
+```{r, echo=F, message=F, warning=F}
+library(tidyverse)
+library(palmerpenguins)
+
+sub_data <- penguins |>
+  slice_sample(n=10) |>
+  select(species, island, bill_length_mm, bill_depth_mm)
+
+sub_data
+```
+
+
+
+22.
+
+```{r, eval=F}
+x <- list()
+for(i in 1:10){
+  x[i] <- i
+}
+x[2] + 1
+```
+
+
+24.
+
+```{r, eval=F}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat <- i + j
+  }
+}
+
+mat
+```
+
+25.
+
+```{r, eval=F}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat[j, i] <- i + j
+  }
+}
+
+mat
+```
+
+26.
+
+```{r, eval=F}
+mat <- matrix(1, 3, 3)
+for(i in 2:3){
+  for(j in 2:3){
+    mat[i,j] <- mat[i-1, j-1] + mat[i, j-1]
+  }
+}
+
+mat
+```
+
+
+# Web scraping
+
+Consider the following portion of a web page:
+
+<h1> STA 279 </h1>
+
+<p> 
+  Welcome to STA 279! This is a 16-week course offered at Wake Forest University, which meets 3 hours each week. The syllabus can be found <a href='https://sta279-s24.github.io/about/'>here</a> 
+</p>
+
+<p>
+  Below are some useful dates for the semester:
+   <table>
+  <tr>
+    <td>Exam 1</td>
+    <td>March 1</td>
+  </tr>
+  <tr>
+    <td>Exam 2</td>
+    <td>April 12</td>
+  </tr>
+</table> 
+</p>
+
+Now here is the source HTML for that simple web page:
+
+```
+<h1> STA 279 </h1>
+
+<p> 
+  Welcome to STA 279! 
+  This is a 16-week course offered at Wake Forest University, 
+  which meets 3 hours each week. 
+  The syllabus can be found 
+  <a href='https://sta279-s24.github.io/about/'>here</a> 
+</p>
+
+<p>
+  Below are some useful dates for the semester:
+   <table>
+  <tr>
+    <td>Exam 1</td>
+    <td>March 1</td>
+  </tr>
+  <tr>
+    <td>Exam 2</td>
+    <td>April 12</td>
+  </tr>
+</table> 
+</p>
+```
+
+## Questions
+
+25. Suppose that the url for this page is "https://fake_web_page.html". Write code that will import the table of exam dates into R, as a data frame.
+
+26. Suppose that the url for this page is "https://fake_web_page.html". What will the following code return?
+
+```{r, eval=F}
+read_html("https://fake_web_page.html") |>
+  html_element("h1") |>
+  html_text2() |>
+  str_extract("\\d+")
+```
+
