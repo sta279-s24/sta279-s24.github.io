@@ -330,13 +330,13 @@ color: #333333;
 
 
 
-<p>Below are questions to help you study for Exam 2. These are examples of the kinds of questions I might ask.</p>
+<p>Below are questions to help you study for Exam 2. These are examples of the kinds of questions I might ask, but they are not comprehensive.</p>
 <ul>
 <li>This is not a practice exam.</li>
 <li>The questions cover most, but not all, possible material for the exam.</li>
 </ul>
-<div id="writing-code" class="section level1">
-<h1>Writing code</h1>
+<div id="wrangling-and-regular-expressions" class="section level1">
+<h1>Wrangling and regular expressions</h1>
 <div id="practice-with-data-wrangling" class="section level2">
 <h2>Practice with data wrangling</h2>
 <p>In each of the questions below, write code (in R, Python, or SQL) to produce the output from the original data.</p>
@@ -346,101 +346,105 @@ color: #333333;
 <pre><code>## # A tibble: 10 × 5
 ##    species   sex    island    bill_length_mm bill_depth_mm
 ##    &lt;fct&gt;     &lt;fct&gt;  &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
-##  1 Adelie    female Dream               36            17.8
-##  2 Adelie    female Dream               37            16.5
-##  3 Adelie    male   Torgersen           39.1          18.7
-##  4 Adelie    female Biscoe              36.4          17.1
-##  5 Adelie    female Biscoe              38.1          16.5
-##  6 Adelie    female Dream               36.5          18  
-##  7 Adelie    male   Dream               40.3          18.5
-##  8 Gentoo    male   Biscoe              50            15.9
-##  9 Chinstrap male   Dream               49.6          18.2
-## 10 Adelie    female Dream               36.9          18.6</code></pre>
+##  1 Gentoo    male   Biscoe              49            16.1
+##  2 Gentoo    male   Biscoe              49.4          15.8
+##  3 Adelie    female Torgersen           35.7          17  
+##  4 Adelie    male   Biscoe              40.6          18.6
+##  5 Gentoo    female Biscoe              46.8          14.3
+##  6 Gentoo    female Biscoe              46.1          13.2
+##  7 Adelie    male   Biscoe              38.2          18.1
+##  8 Adelie    female Biscoe              39            17.5
+##  9 Adelie    male   Dream               39.7          17.9
+## 10 Chinstrap female Dream               42.5          17.3</code></pre>
 <p>Output:</p>
-<pre><code>## # A tibble: 4 × 3
+<pre><code>## # A tibble: 5 × 3
 ##   species   sex        n
 ##   &lt;fct&gt;     &lt;fct&gt;  &lt;int&gt;
-## 1 Adelie    female     6
-## 2 Adelie    male       2
-## 3 Chinstrap male       1
-## 4 Gentoo    male       1</code></pre>
+## 1 Adelie    female     2
+## 2 Adelie    male       3
+## 3 Chinstrap female     1
+## 4 Gentoo    female     2
+## 5 Gentoo    male       2</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Original data:</li>
 </ol>
 <pre><code>## # A tibble: 10 × 5
 ##    species   sex    island    bill_length_mm bill_depth_mm
 ##    &lt;fct&gt;     &lt;fct&gt;  &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
-##  1 Adelie    female Dream               36            17.8
-##  2 Adelie    female Dream               37            16.5
-##  3 Adelie    male   Torgersen           39.1          18.7
-##  4 Adelie    female Biscoe              36.4          17.1
-##  5 Adelie    female Biscoe              38.1          16.5
-##  6 Adelie    female Dream               36.5          18  
-##  7 Adelie    male   Dream               40.3          18.5
-##  8 Gentoo    male   Biscoe              50            15.9
-##  9 Chinstrap male   Dream               49.6          18.2
-## 10 Adelie    female Dream               36.9          18.6</code></pre>
+##  1 Gentoo    male   Biscoe              49            16.1
+##  2 Gentoo    male   Biscoe              49.4          15.8
+##  3 Adelie    female Torgersen           35.7          17  
+##  4 Adelie    male   Biscoe              40.6          18.6
+##  5 Gentoo    female Biscoe              46.8          14.3
+##  6 Gentoo    female Biscoe              46.1          13.2
+##  7 Adelie    male   Biscoe              38.2          18.1
+##  8 Adelie    female Biscoe              39            17.5
+##  9 Adelie    male   Dream               39.7          17.9
+## 10 Chinstrap female Dream               42.5          17.3</code></pre>
 <p>Output:</p>
 <pre><code>## # A tibble: 5 × 3
 ## # Groups:   island [3]
 ##   island    sex    mean_length
 ##   &lt;fct&gt;     &lt;fct&gt;        &lt;dbl&gt;
-## 1 Biscoe    female        37.2
-## 2 Biscoe    male          50  
-## 3 Dream     female        36.6
-## 4 Dream     male          45.0
-## 5 Torgersen male          39.1</code></pre>
+## 1 Biscoe    female        44.0
+## 2 Biscoe    male          44.3
+## 3 Dream     female        42.5
+## 4 Dream     male          39.7
+## 5 Torgersen female        35.7</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Original data:</li>
 </ol>
 <pre><code>## # A tibble: 10 × 5
 ##    species   sex    island    bill_length_mm bill_depth_mm
 ##    &lt;fct&gt;     &lt;fct&gt;  &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
-##  1 Adelie    female Dream               36            17.8
-##  2 Adelie    female Dream               37            16.5
-##  3 Adelie    male   Torgersen           39.1          18.7
-##  4 Adelie    female Biscoe              36.4          17.1
-##  5 Adelie    female Biscoe              38.1          16.5
-##  6 Adelie    female Dream               36.5          18  
-##  7 Adelie    male   Dream               40.3          18.5
-##  8 Gentoo    male   Biscoe              50            15.9
-##  9 Chinstrap male   Dream               49.6          18.2
-## 10 Adelie    female Dream               36.9          18.6</code></pre>
+##  1 Gentoo    male   Biscoe              49            16.1
+##  2 Gentoo    male   Biscoe              49.4          15.8
+##  3 Adelie    female Torgersen           35.7          17  
+##  4 Adelie    male   Biscoe              40.6          18.6
+##  5 Gentoo    female Biscoe              46.8          14.3
+##  6 Gentoo    female Biscoe              46.1          13.2
+##  7 Adelie    male   Biscoe              38.2          18.1
+##  8 Adelie    female Biscoe              39            17.5
+##  9 Adelie    male   Dream               39.7          17.9
+## 10 Chinstrap female Dream               42.5          17.3</code></pre>
 <p>Output:</p>
 <pre><code>## # A tibble: 10 × 6
 ##    species   sex    island    bill_length_mm bill_depth_mm bill_ratio
 ##    &lt;fct&gt;     &lt;fct&gt;  &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;
-##  1 Adelie    female Dream               36            17.8       2.02
-##  2 Adelie    female Dream               37            16.5       2.24
-##  3 Adelie    male   Torgersen           39.1          18.7       2.09
-##  4 Adelie    female Biscoe              36.4          17.1       2.13
-##  5 Adelie    female Biscoe              38.1          16.5       2.31
-##  6 Adelie    female Dream               36.5          18         2.03
-##  7 Adelie    male   Dream               40.3          18.5       2.18
-##  8 Gentoo    male   Biscoe              50            15.9       3.14
-##  9 Chinstrap male   Dream               49.6          18.2       2.73
-## 10 Adelie    female Dream               36.9          18.6       1.98</code></pre>
+##  1 Gentoo    male   Biscoe              49            16.1       3.04
+##  2 Gentoo    male   Biscoe              49.4          15.8       3.13
+##  3 Adelie    female Torgersen           35.7          17         2.1 
+##  4 Adelie    male   Biscoe              40.6          18.6       2.18
+##  5 Gentoo    female Biscoe              46.8          14.3       3.27
+##  6 Gentoo    female Biscoe              46.1          13.2       3.49
+##  7 Adelie    male   Biscoe              38.2          18.1       2.11
+##  8 Adelie    female Biscoe              39            17.5       2.23
+##  9 Adelie    male   Dream               39.7          17.9       2.22
+## 10 Chinstrap female Dream               42.5          17.3       2.46</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Original data:</li>
 </ol>
 <pre><code>## # A tibble: 10 × 5
 ##    species   sex    island    bill_length_mm bill_depth_mm
 ##    &lt;fct&gt;     &lt;fct&gt;  &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
-##  1 Adelie    female Dream               36            17.8
-##  2 Adelie    female Dream               37            16.5
-##  3 Adelie    male   Torgersen           39.1          18.7
-##  4 Adelie    female Biscoe              36.4          17.1
-##  5 Adelie    female Biscoe              38.1          16.5
-##  6 Adelie    female Dream               36.5          18  
-##  7 Adelie    male   Dream               40.3          18.5
-##  8 Gentoo    male   Biscoe              50            15.9
-##  9 Chinstrap male   Dream               49.6          18.2
-## 10 Adelie    female Dream               36.9          18.6</code></pre>
+##  1 Gentoo    male   Biscoe              49            16.1
+##  2 Gentoo    male   Biscoe              49.4          15.8
+##  3 Adelie    female Torgersen           35.7          17  
+##  4 Adelie    male   Biscoe              40.6          18.6
+##  5 Gentoo    female Biscoe              46.8          14.3
+##  6 Gentoo    female Biscoe              46.1          13.2
+##  7 Adelie    male   Biscoe              38.2          18.1
+##  8 Adelie    female Biscoe              39            17.5
+##  9 Adelie    male   Dream               39.7          17.9
+## 10 Chinstrap female Dream               42.5          17.3</code></pre>
 <p>Output:</p>
-<pre><code>## # A tibble: 1 × 5
-##   species sex   island bill_length_mm bill_depth_mm
-##   &lt;fct&gt;   &lt;fct&gt; &lt;fct&gt;           &lt;dbl&gt;         &lt;dbl&gt;
-## 1 Gentoo  male  Biscoe             50          15.9</code></pre>
+<pre><code>## # A tibble: 4 × 5
+##   species sex    island bill_length_mm bill_depth_mm
+##   &lt;fct&gt;   &lt;fct&gt;  &lt;fct&gt;           &lt;dbl&gt;         &lt;dbl&gt;
+## 1 Gentoo  male   Biscoe           49            16.1
+## 2 Gentoo  male   Biscoe           49.4          15.8
+## 3 Gentoo  female Biscoe           46.8          14.3
+## 4 Gentoo  female Biscoe           46.1          13.2</code></pre>
 <ol start="5" style="list-style-type: decimal">
 <li>Original data:</li>
 </ol>
@@ -468,19 +472,19 @@ color: #333333;
 <li>Original data:</li>
 </ol>
 <pre><code>##   id group value
-## 1  1     x     2
-## 2  1     y     4
-## 3  2     x     4
-## 4  2     y     2
-## 5  3     x     6
-## 6  3     y     2</code></pre>
+## 1  1     x     5
+## 2  1     y     3
+## 3  2     x     1
+## 4  2     y     1
+## 5  3     x     2
+## 6  3     y     4</code></pre>
 <p>Output:</p>
 <pre><code>## # A tibble: 3 × 3
 ##      id     x     y
 ##   &lt;dbl&gt; &lt;int&gt; &lt;int&gt;
-## 1     1     2     4
-## 2     2     4     2
-## 3     3     6     2</code></pre>
+## 1     1     5     3
+## 2     2     1     1
+## 3     3     2     4</code></pre>
 </div>
 <div id="joins" class="section level2">
 <h2>Joins</h2>
@@ -606,67 +610,6 @@ color: #333333;
 ## [5] &quot;99 red balloons&quot; &quot;route 66&quot;</code></pre>
 </div>
 </div>
-<div id="reading-code" class="section level1">
-<h1>Reading code</h1>
-<p>For each of the following questions, either write the output of the code, or explain why it gives an error. (Some questions will run correctly, others will cause errors)</p>
-<ol start="19" style="list-style-type: decimal">
-<li></li>
-</ol>
-<pre><code>## # A tibble: 10 × 4
-##    species   island    bill_length_mm bill_depth_mm
-##    &lt;fct&gt;     &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;
-##  1 Adelie    Dream               37.8          18.1
-##  2 Adelie    Biscoe              42.7          18.3
-##  3 Chinstrap Dream               50.8          19  
-##  4 Adelie    Dream               40.3          18.5
-##  5 Gentoo    Biscoe              47.3          13.8
-##  6 Chinstrap Dream               47.6          18.3
-##  7 Gentoo    Biscoe              51.1          16.3
-##  8 Adelie    Torgersen           37.7          19.8
-##  9 Chinstrap Dream               46.4          17.8
-## 10 Gentoo    Biscoe              50.5          15.9</code></pre>
-<ol start="22" style="list-style-type: decimal">
-<li></li>
-</ol>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb50-2"><a href="#cb50-2" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>){</span>
-<span id="cb50-3"><a href="#cb50-3" tabindex="-1"></a>  x[i] <span class="ot">&lt;-</span> i</span>
-<span id="cb50-4"><a href="#cb50-4" tabindex="-1"></a>}</span>
-<span id="cb50-5"><a href="#cb50-5" tabindex="-1"></a>x[<span class="dv">2</span>] <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
-<ol start="24" style="list-style-type: decimal">
-<li></li>
-</ol>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow=</span><span class="dv">5</span>, <span class="at">ncol=</span><span class="dv">3</span>)</span>
-<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>){</span>
-<span id="cb51-3"><a href="#cb51-3" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>){</span>
-<span id="cb51-4"><a href="#cb51-4" tabindex="-1"></a>    mat <span class="ot">&lt;-</span> i <span class="sc">+</span> j</span>
-<span id="cb51-5"><a href="#cb51-5" tabindex="-1"></a>  }</span>
-<span id="cb51-6"><a href="#cb51-6" tabindex="-1"></a>}</span>
-<span id="cb51-7"><a href="#cb51-7" tabindex="-1"></a></span>
-<span id="cb51-8"><a href="#cb51-8" tabindex="-1"></a>mat</span></code></pre></div>
-<ol start="25" style="list-style-type: decimal">
-<li></li>
-</ol>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow=</span><span class="dv">5</span>, <span class="at">ncol=</span><span class="dv">3</span>)</span>
-<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>){</span>
-<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>){</span>
-<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>    mat[j, i] <span class="ot">&lt;-</span> i <span class="sc">+</span> j</span>
-<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a>  }</span>
-<span id="cb52-6"><a href="#cb52-6" tabindex="-1"></a>}</span>
-<span id="cb52-7"><a href="#cb52-7" tabindex="-1"></a></span>
-<span id="cb52-8"><a href="#cb52-8" tabindex="-1"></a>mat</span></code></pre></div>
-<ol start="26" style="list-style-type: decimal">
-<li></li>
-</ol>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">3</span>)</span>
-<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>){</span>
-<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a>  <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>){</span>
-<span id="cb53-4"><a href="#cb53-4" tabindex="-1"></a>    mat[i,j] <span class="ot">&lt;-</span> mat[i<span class="dv">-1</span>, j<span class="dv">-1</span>] <span class="sc">+</span> mat[i, j<span class="dv">-1</span>]</span>
-<span id="cb53-5"><a href="#cb53-5" tabindex="-1"></a>  }</span>
-<span id="cb53-6"><a href="#cb53-6" tabindex="-1"></a>}</span>
-<span id="cb53-7"><a href="#cb53-7" tabindex="-1"></a></span>
-<span id="cb53-8"><a href="#cb53-8" tabindex="-1"></a>mat</span></code></pre></div>
-</div>
 <div id="web-scraping" class="section level1">
 <h1>Web scraping</h1>
 <p>Consider the following portion of a web page:</p>
@@ -721,6 +664,17 @@ April 12
   &lt;/tr&gt;
 &lt;/table&gt; 
 &lt;/p&gt;</code></pre>
+<div id="questions" class="section level2">
+<h2>Questions</h2>
+<ol start="19" style="list-style-type: decimal">
+<li><p>Suppose that the url for this page is “<a href="https://fake_web_page.html" class="uri">https://fake_web_page.html</a>”. Write code that will import the table of exam dates into R, as a data frame.</p></li>
+<li><p>Suppose that the url for this page is “<a href="https://fake_web_page.html" class="uri">https://fake_web_page.html</a>”. What will the following code return?</p></li>
+</ol>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">read_html</span>(<span class="st">&quot;https://fake_web_page.html&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb50-2"><a href="#cb50-2" tabindex="-1"></a>  <span class="fu">html_element</span>(<span class="st">&quot;h1&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb50-3"><a href="#cb50-3" tabindex="-1"></a>  <span class="fu">html_text2</span>() <span class="sc">|&gt;</span></span>
+<span id="cb50-4"><a href="#cb50-4" tabindex="-1"></a>  <span class="fu">str_extract</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">d+&quot;</span>)</span></code></pre></div>
+</div>
 </div>
 
 
