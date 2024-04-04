@@ -1,0 +1,64 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Weighted sums
+
+In a previous assignment, you have computed weighted sums and means. If $x_1,...,x_n$ is a set of observations and $w_1,...,w_n$ a set of weights, then $\sum \limits_{i=1}^n w_i x_i$ is the **weighted** sum.
+
+In R, `sum(w * x)` calculates the weighted sum, for vectors `w` (containing $w_1,...,w_n$) and `x` (containing $x_1,...,x_n$).
+
+1. In R, the `crossprod` function, when applied to vectors, computes the [inner product](https://en.wikipedia.org/wiki/Dot_product) (aka dot product) of the two vectors. Use the `crossprod` function to compute a weighted sum, and compare the speed with `sum(w * x)`.
+
+2. In question 1, does the relative speed change as we change the length of `x`?
+
+## Concatenating strings
+
+The code below generates 10 random strings, of length 50 characters each, and combines them together:
+
+```{r, eval=F}
+random_string <- function() {
+  paste(sample(letters, 50, replace = TRUE), collapse = "")
+}
+strings <- replicate(10, random_string())
+
+collapse <- function(xs) {
+  out <- ""
+  for (x in xs) {
+    out <- paste0(out, x)
+  }
+  out
+}
+
+collapse(strings)
+```
+
+3. Write faster code to combine the strings, using the `paste` function and avoiding a for loop. Compare the speed of your code to the `collapse` function above.
+
+## C++ and Rcpp
+
+When we can't optimize our code any further in R, we sometimes turn to C++ (a different programming language, which is often faster). In a subsequent lecture, we will discuss how to re-write R code in C++ for performance increases. For now, we will get Rcpp (the package used to integrate C++ code into R) set up.
+
+The installation instructions can be found [here](https://adv-r.hadley.nz/rcpp.html#introduction-24) and [here](https://teuder.github.io/rcpp4everyone_en/020_install.html#install-rcpp).
+
+Follow the installation instructions, then run the following code in R to make sure everything was installed correctly:
+
+```{r, eval=F}
+Rcpp::cppFunction('int add(int x, int y, int z) {
+  int sum = x + y + z;
+  return sum;
+}')
+
+add(1, 2, 3)
+```
+
+
+
+
+

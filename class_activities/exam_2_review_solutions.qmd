@@ -1,0 +1,308 @@
+---
+title: "Exam 2 review solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+
+1. 
+
+```{r message=F, warning=F}
+library(tidyverse)
+library(palmerpenguins)
+
+sub_data <- penguins |>
+  slice_sample(n=10) |>
+  select(species, sex, island, bill_length_mm, bill_depth_mm)
+```
+
+```{r}
+sub_data
+
+sub_data |>
+  count(species, sex)
+```
+
+```{python}
+import pandas as pd
+
+sub_data = r.sub_data
+(sub_data.groupby(by = ['species', 'sex'])
+         .agg(n = ('bill_length_mm', 'count')))
+```
+
+
+2.
+
+```{r}
+sub_data |>
+  group_by(island, sex) |>
+  summarize(mean_length = mean(bill_length_mm, na.rm=T))
+```
+
+```{python}
+(sub_data.groupby(by = ['island', 'sex'])
+         .agg(mean = ('bill_length_mm', 'mean'))
+         .reset_index()
+         .dropna())
+```
+
+
+3.
+
+```{r}
+sub_data |>
+  mutate(bill_ratio = bill_length_mm/bill_depth_mm)
+```
+
+```{python}
+sub_data.assign(bill_ratio = sub_data['bill_length_mm']/sub_data['bill_depth_mm'])
+```
+
+
+4.
+
+```{r}
+sub_data |>
+  filter(species == "Gentoo", 
+         island == "Biscoe")
+```
+
+```{python}
+sub_data.query('species == "Gentoo" & island == "Biscoe"')
+```
+
+
+5.
+
+```{r}
+ex_df <- data.frame(
+  id = c(1, 2, 3),
+  x_1 = c(3, 1, 4),
+  x_2 = c(5, 8, 9),
+  y_1 = c(0, 1, 2),
+  y_2 = c(2, 7, 9)
+)
+
+ex_df
+```
+
+```{r}
+ex_df |>
+  pivot_longer(cols = -id, names_to = c("group", "obs"), names_sep = "_")
+```
+
+```{python}
+ex_df = r.ex_df
+
+ex_df_new = ex_df.melt(id_vars = 'id', var_name = 'group', value_name = 'value')
+ex_df_new[['group', 'obs']] = ex_df_new['group'].str.split('_', expand=True)
+ex_df_new
+```
+
+
+
+6.
+
+```{r}
+ex_df <- data.frame(
+  id = c(1, 1, 2, 2, 3, 3),
+  group = c("x", "y", "x", "y", "x", "y"),
+  value = sample(1:6, replace=T)
+)
+
+ex_df
+```
+
+```{r}
+ex_df |>
+  pivot_wider(id_cols = id, names_from = group, values_from = value)
+```
+
+```{python}
+ex_df = r.ex_df
+(ex_df.pivot(columns = 'group', values = 'value', index = 'id')
+      .reset_index())
+```
+
+
+
+7.
+
+```{r}
+df1 <- data.frame(
+  id = c(1, 2, 3),
+  x = c(7, 9, 13)
+)
+
+df2 <- data.frame(
+  id = c(1, 2, 4),
+  y = c(10, 12, 14)
+)
+```
+
+```{r}
+df1
+
+df2
+```
+
+```{r}
+df1 |>
+  left_join(df2, join_by(id))
+```
+
+```{python}
+df1 = r.df1
+df2 = r.df2
+
+pd.merge(df1, df2, how = 'left', left_on = 'id', right_on = 'id')
+```
+
+
+
+8.
+
+```{r}
+df1 |>
+  inner_join(df2, join_by(id))
+```
+
+```{python}
+pd.merge(df1, df2, how = 'inner', left_on = 'id', right_on = 'id')
+```
+
+9.
+
+```{r}
+df1 = data.frame(
+  a_x = 1,
+  a_y = 2,
+  b_x = 2,
+  b_y = 3
+)
+
+df2 = data.frame(
+  id = c("a", "b"),
+  z = c(4, 5)
+)
+```
+
+```{r}
+df1
+
+df2
+```
+
+```{r}
+df1 |> 
+  pivot_longer(cols = -c(), names_to = c("id", ".value"), names_sep = "_") |>
+  left_join(df2, join_by(id))
+```
+
+```{python}
+df1 = r.df1
+df2 = r.df2
+
+df1_new = df1.melt(id_vars = [], var_name = 'id')
+df1_new[['id', 'group']] = df1_new['id'].str.split('_', expand=True)
+df1_new = df1_new.pivot(columns = 'group', values='value', index = 'id').reset_index()
+
+pd.merge(df1_new, df2, how='left', left_on = 'id', right_on = 'id')
+```
+
+
+
+10.
+
+```{r}
+strings <- c(
+  "George Washington: February 22, 1732",
+  "Thomas Jefferson: April 13, 1743",
+  "Abraham Lincoln: February 12, 1809",
+  "Theodore Roosevelt: October 27, 1858"
+)
+
+strings
+```
+
+```{r}
+str_extract(strings, ".+(?=:)")
+```
+
+11.
+
+```{r}
+str_extract(strings, "(?<=: ).+")
+```
+
+12.
+
+```{r}
+str_extract(strings, "(?<=\\s).+(?=:)")
+```
+
+13.
+
+```{r}
+str_extract(strings, "(?<=, ).+")
+```
+
+
+14.
+
+```{r}
+strings <- c("apple", "banana", "canteloupe", "durian",
+             "eggplant", "french fries", "goat cheese",
+             "pizza", "99 red balloons", "101 dalmatians",
+             "route 66")
+```
+
+```{r}
+strings
+```
+
+```{r}
+str_subset(strings, "\\d+")
+```
+
+
+15.
+
+```{r}
+str_subset(strings, "^\\d+")
+```
+
+
+16.
+
+```{r}
+str_subset(strings, "a")
+```
+
+17.
+
+```{r}
+str_subset(strings, "\\s")
+```
+
+
+18.
+
+```{r}
+str_subset(strings, "(.)\\1{1}")
+```
+
+19.
+
+```{r, eval=F}
+read_html("https://fake_web_page.html") |>
+  html_element("table") |>
+  html_table()
+```
+
+20. 279
+

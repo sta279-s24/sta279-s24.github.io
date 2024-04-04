@@ -1,0 +1,132 @@
+---
+title: "Lecture 25: Making code more efficient"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Approaches to faster code
+
+* Do as little as possible
+* Vectorise
+* Avoid copies
+
+## Do as little as possible
+
+```{r}
+n <- 100000
+cols <- 150
+data_mat <- matrix(rnorm(n * cols, mean = 5), ncol = cols)
+data <- as.data.frame(data_mat)
+
+bench::mark(
+  means <- colMeans(data_mat),
+  means <- colMeans(data),
+  check = F
+)
+```
+
+## Avoid copies
+
+The code below samples 100 observations from a $N(0, 1)$ distribution:
+
+```{r, eval=F}
+x <- c()
+for(i in 1:100){
+  x <- c(x, rnorm(1))
+}
+```
+
+How could I make this code more efficient?
+
+## Avoid copies
+
+```{r}
+loop_1 <- function(n){
+  x <- c()
+  for(i in 1:n){
+    x <- c(x, rnorm(1))
+  }
+  return(x)
+}
+
+loop_2 <- function(n){
+  x <- rep(NA, n)
+  for(i in 1:n){
+    x[i] <- rnorm(1)
+  }
+  return(x)
+}
+```
+
+## Avoid copies
+
+```{r}
+
+bench::mark(
+  loop_1(100),
+  loop_2(100),
+  check = F
+)
+
+```
+
+## Avoid copies
+
+```{r}
+
+bench::mark(
+  loop_1(10000),
+  loop_2(10000),
+  check = F
+)
+
+```
+
+
+## Vectorise
+
+The code below samples 100 observations from a $N(0, 1)$ distribution:
+
+```{r, eval=F}
+x <- rep(NA, 100)
+for(i in 1:100){
+  x[i] <- rnorm(1)
+}
+```
+
+How could I make this code more efficient?
+
+## Vectorise
+
+```{r}
+for_loop_sample <- function(n){
+  x <- rep(NA, n)
+  for(i in 1:n){
+    x[i] <- rnorm(1)
+  }
+}
+
+bench::mark(
+  x <- for_loop_sample(100),
+  x <- rnorm(100),
+  check=F
+)
+```
+
+## Other options 
+
+* Different data structures / algorithms
+* Parallelization
+* Rewrite code in C++
+
+## Class activity
+
+[https://sta279-s24.github.io/class_activities/ca_lecture_25.html](https://sta279-s24.github.io/class_activities/ca_lecture_25.html)
+
+

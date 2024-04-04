@@ -1,0 +1,55 @@
+---
+title: "Class activity solutions"
+format: html
+editor: source
+author: "Ciaran Evans"
+---
+
+1. Using `crossprod` is substantially faster
+
+```{r}
+x <- rnorm(100)
+w <- runif(100)
+
+bench::mark(
+  weighted_means <- sum(x*w),
+  weighted_means <- crossprod(x, w),
+  check = F
+)
+```
+
+2. The relative speed of `crossprod` increases as we increase the length of the vectors.
+
+```{r}
+x <- rnorm(100000)
+w <- runif(100000)
+
+bench::mark(
+  weighted_means <- sum(x*w),
+  weighted_means <- crossprod(x, w),
+  check = F
+)
+```
+
+3. 
+
+```{r}
+random_string <- function() {
+  paste(sample(letters, 50, replace = TRUE), collapse = "")
+}
+strings <- replicate(10, random_string())
+
+collapse <- function(xs) {
+  out <- ""
+  for (x in xs) {
+    out <- paste0(out, x)
+  }
+  out
+}
+
+bench::mark(
+  collapse(strings),
+  paste(strings, collapse="")
+)
+```
+

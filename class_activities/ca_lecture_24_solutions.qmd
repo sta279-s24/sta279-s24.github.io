@@ -1,0 +1,171 @@
+---
+title: "Class activity solutions"
+format: html
+editor: source
+author: "Ciaran Evans"
+---
+
+1.
+
+```{r}
+system.time({
+  nsim <- 500
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector()
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save <- c(save, coef)
+  }
+  save <- data.frame(save)
+})
+```
+
+About 0.2 seconds
+
+2.
+
+```{r, eval=F}
+library(profvis)
+profvis({
+  nsim <- 500
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector()
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save <- c(save, coef)
+  }
+  save <- data.frame(save)
+})
+```
+
+3. Fitting the regression model and extracting the coefficient takes the most time (`lm(y ~ x)$coef[2]`)
+
+4. Fitting the regression model still takes a lot of time. But now storing the coefficient (`save <- c(save, coef)`) also takes a lot of time.
+
+```{r, eval=F}
+profvis({
+  nsim <- 10000
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector()
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save <- c(save, coef)
+  }
+  save <- data.frame(save)
+})
+```
+
+
+5.
+
+```{r, eval=F}
+profvis({
+  nsim <- 10000
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector(length = nsim)
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save[i] <- coef
+  }
+  save <- data.frame(save)
+})
+```
+
+6. The `lm` function parses formulas, checks for errors, and makes the output look pretty
+
+```{r}
+my_lm <- function(X, y){
+  return(c(solve(t(X) %*% X) %*% t(X) %*% y))
+}
+```
+
+7. Using the `my_lm` function is faster
+
+```{r}
+n <- 100
+beta0 <- 1
+beta1 <- 0.5
+x <- rnorm(n)
+y <- beta0 + beta1*x + rnorm(n)
+X <- cbind(1, x)
+
+lb <- bench::mark(
+  coef <- lm(y ~ x)$coef[2],
+  coef <- my_lm(X, y)[2],
+  check = F
+)
+
+lb
+plot(lb, type="boxplot")
+```
+
+8. With both changes, the code now runs about 10 times faster for 10000 simulations.
+
+```{r}
+system.time({
+  nsim <- 10000
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector()
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    
+    coef <- lm(y ~ x)$coef[2]
+    save <- c(save, coef)
+  }
+  save <- data.frame(save)
+})
+```
+
+```{r}
+system.time({
+  nsim <- 10000
+  n <- 100
+  beta0 <- 1
+  beta1 <- 0.5
+  
+  save <- vector(length=nsim)
+  
+  for (i in 1:nsim) {
+    x <- rnorm(n)
+    y <- beta0 + beta1*x + rnorm(n)
+    X <- cbind(1, x)
+    
+    coef <- my_lm(X, y)[2]
+    save[i] <- coef
+  }
+  save <- data.frame(save)
+})
+```
