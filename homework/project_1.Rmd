@@ -30,7 +30,7 @@ Any violations of these rules will result in a 0 on the project.
 # Deliverables
 
 * Project checkpoint (brief overview of your research questions and data sources). **Due:** Friday, April 19 at 2pm on Canvas
-* Final project report (2-3 page summary of your research question, data, and results), and all code used. **Due:** Tuesday, April 31 at 2pm on Canvas
+* Final project report (2-3 page summary of your research question, data, and results), and all code used. **Due:** Tuesday, April 30 at 2pm on Canvas
 
 ## Project checkpoint
 
