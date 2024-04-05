@@ -7,140 +7,97 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-```{r}
-library(tidyverse)
-library(mdsr)
-library(DBI)
-
-db <- dbConnect_scidb("airlines")
-
-query <- "
-  SHOW TABLES;
-"
-dbGetQuery(db, query)
-```
-
 1.
 
-```{sql connection=db}
-SELECT 
-  dest, SUM(1) as N
-FROM flights
-WHERE origin = 'ORD' AND year = 2010
-GROUP BY dest
-ORDER BY N DESC
-LIMIT 0, 5;
+```{r, message=F, warning=F}
+library(rvest)
+library(tidyverse)
+
+read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
 ```
 
 2.
 
-```{sql connection=db}
-SELECT 
-  dest, AVG(arr_delay) as mean_arr_delay
-FROM flights
-WHERE year = 2010
-GROUP BY dest
-ORDER BY mean_arr_delay DESC
-LIMIT 0, 5;
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\("),
+                       too_few = "align_start")
 ```
 
 3.
 
-```{sql connection=db}
-SELECT 
-  name, AVG(arr_delay) as mean_arr_delay
-FROM flights
-JOIN airports ON flights.dest = airports.faa
-WHERE year = 2010
-GROUP BY dest
-ORDER BY mean_arr_delay DESC
-LIMIT 0, 5;
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_4)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\("),
+                       too_few = "align_start")
 ```
 
-4.
+There are several extra episodes which shouldn't be there, and which don't appear to have names. This is because of several "masterclass" episodes on that wikipedia page, which weren't part of the main show.
 
-```{sql connection=db}
-SELECT 
-  SUM(cancelled) as N,
-  SUM(cancelled)/SUM(1) AS prop_cancelled
-FROM flights
-WHERE year = 2010 AND 
-  ((origin = 'JFK' AND dest = 'SFO') OR 
-  (origin = 'SFO' AND dest = 'JFK'))
-LIMIT 0, 5;
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_4)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  filter(str_detect(episode, ":")) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\s+\\("),
+                       too_few = "align_start")
 ```
 
-5. This one is a bit more open-ended
+5.
+
+```{r, message=F, warning=F}
+library(data.table)
+
+episode_list <- list()
+urls <- paste0("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_", 
+               2:13, ")")
+
+for(i in 2:13){
+  episodes <- read_html(urls[i-1]) |>
+    html_elements(".mw-headline[id^='Episode_']") |>
+    html_text2() 
+
+  episode_list[[i-1]] <- data.frame(episode = episodes) |> 
+    filter(str_detect(episode, ":")) |>
+    separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\s+\\("),
+                       too_few = "align_start") |>
+    mutate(series = i)
+}
+
+episodes <- rbindlist(episode_list)
+head(episodes)
+```
 
 6.
 
 ```{r}
-my_kmeans <- function(dat, k, max_iter){
-  
-  n <- nrow(dat) # number of observations
-  
-  # choose the initial means
-  means <- dat[sample(1:n, k),]
-  
-  # calculate distances to the initial means
-  dists <- matrix(nrow = n, ncol = k)
-  for(i in 1:k){
-    dists[,i] <- rowSums((sweep(as.matrix(dat), 2, as.matrix(means)[i,]))^2)
-  }
-  
-  # initialize groups
-  groups <- apply(dists, 1, which.min)
-  
-  # track the number of iterations and whether the groups have changed
-  cur_iter <- 0
-  group_change <- 1
-  
-  while(group_change > 0 & cur_iter < max_iter){
-    
-    # update the means
-    for(i in 1:k){
-      means[i,] <- colMeans(dat[groups == i,])
-    }
-    
-    # update the distances
-    dists <- matrix(nrow = n, ncol = k)
-    for(i in 1:k){
-      dists[,i] <- rowSums((sweep(dat, 2, means[i,]))^2)
-    }
-    
-    # update the groups
-    new_groups <- apply(dists, 1, which.min)
-    
-    cur_iter <- cur_iter + 1
-    group_change <- sum(groups != new_groups)
-    groups <- new_groups
-  }
-  
-  return(list(means, groups))
-}
+episodes |>
+  count(episode_name) |>
+  filter(n == 1) |>
+  nrow()
 ```
 
+7.
 
 ```{r}
-library(palmerpenguins)
-
-clustering <- penguins |>
-  select(flipper_length_mm, bill_length_mm) |>
-  drop_na() |>
-  as.matrix() |>
-  my_kmeans(k=3, max_iter = 100)
-
-penguins |>
-  select(flipper_length_mm, bill_length_mm) |>
-  drop_na() |>
-  mutate(group = as.factor(clustering[[2]])) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = group)) +
-  geom_point()
-
+episodes |>
+  count(episode_name, sort=T)
 ```
-
-
-
-
 
 

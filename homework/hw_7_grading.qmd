@@ -7,129 +7,9 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-**General grading notes:** 
+Total: 44 pts
 
-* They will write code in many different ways. As long as it works, they can receive credit for the question. If it doesn't work, but they made a reasonable attempt (at least some of the code has the right idea) then they receive partial credit.
-* If code is written particularly inefficiently, you don't need to take off points, but you can leave a comment on how to write it more simply
-
-#### Naming (2 pts)
-
-Check that they used reasonable variable names on the assignment. If the names are generally terrible (e.g., `blah1` and `blah2` instead of `robotA` and `robotB`), they lose these 2 pts.
-
-
-#### Question 1 (5 pts)
-
-```{r}
-df1 <- data.frame(
-  grp = c("A", "A", "B", "B"),
-  sex = c("F", "M", "F", "M"),
-  meanL = c(0.225, 0.47, 0.325, 0.547),
-  sdL = c(0.106, 0.325, 0.106, 0.308),
-  meanR = c(0.34, 0.57, 0.4, 0.647),
-  sdR = c(0.0849, 0.325, 0.0707, 0.274)
-)
-```
-
-```{python}
-import pandas as pd
-
-df1 = r.df1
-
-(df1.melt(id_vars = ['grp', 'sex'], var_name = 'stat')
-    .pivot(columns = ['sex', 'stat'], values = 'value',
-           index = 'grp'))
-```
-
-**Grading:**
-
-* 3 pts for the right dimensions 
-* 2 pts for using `melt` and `pivot` (as directed in the question)
-
-#### Question 2 (5 pts)
-
-```{r}
-df2 <- data.frame(id = rep(c(1, 2, 3), 2),
-                  group = rep(c("T", "C"), each=3),
-                  vals = c(4, 6, 8, 5, 6, 10))
-```
-
-```{python}
-df2 = r.df2
-
-df2_new = df2.pivot(index = 'id', columns = 'group', values = 'vals')
-df2_new = df2_new.assign(diff = df2_new['T'] - df2_new['C'])
-df2_new
-```
-
-**Grading:**
-
-* 3 pts for correct output
-* 2 pts for using `pivot` and `assign`
-
-#### Question 3 (2 pts)
-
-```{python}
-sim_results = pd.read_csv("https://sta279-f23.github.io/homework/sim_results.csv")
-```
-
-```{python}
-sim_results.melt(id_vars = 'n', var_name = 'method', value_name = 'result')
-```
-
-**Grading:** 2 pts for correct output
-
-#### Question 4 (4 pts)
-
-```{python}
-sim_res_new = sim_results.melt(id_vars = 'n', var_name = 'method', value_name = 'result')
-sim_res_new[['method', 'iteration']] = sim_res_new['method'].str.split('_', expand=True)
-sim_res_new
-```
-
-**Grading:**
-
-* 3 pts for correctly splitting the data
-* 1 pt for reasonable column names
-
-#### Question 5 (6 pts)
-
-```{python}
-import numpy as np
-
-sim_res_new = (sim_res_new.groupby(by=['n', 'method'])
-            .agg(coverage = ('result', lambda x: np.mean(2 - x))))
-sim_res_new
-```
-
-**Grading:**
-
-* 2 pts for converting the 1s and 2s into 1s and 0s
-* 2 pts for calculating average coverage
-* 2 pts for grouping by sample size and method
-
-#### Question 6 (2 pts)
-
-```{python}
-sim_res_new = sim_res_new.reset_index()
-sim_res_new
-```
-
-**Grading:** 2 pts for resetting the index
-
-#### Question 7 (2 pts)
-
-```{python}
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-plt.figure()
-sns.lineplot(x="n", y="coverage", data=sim_res_new, hue="method", marker ='o')
-plt.show()
-```
-
-**Grading:** 2 pts for copying the code. If it didn't run because they had issues with seaborn or matplotlib, that is ok for this assignment
-
-#### Question 8 (2 pts)
+1. (2 pts)
 
 ```{r}
 months <- tolower(lubridate::month(c(12, 1:7), label=T, abbr=F))
@@ -138,7 +18,7 @@ months
 
 **Grading:** 2 pts for creating the vector (whichever way they choose)
 
-#### Question 9 (1 pt)
+2. (1 pt)
 
 ```{r}
 urls <- paste0("https://www.basketball-reference.com/leagues/NBA_2021_games-",
@@ -147,7 +27,7 @@ urls <- paste0("https://www.basketball-reference.com/leagues/NBA_2021_games-",
 
 **Grading:** 1 pt for running the code
 
-#### Question 10 (6 pts)
+3. (6 pts)
 
 ```{r}
 library(rvest)
@@ -171,7 +51,7 @@ df_list[[2]]
 * 2 pts for correctly scraping each table
 * 2 pts for storing the data frames in a list
 
-#### Question 11 (1 pt)
+4. (1 pt)
 
 ```{r, message=F, warning=F}
 library(data.table)
@@ -181,7 +61,7 @@ nba <- rbindlist(df_list)
 
 **Grading:** 1 pt for running code
 
-#### Question 12 (6 pts)
+5. (6 pts)
 
 ```{r, message=F, warning=F}
 colnames(nba) <- c("date", "start", "visitor", "visitor_pts", "home", "home_pts",
@@ -205,7 +85,7 @@ nba |>
 * 2 pts for plotting difference in pts against attendance
 * 2 pts for axis labels (something reasonable)
 
-#### Question 13 (7 pts)
+6. (7 pts)
 
 ```{r}
 nba |>
@@ -227,5 +107,99 @@ nba |>
 * 1 pt for correctly ordering the time axis
 
 
+7. (2 pts)
+
+```{r}
+table_list <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements("table.wikitable.sortable") |>
+  html_table()
+```
+
+**Grading:** 2 pts for identifying the correct tables (the specific selector they use may vary somewhat)
+
+8. (2 pts)
+
+```{r}
+table_list[[1]]
+```
+
+12 contestants
+
+**Grading:** 2 pts for correct answer
+
+9. (2 pts)
+
+
+```{r}
+table_list <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_5)") |>
+  html_elements("table.wikitable.sortable") |>
+  html_table()
+
+table_list[[1]]
+```
+
+There is a footnote in the column name
+
+**Grading:** 2 pts for correct answer
+
+10. (3 pts)
+
+```{r}
+table_list <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_5)") |>
+  html_elements("table.wikitable.sortable") |>
+  html_table()
+
+table_list[[1]] |>
+  rename(baker = starts_with("Baker"))
+```
+
+**Grading:** 3 pts for renaming the column using `rename` and `starts_with`. Lose 1 pt if they rename it, but use a different method
+
+11. (6 pts)
+
+```{r}
+urls <- paste0("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_", 
+               2:13, ")")
+contestants <- list()
+for(i in 2:13){
+  contestants[[i-1]] <- read_html(urls[i-1]) |>
+    html_element("table.wikitable.sortable") |>
+    html_table() |>
+    rename(baker = starts_with("Baker"),
+           age = starts_with("Age"),
+           occupation = starts_with("occupation"),
+           hometown = starts_with("hometown")) |>
+    select(baker, age, occupation, hometown) |>
+    mutate(series = i)
+}
+
+contestants <- rbindlist(contestants)
+head(contestants)
+```
+
+**Grading:** 2 pts for iterating over series, 3 pts for correct columns, 1 pt for series column
+
+
+12. (3 pts)
+
+```{r}
+contestants |>
+  group_by(series) |>
+  count()
+```
+
+**Grading:** 3 pts for correct answer
+
+13. (3 pts)
+
+```{r}
+contestants |>
+  group_by(series) |>
+  mutate(mean_age = mean(age)) |>
+  ggplot(aes(x = series, y = mean_age)) +
+  geom_point()
+```
+
+**Grading:** 3 pts for a reasonable plot or summary statistics
 
 

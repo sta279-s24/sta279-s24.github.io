@@ -16,3 +16,6 @@ April 3
 April 5
 : Improving performance
   : [slides (html)](https://sta279-s24.github.io/slides/lecture_25.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_25.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_25.html)
+  
+: **Project released**{: .label .label-yellow }
+  : [Project](https://sta279-s24.github.io/homework/project_1.html)
