@@ -1,0 +1,47 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Weighted sums
+
+In a previous assignment, you have computed weighted sums and means. If $x_1,...,x_n$ is a set of observations and $w_1,...,w_n$ a set of weights, then $\sum \limits_{i=1}^n w_i x_i$ is the **weighted** sum.
+
+In R, `sum(w * x)` calculates the weighted sum, for vectors `w` (containing $w_1,...,w_n$) and `x` (containing $x_1,...,x_n$).
+
+1. Write a function in C++ called `weighted_sumC` which returns the weighted sum (a `double`), given a `NumericVector` `x` and a `NumericVector` `w`. Import this function into R using `Rcpp::cppFunction`, and verify that it works.
+
+2. Compare the speed of `weighted_sumC(x, w)` to `sum(x * w)` and `crossprod(x, w)` in R.
+
+## Calculating variance
+
+The sample variance of $x_1,...,x_n$ is defined by
+
+$\frac{1}{n - 1} \sum \limits_{i=1}^n (x_i - \overline{x})^2$
+
+where $\overline{x}$ is the sample mean.
+
+3. Write a function in C++ called `varC` which returns the sample variance (a `double`), given a `NumericVector` `x`. Import this function into R using `Rcpp::cppFunction`, and verify that it works.
+
+Note: `pow(a, b)` computes $a^b$ in C++.
+
+4. Compare the speed of `varC(x)` to `var(x)` in R.
+
+## Matrix products
+
+Let $A$ be an $n \times m$ matrix ($n$ rows and $m$ columns), and $B$ an $m \times p$ matrix. The product of $C = AB$ is a matrix of size $n \times p$, with entries
+
+$C_{ij} = \sum \limits_{k=1}^m A_{ik}B_{kj}$
+
+5. Write a function in C++ called `matrix_productC` which takes in two `NumericMatrix` objects, and returns their product (another `NumericMatrix`).
+
+Note:
+
+`NumericMatrix result(a, b);`
+
+will create a NumericMatrix of 0s, with $a$ rows and $b$ columns.
