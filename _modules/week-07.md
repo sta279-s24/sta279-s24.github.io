@@ -4,7 +4,7 @@ title: Exam 1
 
 February 26
 : Reshaping data
-  : [slides (html)](https://sta279-s24.github.io/slides/lecture_15.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_15.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_15.html)
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_15.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_15.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_15.html), [Class Activity solutions](https://sta279-s24.github.io/class_activities/ca_lecture_15_solutions.html)
 
 February 28
 : Exam 1 review day
