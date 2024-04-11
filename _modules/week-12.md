@@ -8,6 +8,7 @@ April 8
     
 April 10
 : Exam review day
+  : [slides (pdf)](https://sta279-s24.github.io/slides/exam_2_review_notes.pdf)
 
 April 12
 : Exam 2
