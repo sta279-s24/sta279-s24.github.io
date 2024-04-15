@@ -7,11 +7,11 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday, November 10, 11:00am on Canvas
+**Due:** Tuesday, April 23, 2:00pm on Canvas
 
 **Instructions:** 
 
-* Download the [HW 9 template](https://sta279-f23.github.io/homework/hw_8_template.qmd), and open the template (a Quarto document) in RStudio. 
+* Download the [HW 9 template](https://sta279-s24.github.io/homework/hw_9_template.qmd), and open the template (a Quarto document) in RStudio. 
 * Put your name in the file header
 * Click `Render`
 * Type all code and answers in the document (using `###` for section headings and `####` for question headings)
@@ -20,254 +20,55 @@ link-citations: yes
   
 **Resources:** In addition to the class notes and activities, I recommend reading the following resources:
 
-* [Chapter 16](https://r4ds.hadley.nz/regexps) in *R for Data Science* (2nd edition)
-* [Chapter 25](https://r4ds.hadley.nz/webscraping) in *R for Data Science* (2nd edition)
+* [Chapter 25](https://adv-r.hadley.nz/rcpp.html) in *Advanced R* (2nd edition)
 
 
-# The Great British Bake Off
+# Writing R code in C++ 
 
-The Great British Bake Off (called the Great British Baking Show in the US because of trademark issues with Pillsbury -- yes, really) is a British competition baking show. Each episode involves three challenges: a signature bake, a technical challenge, and a showstopper, all centered around a theme (bread week, cake week, pastry week, etc.). The participant who performs worst is eliminated (with a couple rare exceptions), and the participant who performs best is awarded "star baker" for the week. 
+Compared to R, C++ is often more efficient for operations that involve iteration (e.g. with for loops). In this assignment, you will practice writing functions in C++.
 
-The goal of this assignment is to use web scraping and data wrangling (including working with strings) to collect and analyze data about the show. We will scrape the data from Wikipedia articles about the show.
+## Matrix sums
 
-## Getting the episode names
+Let $A$ be an $n \times m$ matrix ($n$ rows and $m$ columns), and $B$ an $n \times m$ matrix. The sum $C = A + B$ is a matrix of size $n \times m$, with entries
 
-We will begin with series 2 (series 1 had a slightly different format, so we will ignore it for now). The Wikipedia article on series 2 can be found at:
-
-[https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)](https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2))
-
-If you scroll down, you will notice that there is an "Episodes" section, which contains the headings "Episode 1: Cakes", "Episode 2: Tarts", etc. 
+$C_{ij} = A_{ij} + B_{ij}$
 
 :::{.question}
 #### Question 1
 
-Use the `Inspect` tool in Chrome to find the selector for these episode titles, then use the `read_html`, `html_elements`, and `html_text2` functions to create a vector of the episode titles. The output should look like this:
-
-```{r, echo=F, message=F, warning=F}
-library(rvest)
-library(tidyverse)
-
-read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
-  html_elements(".mw-headline[id^='Episode_']") |>
-  html_text2() 
-```
+Write a function in C++ called `matrix_sumC` which takes in two `NumericMatrix` objects (of the same size), and returns their sum (another `NumericMatrix`).
 
 :::
+
+## Matrix transposes
+
+
+Let $A$ be an $n \times m$ matrix ($n$ rows and $m$ columns). The **transpose** $A^T$ is an $m \times n$ matrix with entries $(A^T)_{ij} = A_{ji}$ (i.e., we switch the rows and columns).
+
 
 :::{.question}
 #### Question 2
 
-Create a data frame which contains the episode information in the following format:
-
-```{r, echo=F}
-episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
-  html_elements(".mw-headline[id^='Episode_']") |>
-  html_text2() 
-
-data.frame(episode = episodes) |>
-  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
-                                          episode_name = ".+", "\\("),
-                       too_few = "align_start")
-```
-
-Follow the example of using `separate_wider_regex` from the slides.
-
-Hint: the `too_few = "align_start"` option in `separate_wider_regex` is useful for handling optional patterns at the *end* of a string, like parentheses...
+Write a function in C++ called `matrix_transposeC` which takes in a `NumericMatrix` object, and returns its transpose (another `NumericMatrix`).
 
 :::
-
 
 :::{.question}
 #### Question 3
 
-Now try using your code from question 2 to scrape the episode information for series 4. You should get an error. 
-
-Explain what goes wrong, and *why* you get that error (look at the Wikipedia page!).
+Compare the speed of `matrix_transposeC` to the `t()` function in R.
 
 :::
 
-To fix the error from question 3, we will get rid of the "Episodes" from the masterclass. This can be done with a little help from the `str_detect` function, which returns TRUE if a string contains a match to the specified pattern.
+## Matrix trace
 
-For example:
-
-```{r}
-str_detect(c("ab: c", "xy: z", "ab"), ":")
-```
-
+Let $A$ be an $n \times n$ square matrix (same number of rows and columns). The **trace** of $A$ is given by $tr(A) = \sum_{i=1}^n A_{ii}$.
 
 :::{.question}
 #### Question 4
 
-Use the `str_detect` function to help remove the "Episode" titles which were causing the error in question 3. Then create the table of episode information:
-
-
-```{r, echo=F}
-episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_4)") |>
-  html_elements(".mw-headline[id^='Episode_']") |>
-  html_text2() 
-
-data.frame(episode = episodes) |>
-  filter(str_detect(episode, ":")) |>
-  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
-                                          episode_name = ".+", "\\s+\\("),
-                       too_few = "align_start")
-```
+Write a function in C++ called `matrix_traceC` which takes in a square `NumericMatrix` object, and returns its trace (a `double`).
 
 :::
-
-:::{.question}
-#### Question 5
-
-Adapting the code from question 4, iterate over series 2 -- 13, and combine the episode information for all series into a single data frame that looks like this:
-
-```{r, echo=F, message=F, warning=F}
-library(data.table)
-
-episode_list <- list()
-urls <- paste0("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_", 
-               2:13, ")")
-
-for(i in 2:13){
-  episodes <- read_html(urls[i-1]) |>
-    html_elements(".mw-headline[id^='Episode_']") |>
-    html_text2() 
-
-  episode_list[[i-1]] <- data.frame(episode = episodes) |> 
-    filter(str_detect(episode, ":")) |>
-    separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
-                                          episode_name = ".+", "\\s+\\("),
-                       too_few = "align_start") |>
-    mutate(series = i)
-}
-
-episodes <- rbindlist(episode_list)
-episodes
-```
-
-Hint: as in previous assignments, the `paste0` and `rbindlist` functions may be useful
-
-:::
-
-Using your data from question 5, answer the following questions about the weekly themes across the series.
-
-:::{.question}
-#### Question 6
-
-How many episode themes have appeared only once?
-
-:::
-
-:::{.question}
-#### Question 7
-
-Which episode themes appear in every series?
-
-:::
-
-**Note:** looking at the episode information, you will see that "Cakes" appears 7 times, and "Cake" appears 5 times. So, "Cake week" actually happens every series! The issue here is that "Cake" vs. "Cakes" looks different, but they are really the same theme (just singular vs. plural). How should we handle the issue with pluralization? 
-
-There are some other issues: should we count "Biscuits" the same as "Biscuits and Traybakes"? Are "Pies" the same as "Pies and Tarts"? And depending on how you wrote the regular expressions, some of the names might have trailing white space, which makes "Alternative Ingredients" look different from "Alternative Ingredients ".
-
-Handling the extra white space is straightforward: the `trimws` function in base R will do that for us, or we can modify our regular expressions. The other issues are more complicated; we may return to them at a later date.
-
-
-```{r, include=F}
-episodes |>
-  count(episode_name) |>
-  arrange(desc(n))
-```
-
-
-## Getting the contestants
-
-Now let's scrape some of the tabular data. Each series has a Wikipedia page, and these pages contain several tables. The first table is information about each baker, and then there are tables with the results for each episode.
-
-
-:::{.question}
-#### Question 8
-
-Use the `Inspect` tool in Chrome to find the selector for these tables on the series 2 page. There should be one selector that will identify all the tables we want: using the `html_elements` function with this selector, and then the `html_table` function, will produce a list of data frames. There should be 9 tables for series 2 (one table for the contestants, and 8 tables for the episodes).
-
-```{r, include=F}
-table_list <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
-  html_elements("table.wikitable.sortable") |>
-  html_table()
-```
-
-:::
-
-:::{.question}
-#### Question 9
-
-Look at the first table, which contains contestant information. How many contestants appeared on series 2?
-
-:::
-
-:::{.question}
-#### Question 10
-
-Repeat question 8 for series 5. What do you notice about the name of the "Baker" column?
-
-:::
-
-Footnotes like this can cause a problem when we want to combine information across the series. Let's sanitize the names of the tables to make sure the information can be combined. 
-
-:::{.question}
-#### Question 11
-
-Use the `rename` and `starts_with` functions to rename the `Baker[3]` column `baker` in Series 5.
-
-:::
-
-:::{.question}
-#### Question 12
-
-Iterate over series 2 -- 13, extracting the contestant table for each series, and combine the results into a single data frame (you can remove the `Links` column). The results should look like this:
-
-```{r, echo=F}
-contestants <- list()
-for(i in 2:13){
-  contestants[[i-1]] <- read_html(urls[i-1]) |>
-    html_element("table.wikitable.sortable") |>
-    html_table() |>
-    rename(baker = starts_with("Baker"),
-           age = starts_with("Age"),
-           occupation = starts_with("occupation"),
-           hometown = starts_with("hometown")) |>
-    select(baker, age, occupation, hometown) |>
-    mutate(series = i)
-}
-
-contestants <- rbindlist(contestants)
-contestants
-```
-
-:::
-
-Using your data from question 12, answer the following questions about the contestants over the course of the show.
-
-:::{.question}
-#### Question 13
-
-How many contestants participated in each series?
-
-:::
-
-:::{.question}
-#### Question 14
-
-Have the contestant ages changed over the show? Calculate relevant summary statistics and create a plot to address the question.
-
-:::
-
-```{r, include=F}
-contestants |>
-  group_by(series) |>
-  mutate(mean_age = mean(age)) |>
-  ggplot(aes(x = series, y = mean_age)) +
-  geom_point()
-```
-
-
 
 

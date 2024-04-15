@@ -1,5 +1,5 @@
 ---
-title: "Homework 8 grading"
+title: "Homework 8 solutions"
 format: 
   html:
     embed-resources: true
@@ -7,181 +7,114 @@ editor: source
 author: "Ciaran Evans"
 ---
 
-```{r}
+Total: 21 pts
+
+1. (2 pts)
+
+```{r, message=F, warning=F}
+library(rvest)
 library(tidyverse)
-library(mdsr)
-library(DBI)
 
-db <- dbConnect_scidb("airlines")
-
-query <- "
-  SHOW TABLES;
-"
-dbGetQuery(db, query)
+read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
 ```
 
-1. (6 pts)
+**Grading:** 2 pts for correct output
 
-```{sql connection=db}
-SELECT 
-  dest, SUM(1) as N
-FROM flights
-WHERE origin = 'ORD' AND year = 2010
-GROUP BY dest
-ORDER BY N DESC
-LIMIT 0, 5;
-```
-
-**Grading:** 
-
-* 1 pt for counting the number of flights
-* 1 pt for grouping by destination
-* 1 pt for displaying both the count and the destination in the output
-* 1 pt for descending order
-* 2 pts for choosing ORD and 2010
-
-2. (5 pts)
-
-```{sql connection=db}
-SELECT 
-  dest, AVG(arr_delay) as mean_arr_delay
-FROM flights
-WHERE year = 2010
-GROUP BY dest
-ORDER BY mean_arr_delay DESC
-LIMIT 0, 5;
-```
-
-**Grading:** 
-
-* 1 pt for calculating mean arrival delay
-* 1 pt for grouping by destination
-* 1 pt for displaying both the delay and the destination in the output
-* 1 pt for descending order
-* 1 pts for choosing 2010
-
-3. (7 pts)
-
-```{sql connection=db}
-SELECT 
-  name, AVG(arr_delay) as mean_arr_delay
-FROM flights
-JOIN airports ON flights.dest = airports.faa
-WHERE year = 2010
-GROUP BY dest
-ORDER BY mean_arr_delay DESC
-LIMIT 0, 5;
-```
-
-**Grading:** 
-
-* 1 pt for calculating mean arrival delay
-* 1 pt for grouping by destination
-* 1 pt for displaying both the delay and the destination in the output
-* 1 pt for descending order
-* 1 pts for choosing 2010
-* 2 pts for joining on dest = faa
-
-4. (6 pts)
-
-```{sql connection=db}
-SELECT 
-  SUM(cancelled) as N,
-  SUM(cancelled)/SUM(1) AS prop_cancelled
-FROM flights
-WHERE year = 2010 AND 
-  ((origin = 'JFK' AND dest = 'SFO') OR 
-  (origin = 'SFO' AND dest = 'JFK'))
-LIMIT 0, 5;
-```
-
-**Grading:** 
-
-* 1 pt for calculating number of cancelled flights
-* 1 pt for calculating proportion of cancelled flights
-* 4 pt for year = 2010, AND correctly identifying flights between JFK and SFO (either JFK is origin and SFO is dest, or JFK is dest and SFO is origin)
-
-5. This one is a bit more open-ended; student answers may vary (6 pts)
-
-**Grading:** 
-
-* 2 pts for answers that involve JFK, EWR, and LGA as the origin airports
-* 2 pts for looking at something reasonable (arrival delay, departure delay, etc.)
-* 2 pts for making a reasonable comparison between the airports
-
-6. (17 pts)
+2. (4 pts)
 
 ```{r}
-my_kmeans <- function(dat, k, max_iter){
-  
-  n <- nrow(dat) # number of observations
-  
-  # choose the initial means
-  means <- dat[sample(1:n, k),]
-  
-  # calculate distances to the initial means
-  dists <- matrix(nrow = n, ncol = k)
-  for(i in 1:k){
-    dists[,i] <- rowSums((sweep(as.matrix(dat), 2, as.matrix(means)[i,]))^2)
-  }
-  
-  # initialize groups
-  groups <- apply(dists, 1, which.min)
-  
-  # track the number of iterations and whether the groups have changed
-  cur_iter <- 0
-  group_change <- 1
-  
-  while(group_change > 0 & cur_iter < max_iter){
-    
-    # update the means
-    for(i in 1:k){
-      means[i,] <- colMeans(dat[groups == i,])
-    }
-    
-    # update the distances
-    dists <- matrix(nrow = n, ncol = k)
-    for(i in 1:k){
-      dists[,i] <- rowSums((sweep(dat, 2, means[i,]))^2)
-    }
-    
-    # update the groups
-    new_groups <- apply(dists, 1, which.min)
-    
-    cur_iter <- cur_iter + 1
-    group_change <- sum(groups != new_groups)
-    groups <- new_groups
-  }
-  
-  return(list(means, groups))
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_2)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\("),
+                       too_few = "align_start")
+```
+
+**Grading:** 2 pts for separate columns for episode name and episode number. 2 pts for removing the words in parentheses
+
+3. (2 pts)
+
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_4)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\("),
+                       too_few = "align_start")
+```
+
+There are several extra episodes which shouldn't be there, and which don't appear to have names. This is because of several "masterclass" episodes on that wikipedia page, which weren't part of the main show.
+
+**Grading:** 2 pts for a reasonable answer. If they didn't have an error, because of how they originally wrote the code, that is ok.
+
+4. (4 pts)
+
+```{r}
+episodes <- read_html("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_4)") |>
+  html_elements(".mw-headline[id^='Episode_']") |>
+  html_text2() 
+
+data.frame(episode = episodes) |>
+  filter(str_detect(episode, ":")) |>
+  separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\s+\\("),
+                       too_few = "align_start")
+```
+
+**Grading:** If they didn't have an error (because they wrote their code differently) that is ok. 1 pt for separate columns for episode name and episode number. 2 pts for removing the words in parentheses. 1 pt for 10 rows in the output.
+
+5. (5 pts)
+
+```{r, message=F, warning=F}
+library(data.table)
+
+episode_list <- list()
+urls <- paste0("https://en.wikipedia.org/wiki/The_Great_British_Bake_Off_(series_", 
+               2:13, ")")
+
+for(i in 2:13){
+  episodes <- read_html(urls[i-1]) |>
+    html_elements(".mw-headline[id^='Episode_']") |>
+    html_text2() 
+
+  episode_list[[i-1]] <- data.frame(episode = episodes) |> 
+    filter(str_detect(episode, ":")) |>
+    separate_wider_regex(episode, patterns = c(".+ ", episode = "\\d+", ": ", 
+                                          episode_name = ".+", "\\s+\\("),
+                       too_few = "align_start") |>
+    mutate(series = i)
 }
+
+episodes <- rbindlist(episode_list)
+head(episodes)
 ```
 
+**Grading:** 2 pts for iterating over series, 2 pts for separate episode number and name columns, 1 pt for series column
+
+6. (2 pts)
 
 ```{r}
-library(palmerpenguins)
-
-clustering <- penguins |>
-  select(flipper_length_mm, bill_length_mm) |>
-  drop_na() |>
-  as.matrix() |>
-  my_kmeans(k=3, max_iter = 100)
-
-penguins |>
-  select(flipper_length_mm, bill_length_mm) |>
-  drop_na() |>
-  mutate(group = as.factor(clustering[[2]])) |>
-  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = group)) +
-  geom_point()
-
+episodes |>
+  count(episode_name) |>
+  filter(n == 1) |>
+  nrow()
 ```
 
-**Grading:** If they didn't write this as a function, they lose 10 pts
+**Grading:** 2 pts for correct answer. They can get 1 pt if they arrived at an incorrect answer but did something reasonable
 
-* 3 pts for correct inputs (data, number of clusters, max iterations)
-* 2 pts for correct output (cluster assignments and group means)
-* 2 pts for correct initialization
-* 2 pts for calculating distances
-* 2 pts for assinging groups
-* 2 pts for updating means
-* 4 pts for iterating until convergence, or max iterations reached
+7. (2 pts)
+
+```{r}
+episodes |>
+  count(episode_name, sort=T)
+```
+
+**Grading:** Answers may vary, depending on whether they count "Cake" and "Cakes" as the same, whether "Biscuits" is the same as "Biscuits and traybakes", etc.
+
