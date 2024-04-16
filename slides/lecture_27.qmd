@@ -1,0 +1,330 @@
+---
+title: "Lecture 27: Implementing statistical methods"
+format: 
+  revealjs:
+    theme: theme.scss
+editor: source
+execute: 
+  echo: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Penguins data
+
+```{r, message=F, warning=F, echo=F}
+library(palmerpenguins)
+library(tidyverse)
+
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = species)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+## Penguins data
+
+What if we didn't know the species?
+
+```{r, message=F, warning=F, echo=F}
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+## Though excercise
+
+```{r, message=F, warning=F, echo=F}
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+With your neighbor, discuss how you might identify potential groups in this scatterplot, *without* knowing species information.
+
+## Clustering
+
+```{r, message=F, warning=F, echo=F}
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+*Clustering* is the process of dividing data into groups based on the observed variables.
+
+## k-means clustering
+
+```{r, include=F}
+df <- penguins |>
+  select(flipper_length_mm, bill_length_mm) |>
+  drop_na() # remove missing values before clustering
+```
+
+
+```{r}
+# cluster with k = 3
+clusters <- kmeans(df, 3, algorithm = "Lloyd", iter.max=20)$cluster
+
+df |>
+  mutate(cluster = as.factor(clusters)) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = cluster)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+## k-means clustering
+
+```{r, message=F, warning=F, echo=F}
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point() +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+## k-means clustering
+
+## Recommendations
+
+* Before putting code in a function, write it for an example dataset. *Then* generalize
+* Start small (one row, one iteration, etc.), then build up
+* Work step by step
+
+## Step 1: initialization
+
+**Initialization:** Randomly select $k$ observations from the dataset to be the *initial* group means
+
+```{r}
+head(df)
+```
+
+**Question:** How would we randomly choose $k=3$ rows from our dataset?
+
+## Step 1: initialization
+
+**Initialization:** Randomly select $k$ observations from the dataset to be the *initial* group means
+
+```{r, include=F}
+set.seed(3)
+```
+
+
+```{r}
+k <- 3
+n <- nrow(df)
+
+# choose the initial means
+means <- df[sample(1:n, k),]
+means
+```
+
+## Step 1: initialization
+
+```{r, echo=F, message = F, warning=F}
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point(alpha = 0.2) +
+  geom_point(data = means, color="red", size = 2) +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+## Step 2: calculate distances
+
+**Calculate distances:** For every observation in the dataset, calculate the distance to each of the $k$ group means
+
+```{r}
+means
+
+head(df)
+```
+
+## Step 2: calculate distances
+
+**Question:** How could we calculate these distances in R?
+
+```{r}
+means
+
+head(df)
+```
+
+
+## Step 2: calculate distances
+
+```{r}
+means[1,]
+head(df)
+```
+
+```{r, include=F}
+df <- as.matrix(df)
+means <- as.matrix(means)
+```
+
+```{r}
+sweep(df, 2, means[1,])
+```
+
+## Step 2: calculate distances
+
+```{r, eval=F}
+sweep(df, 2, means[1,])
+```
+
+```{r, echo=F}
+sweep(df, 2, means[1,])[1:3,]
+```
+
+**Question:** Now how do I get the distances?
+
+## Step 2: calculate distances
+
+```{r, eval=F}
+sweep(df, 2, means[1,])
+```
+
+```{r, echo=F}
+sweep(df, 2, means[1,])[1:3,]
+```
+
+```{r, eval=F}
+rowSums(sweep(df, 2, means[1,])^2)
+```
+
+```{r, echo=F}
+rowSums(sweep(df, 2, means[1,])^2)[1:3]
+```
+
+## So far
+
+```{r, eval=F}
+k <- 3
+n <- nrow(df)
+
+# choose the initial means
+means <- df[sample(1:n, k),]
+
+# calculate distances for the first group mean
+rowSums(sweep(df, 2, means[1,])^2)
+```
+
+**Question:** How would we modify this code to get distances for *each* group mean?
+
+## Step 2: calculate distances
+
+```{r}
+dists <- matrix(nrow = n, ncol = k)
+for(i in 1:k){
+  dists[,i] <- rowSums((sweep(df, 2, means[i,]))^2)
+}
+
+head(dists)
+```
+
+## Step 3: Assign points to the nearest group mean
+
+```{r}
+head(dists)
+```
+
+**Question:** Which group mean does each row get assigned to?
+
+
+## Step 3: Assign points to the nearest group mean
+
+```{r}
+head(dists)
+```
+
+**Question:** How could I write code to assign each row?
+
+## Step 3: Assign points to the nearest group mean
+
+```{r}
+groups <- apply(dists, 1, which.min)
+```
+
+```{r, echo=F, message = F, warning=F}
+penguins |>
+  drop_na(flipper_length_mm, bill_length_mm) |>
+  mutate(groups = groups) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, 
+             color = as.factor(groups))) +
+  geom_point(alpha = 0.35) +
+  geom_point(data = means, color="black", size = 2) +
+  labs(x = "Flipper length", y = "Bill length", color = "Current group assignment") +
+  theme_bw()
+```
+
+## Step 4: Re-calculate group means
+
+**Update means:** For each group, re-calculate the new group mean as the mean of the points assigned to that group
+
+```{r, eval=F}
+head(df)
+
+head(groups)
+```
+
+```{r, echo=F}
+r_samp <- sample(1:nrow(df), 6)
+df[r_samp,]
+
+groups[r_samp]
+```
+
+
+## Step 4: Re-calculate the group means
+
+```{r}
+for(i in 1:k){
+  means[i,] <- colMeans(df[groups == i,])
+}
+
+means
+```
+
+## Step 4: Re-calculate the group means
+
+```{r, echo=F, message = F, warning=F}
+penguins |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm)) +
+  geom_point(alpha = 0.2) +
+  geom_point(data = means, color="red", size = 2) +
+  labs(x = "Flipper length", y = "Bill length") +
+  theme_bw()
+```
+
+## So far:
+
+```{r, eval=F}
+# choose the initial means
+means <- df[sample(1:n, k),]
+
+# calculate distances
+dists <- matrix(nrow = n, ncol = k)
+for(i in 1:k){
+  dists[,i] <- rowSums((sweep(df, 2, means[i,]))^2)
+}
+
+# assign groups
+groups <- apply(dists, 1, which.min)
+
+# update means
+for(i in 1:k){
+  means[i,] <- colMeans(df[groups == i,])
+}
+```
+
+**Question:** What should we do next?
+
+

@@ -1,0 +1,63 @@
+---
+title: "Class activity"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+# k-means clustering
+
+There are a variety of ways to conduct k-means clustering. The most straightforward (though not necessarily the best) is Lloyd's algorithm:
+
+* **Step 1: Initialize:** Given a value of $k$, randomly select $k$ observations from the dataset to be the initial group means.
+* **Step 2: Calculate distances:** For every observation in the dataset, calculate the distance to each of the $k$ group means.
+* **Step 3: Assign groups:** Assign each observation to the nearest group mean.
+* **Step 4: Update means:** For each group, re-calculate the new group mean as the mean of the points assigned to that group in step 3. 
+* **Step 5: Iterate:** Repeat steps 2 - 4 until convergence (the group assignments stop changing) or until a maximum number of iterations has been reached.
+
+## Code so far
+
+Here is the code we have written in class so far for the penguins data:
+
+```{r, eval=F}
+library(palmerpenguins)
+library(tidyverse)
+
+df <- penguins |>
+  select(flipper_length_mm, bill_length_mm) |>
+  drop_na() # remove missing values before clustering
+
+k <- 3 # number of clusters
+n <- nrow(df) # number of observations
+
+# choose the initial means
+means <- df[sample(1:n, k),]
+
+# make data and means into matrices
+df <- as.matrix(df)
+means <- as.matrix(means)
+
+# calculate distances
+dists <- matrix(nrow = n, ncol = k)
+for(i in 1:k){
+  dists[,i] <- rowSums((sweep(df, 2, means[i,]))^2)
+}
+
+# assign points to nearest group
+groups <- apply(dists, 1, which.min)
+
+# recalculate group means
+for(i in 1:k){
+  means[i,] <- colMeans(df[groups == i,])
+}
+```
+
+## Questions
+
+The next step is to *iterate* this process: continue alternating between updating group assignments and updating group means, until the group assignments stop changing.
+
+1. Using a loop, iterate the $k$-means algorithm until the group assignments stop changing. Make a plot showing the final cluster assignments for the penguins data.
+
