@@ -10,7 +10,8 @@ April 15
     
 April 17
 : Implementing statistical methods
-  : [slides (html)](https://sta279-s24.github.io/slides/lecture_27.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_27.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_27.html)
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_27.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_27.pdf)
 
 April 19
 : Implementing statistical methods
+  : [slides (html)](https://sta279-s24.github.io/slides/lecture_27.html), [slides (pdf)](https://sta279-s24.github.io/slides/lecture_27.pdf), [Class Activity](https://sta279-s24.github.io/class_activities/ca_lecture_27.html)
