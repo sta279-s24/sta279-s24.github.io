@@ -1,0 +1,559 @@
+---
+title: "Final exam review"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=F)
+knitr::opts_chunk$set(warning=F)
+library(tidyverse)
+library(stringr)
+```
+
+Below are questions to help you study for the final exam. These are examples of the kinds of questions I might ask.
+
+* This is not a practice exam. 
+* The questions are not comprehensive; I recommend looking back at previous exam review questions, the midterms themslves, and class activities and homework assignments
+
+**What languages will I be tested on?**
+
+* You should be able to read code in R for all topics covered this semester
+* You should be able to read C++ and identify and correct basic errors in the code
+* When asked to write a function, you will be able to use R, Python, or possibly C++
+* When asked to write code for data wrangling (summarizing, pivoting, joining, etc.) you will be able to use R, Python, or SQL
+
+
+# Writing a function
+
+Suppose we have a sample $X_1,...,X_n$ from some population distribution. We know that the mean describes the "center" of the distribution, the standard deviation is a measure of variability, and skewness describes the shape of the distribution. 
+
+Another quantity we can calculate to describe a distribution is *kurtosis*, which describes how heavy the tails of the distribution are. The *sample kurtosis* is calculated by:
+
+$$\dfrac{\frac{1}{n} \sum \limits_{i=1}^n (X_i - \bar{X})^4}{\left( \frac{1}{n} \sum \limits_{i=1}^n (X_i - \bar{X})^2 \right)^2} \ \ - \ \ 3$$
+
+where $\bar{X}$ is the sample mean.
+
+1. Write a function in R, Python, or C++ to calculate the sample kurtosis. If you choose R, your function should take in one argument: a vector `x`. If you choose Python, your function should take in one argument: a 1-d numpy array `x`. If you choose C++, your function should take in one argument: a `NumericVector` `x`.
+
+# More function writing
+
+Suppose we have a sample $(X_1, Y_1),...,(X_n, Y_n)$ of $n$ observations collected on two variables, $X$ and $Y$. The strength of the linear relationship between $X$ and $Y$ is measured by their *correlation*, and the sample correlation is calculated with the following formula:
+
+
+$$\dfrac{ \sum \limits_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})}{\left( \sum \limits_{i=1}^n (X_i - \bar{X})^2 \right)^{1/2} \left( \sum \limits_{i=1}^n (Y_i - \bar{Y})^2 \right)^{1/2}}$$
+
+2. Write a function in R, Python, or C++ to calculate the sample correlation. If you choose R, your function should take in two arguments: a vector `x` and a vector `y`. If you choose Python, your function should take in two arguments: a 1-d numpy array `x` and a 1-d numpy array `y`. If you choose C++, your function should take in two arguments: a `NumericVector` `x` and a `NumericVector` `y`.
+
+
+# Reading code: loops and functions
+
+For each of the following questions, either write the output of the code, or explain why it gives an error. (Some questions will run correctly, others will cause errors)
+
+1.
+
+```{r, eval=F}
+x <- list()
+for(i in 1:10){
+  x[i] <- i
+}
+x[2] + 1
+```
+
+2.
+
+```{r, eval=F}
+nsim <- 1000 # number of games
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  # each game starts with the marker in the middle
+  marker <- 0
+  
+  while(abs(marker) < 0){
+    robotA <- runif(1, 0, 0.5)
+    robotB <- runif(1, 0, 0.5)
+    marker <- marker + robotA - robotB
+  }
+  
+  # check whether robot A wins
+  results[i] <- marker >= 0.5
+}
+
+# fraction of the time that robot A wins
+mean(results)
+```
+
+
+3.
+
+```{r, eval=F}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat <- i + j
+  }
+}
+
+mat
+```
+
+5.
+
+```{r, eval=F}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat[j, i] <- i + j
+  }
+}
+
+mat
+```
+
+5.
+
+```{r, eval=F}
+mat <- matrix(1, 3, 3)
+for(i in 2:3){
+  for(j in 2:3){
+    mat[i,j] <- mat[i-1, j-1] + mat[i, j-1]
+  }
+}
+
+mat
+```
+
+
+6.
+
+```{r, eval=F}
+f1 <- function(x = 1){
+  return(x + 1)
+}
+g1 <- function(x){
+  return(f1() + x)
+}
+
+f1(g1(3))
+```
+
+7.
+
+```{r, eval=F}
+f1 <- function(n, groups){
+  x <- matrix(1, nrow=n, ncol=n)
+  unique_groups = unique(groups)
+  means <- matrix(nrow = length(unique_groups), ncol = n)
+  for(i in 1:length(unique_groups)){
+    means[i,] <- colMeans(x[groups == unique_groups[i],])
+  }
+  
+  return(means)
+}
+
+f1(5, groups = c(1, 1, 2, 2, 2))
+```
+
+## C++ code
+
+The following C++ code chunks contain errors. Identify the errors and explain how to correct them.
+
+8.
+
+```{r, eval=F}
+Rcpp::cppFunction('double weighted_sum(NumericVector x, NumericVector w){
+  int n = x.size();
+  sum = 0;
+  
+  for(int i = 0; i < n; ++i){
+    sum += x[i]*w[i];
+  }
+  
+  return sum;
+}')
+```
+
+9.
+
+```{r, eval=F}
+Rcpp::cppFunction('NumericMatrix varC(NumericVector x){
+  int n = x.size();
+  
+  double mean = 0;
+  
+  for(int i = 0; i < n; ++i){
+    mean += x[i]/n;
+  }
+  
+  double sum = 0;
+  
+  for(int i = 0; i < n; ++i){
+    sum += pow(x[i] - mean, 2);
+  }
+  
+  return sum/(n-1);
+}')
+```
+
+10.
+
+```{r, eval=F}
+Rcpp::cppFunction('NumericMatrix matrix_prod(NumericMatrix A, NumericMatrix B){
+  int ncol_a = A.ncol()
+  int nrow_a = A.nrow()
+  int ncol_b = B.ncol()
+  int nrow_b = B.nrow()
+  
+  NumericMatrix result(nrow_a, ncol_b)
+  
+  for(int i = 1; i <= nrow_a; ++i){
+    for(int j = 1; j <= ncol_b; ++j){
+      double sum = 0
+      for(int k = 1; k <= ncol_a; ++k){
+        sum += A(i,k)*B(k,j)
+      }
+      
+      result(i,j) = sum
+    }
+  }
+  
+  return result
+}')
+```
+
+
+
+
+# Improving code efficiency
+
+10. Re-write the following code to run as efficiently as you can.
+
+```{r, eval=F}
+x <- c()
+for(i in 1:100){
+  x <- c(x, runif(1))
+}
+```
+
+# More improving code efficiency
+
+Your friend writes two different functions to compute the standard deviation in R:
+
+```{r, eval=F}
+my_sd_1 <- function(x){
+  x_m <- mean(x)
+  sq_diffs <- c()
+  for(i in 1:length(x)){
+    sq_diffs <- c(sq_diffs, (x[i] - x_m)^2)
+  }
+  
+  x_sd <- 0
+  for(i in 1:length(x)){
+    x_sd <- x_sd + sq_diffs[i]
+  }
+  
+  return(sqrt(x_sd/(length(x) - 1)))
+}
+
+
+my_sd_2 <- function(x){
+  x_m <- mean(x)
+  return(sqrt(sum((x - x_m)^2)/(length(x) - 1)))
+}
+```
+
+Both functions work correctly, but they are not equally efficient. 
+
+11. What tool(s) could your friend use to compare the efficiency of the two functions?
+
+
+Your friend takes your suggestion from the previous question to compare their performance, producing the following output:
+
+```
+  expression      min   median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time result
+  <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl> <int> <dbl>   <bch:tm> <list>
+  ..........   2.46ms   2.48ms    396.00    78.2KB        0   199     0      502ms <NULL>
+  .......... 802.86ms 802.86ms      1.25     382MB        0     1     0      803ms <NULL>
+```
+
+12. However, your friend forgets which function corresponds to which row in the output. Match each function (`my_sd_1` and `my_sd_2`) to one of the rows of output, and explain your reasoning.
+
+# Reading data wrangling code
+
+Here are two small datasets, `df1` and `df2`:
+
+```{r, include=F}
+set.seed(3)
+
+df1 <- data.frame(id = 1:5, 
+                  x = sample(1:10, 5, replace=T),
+                  y = sample(1:10, 5, replace=T),
+                  z = sample(1:10, 5, replace=T))
+
+df2 <- data.frame(id = 3:6,
+                  a = sample(1:10, 4, replace=T),
+                  b = sample(1:10, 4, replace=T))
+```
+
+```{r}
+df1
+
+df2
+```
+
+
+For each of the following chunks of code, write down the output or explain why it will cause an error.
+
+
+12.
+
+```{r, eval=F}
+df1 |>
+  left_join(df2, join_by(id))
+```
+
+13.
+
+```{r, eval=F}
+df1 |>
+  inner_join(df2, join_by(id))
+```
+
+14.
+
+```{r, eval=F}
+df1 |>
+  group_by(z) |>
+  summarize(max_b = max(b))
+```
+
+
+15.
+
+```{r, eval=F}
+df1 |>
+  select(x, y) |>
+  pivot_longer(cols = -id,
+               names_to = "measurement",
+               values_to = "value")
+```
+
+16.
+
+```{r, eval=F}
+df1 |>
+  select(id, x, y) |>
+  pivot_longer(cols = -id,
+               names_to = "measurement",
+               values_to = "value") |>
+  filter(id %in% c(1, 2, 3))
+```
+
+17.
+
+```{r, eval=F}
+df1 |>
+  left_join(df2, join_by(id)) |>
+  mutate(new_var = x + a) |>
+  group_by(z) |>
+  summarize(mean_new_var = mean(new_var))
+```
+
+
+18.
+
+```{r, eval=F}
+df1 |>
+  left_join(df2, join_by(id)) |>
+  mutate(new_var = x + a) |>
+  group_by(z) |>
+  summarize(mean_new_var = mean(new_var, na.rm=T)) |>
+  summarize(mean_b = mean(b))
+```
+
+
+
+
+
+
+
+# More writing data wrangling code
+
+Here is another small dataset, `ex_df`, which has a single column (`faculty`):
+
+```{r, include=F}
+ex_df <- data.frame(faculty = c("Rob Erhardt, Professor: MAN 343",
+                "Daniel Beavers, Associate Professor: MAN 337",
+                "Kenneth Berenhaut, Professor: MAN 379",
+                "Leonardo Cella, Assistant Professor: MAN 344",
+                "Lucy D'Agostino McGowan, Assistant Professor: MAN 342",
+                "Nicole Dalzell, Associate Teaching Professor: MAN 338"))
+```
+
+```{r}
+ex_df
+```
+
+17. Write code to produce the following output using `ex_df`:
+
+```{r, echo=F}
+ex_df |>
+  separate_wider_regex(faculty,
+                       patterns = c(
+                         name = ".+",
+                         ", ",
+                         position = ".+",
+                         ": ",
+                         office = ".+"
+                       ))
+```
+
+
+# Regular expressions
+
+Suppose you receive a vector containing the following email addresses:
+
+```{r}
+emails <- c("evansc@wfu.edu",
+            "dalzelnm@wfu.edu",
+            "heplersa@wfu.edu")
+```
+
+18. Fill in the following code to produce the desired output:
+
+```{r, eval=F}
+str_extract(emails, ...)
+```
+
+```{r, echo=F}
+str_extract(emails, "^.+(?=@)")
+```
+
+# More regular expressions
+
+You have a folder with the following filenames:
+
+```{r}
+filenames <- c(".bash_profile",
+               "workspace.doc",
+               "img0912.jpg",
+               "updated_img0912.png",
+               "documentation.html",
+               "favicon.gif",
+               "access.lock")
+```
+
+
+19. Fill in the following code to produce the desired output:
+
+```{r, eval=F}
+str_subset(filenames, ...)
+```
+
+```{r, echo=F}
+str_subset(filenames, "(gif|png|jpg)")
+```
+
+# More regular expressions
+
+Consider the following string:
+
+```{r}
+ex_str <- "The kurtosis is defined by the equation $\\mu_4/\\sigma^4$, 
+where $\\mu_4$ is the fourth central moment 
+and $\\sigma$ is the standard deviation."
+```
+
+20. Fill in the following code to produce the desired output:
+
+```{r, eval=F}
+str_extract_all(ex_str, ...)
+```
+
+```{r, echo=F}
+str_extract_all(ex_str, "\\$[^\\$]+\\$")
+```
+
+
+# Web scraping
+
+Consider the following short portion of a web page, with URL `https://fake_page.html`.
+
+```
+<div class="mesa">
+  <span>
+    <p> Hello! </p>
+  </span>
+  
+  <p class="small"> Welcome to STA 279! </p>
+  
+  <span>
+    <p class="small"> Room: Carswell 102 </p>
+  </span>
+  
+  <span>
+    <h3 class="small"> Grading policy </h3>
+  </span>
+  
+  <span>
+    <p class="small"> Exam dates </p>
+  </span>
+</div>
+```
+
+19. Write code in R that will extract the following strings from this web page (as a vector):
+
+```{r, include=F}
+res_strs <- c("Room: Carswell 102", "Exam dates")
+```
+
+```{r, echo=F}
+res_strs
+```
+
+
+# Probability simulation
+
+You have 40 cards, with 4 different colors. Cards for each color are numbered 1--10. Two cards are picked at random (without replacement). What is the probability that the two cards chosen have different numbers and different colors?
+
+30. Write a simulation to estimate the probability.
+
+# Another probability simulation
+
+An election is held between two candidates. Candidate A wins the election with $p$ votes, while candidate B loses with $q < p$ votes. Given these final vote counts, what is the probability that, when the votes are tallied, candidate $A$ has more votes than candidate $B$ throughout the count? (So candidate A has more votes after 1 vote has been counted, after 2 votes have been counted, etc.)
+
+31. Below is code that attempts to estimate this probability, with $p = 20$ and $q = 10$. It is very wrong. Explain why.
+
+```{r, eval=F}
+p <- 20
+q <- 10
+nsim <- 1000
+votes <- rep(c(0, 1), times = c(q, p))
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  shuffled_votes <- sample(votes, p+q, replace=F)
+  results[i] <- sum(shuffled_votes) > sum(1 - shuffled_votes)
+}
+
+mean(results)
+```
+
+32. Write code that correctly estimates the probability, given $p$ and $q$.
+
+
+# Statistical simulation
+
+In class, you learned about the k-means clustering algorithm. Given a dataset and a number of clusters $k$, the k-means algorithm divides the data into $k$ groups.
+
+Suppose that you have data $X_1,...,X_n$. Each observation $X_i$ comes from one of three groups, with means $\mu_1, \mu_2, \mu_3$. Let $G_i$ be the group for $X_i$, and suppose that $X_i \sim N(\mu_{G_i}, 1)$.
+
+We observe $X_1,...,X_n$, but we don't get to see the actual groups $G_1,...,G_n$. Instead, we are going to try to estimate the group assignments using the k-means algorithm, with $k=3$. We want to estimate the probability that we correctly assign groups for all observations $X_i$, and explore how that probability changes with $\mu_1, \mu_2$, and $\mu_3$.
+
+33. Design a simulation study to answer this question. You do not need to write code, but you must describe each of the ADEMP steps in enough detail that I could implement your simulation study.
+

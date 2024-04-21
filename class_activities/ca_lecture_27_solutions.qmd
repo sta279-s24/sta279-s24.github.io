@@ -1,0 +1,81 @@
+---
+title: "Class activity solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+
+```{r}
+my_kmeans <- function(dat, k, max_iter){
+  
+  n <- nrow(dat) # number of observations
+  
+  # choose the initial means
+  means <- dat[sample(1:n, k),]
+  
+  # calculate distances to the initial means
+  dists <- matrix(nrow = n, ncol = k)
+  for(i in 1:k){
+    dists[,i] <- rowSums((sweep(as.matrix(dat), 2, as.matrix(means)[i,]))^2)
+  }
+  
+  # initialize groups
+  groups <- apply(dists, 1, which.min)
+  
+  # track the number of iterations and whether the groups have changed
+  cur_iter <- 0
+  group_change <- 1
+  
+  while(group_change > 0 & cur_iter < max_iter){
+    
+    # update the means
+    for(i in 1:k){
+      means[i,] <- colMeans(dat[groups == i,])
+    }
+    
+    # update the distances
+    dists <- matrix(nrow = n, ncol = k)
+    for(i in 1:k){
+      dists[,i] <- rowSums((sweep(dat, 2, means[i,]))^2)
+    }
+    
+    # update the groups
+    new_groups <- apply(dists, 1, which.min)
+    
+    cur_iter <- cur_iter + 1
+    group_change <- sum(groups != new_groups)
+    groups <- new_groups
+  }
+  
+  return(list(means, groups))
+}
+```
+
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(palmerpenguins)
+
+clustering <- penguins |>
+  select(flipper_length_mm, bill_length_mm) |>
+  drop_na() |>
+  as.matrix() |>
+  my_kmeans(k=3, max_iter = 100)
+
+penguins |>
+  select(flipper_length_mm, bill_length_mm) |>
+  drop_na() |>
+  mutate(group = as.factor(clustering[[2]])) |>
+  ggplot(aes(x = flipper_length_mm, y = bill_length_mm, color = group)) +
+  geom_point()
+
+```
+
+
+
+
+
+
