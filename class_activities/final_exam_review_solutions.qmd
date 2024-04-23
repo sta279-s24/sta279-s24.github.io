@@ -1,0 +1,504 @@
+---
+title: "Final exam review solutions"
+format: 
+  html:
+    embed-resources: true
+editor: source
+author: "Ciaran Evans"
+---
+
+# Writing functions
+
+1. 
+
+```{r}
+my_kurtosis <- function(x){
+  return(mean((x - mean(x))^4)/(mean((x - mean(x))^2))^2 - 3)
+}
+```
+
+
+2.
+
+```{r}
+my_corr <- function(x, y){
+  return(sum((x - mean(x)) * (y - mean(y)))/( sqrt(sum((x - mean(x))^2)) * 
+                                         sqrt(sum((y - mean(y))^2)) ))
+}
+```
+
+
+# Reading code: loops and functions
+
+3.
+
+```{r, error=T}
+x <- list()
+for(i in 1:10){
+  x[i] <- i
+}
+x[2] + 1
+```
+
+`x[2]` is a list, so we can't add 1. If we want to add 1 to the second element of `x`, we should use `x[[2]] + 1`
+
+4.
+
+```{r, error=T}
+nsim <- 1000 # number of games
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  # each game starts with the marker in the middle
+  marker <- 0
+  
+  while(abs(marker) < 0){
+    robotA <- runif(1, 0, 0.5)
+    robotB <- runif(1, 0, 0.5)
+    marker <- marker + robotA - robotB
+  }
+  
+  # check whether robot A wins
+  results[i] <- marker >= 0.5
+}
+
+# fraction of the time that robot A wins
+mean(results)
+```
+
+The output of this code will be 0, because the while loop never runs (the absolute value of a number can never be less than 0).
+
+
+5.
+
+```{r, error=T}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat <- i + j
+  }
+}
+
+mat
+```
+
+`mat` starts off as a matrix, but then gets over-written to just be a number.
+
+6.
+
+```{r, error=T}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat[j, i] <- i + j
+  }
+}
+
+mat
+```
+
+Using `mat[i,j]` would fix the error.
+
+7.
+
+```{r, error=T}
+mat <- matrix(1, 3, 3)
+for(i in 2:3){
+  for(j in 2:3){
+    mat[i,j] <- mat[i-1, j-1] + mat[i, j-1]
+  }
+}
+
+mat
+```
+
+
+
+8.
+
+```{r, error=T}
+f1 <- function(x = 1){
+  return(x + 1)
+}
+g1 <- function(x){
+  return(f1() + x)
+}
+
+f1(g1(3))
+```
+
+9.
+
+```{r, error=T}
+f1 <- function(n, groups){
+  x <- matrix(1, nrow=n, ncol=n)
+  unique_groups = unique(groups)
+  means <- matrix(nrow = length(unique_groups), ncol = n)
+  for(i in 1:length(unique_groups)){
+    means[i,] <- colMeans(x[groups == unique_groups[i],])
+  }
+  
+  return(means)
+}
+
+f1(5, groups = c(1, 1, 2, 2, 2))
+```
+
+## C++ code
+
+10. The issue is that the type of `sum` is not specified when the variable is created. Since the return type of the function is `double`, and we return `sum`, then `sum` should also be a `double`.
+
+```{r, eval=F}
+Rcpp::cppFunction('double weighted_sum(NumericVector x, NumericVector w){
+  int n = x.size();
+  double sum = 0;
+  
+  for(int i = 0; i < n; ++i){
+    sum += x[i]*w[i];
+  }
+  
+  return sum;
+}')
+```
+
+11. The return type of the function (`NumericMatrix`) does not match the type of the object that is actually returned (`sum`, which is a `double`). We should change the return type of the function.
+
+```{r, eval=F}
+Rcpp::cppFunction('double varC(NumericVector x){
+  int n = x.size();
+  
+  double mean = 0;
+  
+  for(int i = 0; i < n; ++i){
+    mean += x[i]/n;
+  }
+  
+  double sum = 0;
+  
+  for(int i = 0; i < n; ++i){
+    sum += pow(x[i] - mean, 2);
+  }
+  
+  return sum/(n-1);
+}')
+```
+
+12. C++ is 0-indexed, so the `for` loop indices need to change. Also, we need semicolons to end the lines!
+
+```{r, eval=F}
+Rcpp::cppFunction('NumericMatrix matrix_prod(NumericMatrix A, NumericMatrix B){
+  int ncol_a = A.ncol();
+  int nrow_a = A.nrow();
+  int ncol_b = B.ncol();
+  int nrow_b = B.nrow();
+  
+  NumericMatrix result(nrow_a, ncol_b);
+  
+  for(int i = 0; i < nrow_a; ++i){
+    for(int j = 0; j < ncol_b; ++j){
+      double sum = 0;
+      for(int k = 0; k < ncol_a; ++k){
+        sum += A(i,k)*B(k,j);
+      }
+      
+      result(i,j) = sum;
+    }
+  }
+  
+  return result;
+}')
+```
+
+
+# Improving code efficiency
+
+13. Don't grow vectors! And vectorize when possible.
+
+```{r, eval=F}
+x <- runif(100)
+```
+
+14. Benchmarking (e.g., the `bench::mark()` function) and/or profiling.
+
+15. `my_sd_1` grows vectors, and is not vectorized, so will be the slower function (the second line).
+
+
+
+# Reading data wrangling code
+
+Here are two small datasets, `df1` and `df2`:
+
+```{r, include=F}
+
+library(tidyverse)
+
+set.seed(3)
+
+df1 <- data.frame(id = 1:5, 
+                  x = sample(1:10, 5, replace=T),
+                  y = sample(1:10, 5, replace=T),
+                  z = sample(1:10, 5, replace=T))
+
+df2 <- data.frame(id = 3:6,
+                  a = sample(1:10, 4, replace=T),
+                  b = sample(1:10, 4, replace=T))
+```
+
+```{r}
+df1
+
+df2
+```
+
+
+
+16.
+
+```{r}
+df1 |>
+  left_join(df2, join_by(id))
+```
+
+17.
+
+```{r}
+df1 |>
+  inner_join(df2, join_by(id))
+```
+
+18. Error because `b` is not a column in `df1`
+
+```{r, error=T}
+df1 |>
+  group_by(z) |>
+  summarize(max_b = max(b))
+```
+
+
+19. Error: once only columns `x` and `y` are selected, I can't reference `id` as a column.
+
+```{r, error=T}
+df1 |>
+  select(x, y) |>
+  pivot_longer(cols = -id,
+               names_to = "measurement",
+               values_to = "value")
+```
+
+20.
+
+```{r}
+df1 |>
+  select(id, x, y) |>
+  pivot_longer(cols = -id,
+               names_to = "measurement",
+               values_to = "value") |>
+  filter(id %in% c(1, 2, 3))
+```
+
+21.
+
+```{r}
+df1 |>
+  left_join(df2, join_by(id)) |>
+  mutate(new_var = x + a) |>
+  group_by(z) |>
+  summarize(mean_new_var = mean(new_var))
+```
+
+
+22. Error: once we summarize, the only variables in the table are the grouping variables and the summary statistics. So, column `b` no longer exists when we get to the last line
+
+```{r, error=T}
+df1 |>
+  left_join(df2, join_by(id)) |>
+  mutate(new_var = x + a) |>
+  group_by(z) |>
+  summarize(mean_new_var = mean(new_var, na.rm=T)) |>
+  summarize(mean_b = mean(b))
+```
+
+
+# More writing data wrangling code
+
+Here is another small dataset, `ex_df`, which has a single column (`faculty`):
+
+```{r, include=F}
+ex_df <- data.frame(faculty = c("Rob Erhardt, Professor: MAN 343",
+                "Daniel Beavers, Associate Professor: MAN 337",
+                "Kenneth Berenhaut, Professor: MAN 379",
+                "Leonardo Cella, Assistant Professor: MAN 344",
+                "Lucy D'Agostino McGowan, Assistant Professor: MAN 342",
+                "Nicole Dalzell, Associate Teaching Professor: MAN 338"))
+```
+
+```{r}
+ex_df
+```
+
+23.
+
+```{r}
+ex_df |>
+  separate_wider_regex(faculty,
+                       patterns = c(
+                         name = ".+",
+                         ", ",
+                         position = ".+",
+                         ": ",
+                         office = ".+"
+                       ))
+```
+
+# Regular expressions
+
+Suppose you receive a vector containing the following email addresses:
+
+```{r}
+emails <- c("evansc@wfu.edu",
+            "dalzelnm@wfu.edu",
+            "heplersa@wfu.edu")
+```
+
+24. 
+
+```{r}
+str_extract(emails, "^.+(?=@)")
+```
+
+# More regular expressions
+
+You have a folder with the following filenames:
+
+```{r}
+filenames <- c(".bash_profile",
+               "workspace.doc",
+               "img0912.jpg",
+               "updated_img0912.png",
+               "documentation.html",
+               "favicon.gif",
+               "access.lock")
+```
+
+
+25. 
+
+```{r}
+str_subset(filenames, "(gif|png|jpg)")
+```
+
+# More regular expressions
+
+Consider the following string:
+
+```{r}
+ex_str <- "The kurtosis is defined by the equation $\\mu_4/\\sigma^4$, 
+where $\\mu_4$ is the fourth central moment 
+and $\\sigma$ is the standard deviation."
+```
+
+26. 
+
+```{r}
+str_extract_all(ex_str, "\\$[^\\$]+\\$")
+```
+
+
+# Web scraping
+
+27. Here we want the `<p>` elements with `class = "small"`, nested inside a `span` element:
+
+```{r, eval=F}
+read_html("https://fake_page.html") |>
+  html_elements("span > p.small") |>
+  html_text2()
+```
+
+# Probability simulation
+
+28.
+
+```{r}
+set.seed(442)
+
+nsim <- 1000
+results <- rep(NA, nsim)
+
+card_numbers <- rep(1:10, 4)
+card_colors <- rep(1:4, each=10)
+
+for(i in 1:nsim){
+  cards_drawn <- sample(1:40, 2, replace=F)
+  results[i] <- (card_numbers[cards_drawn[1]] != card_numbers[cards_drawn[2]]) &
+    (card_colors[cards_drawn[1]] != card_colors[cards_drawn[2]])
+}
+
+mean(results)
+```
+
+# Another probability simulation
+
+29.
+
+```{r, eval=F}
+p <- 20
+q <- 10
+nsim <- 1000
+votes <- rep(c(0, 1), times = c(q, p))
+results <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  shuffled_votes <- sample(votes, p+q, replace=F)
+  results[i] <- sum(shuffled_votes) > sum(1 - shuffled_votes)
+}
+
+mean(results)
+```
+
+This code doesn't work because it doesn't check anything about the counting process -- it only looks at the final count. And regardless how we shuffle the votes, the final counts will remain the same. What we need to do instead is look at the count for each candidates after each vote has been counted.
+
+30.
+
+```{r}
+p <- 20
+q <- 10
+nsim <- 1000
+votes <- rep(c(0, 1), times = c(q, p))
+results <- rep(1, nsim)
+
+for(i in 1:nsim){
+  shuffled_votes <- sample(votes, p+q, replace=F)
+  count_a <- 0
+  count_b <- 0
+  for(j in 1:(p+q)){
+    count_a <- count_a + shuffled_votes[j]
+    count_b <- count_b + (1-shuffled_votes[j])
+    if(count_b >= count_a){
+      results[i] <- 0
+    }
+  }
+}
+
+mean(results)
+```
+
+
+# Statistical simulation
+
+31.
+
+A: How does the "distance" between groups impact performance of the k-means algorithm?
+
+D: Generate data $X_1,...,X_n$ with $n = 300$. Suppose 100 observations in each group, with $G_1,...,G_{100} = 1$, $G_{101},...,G_{200} = 2$, and $G_{201},...,G_{300} = 3$. Each $X_i$ is simulated from
+
+$$X_i \sim N(\mu_{G_i}, 1)$$
+
+To examine the impact of distance between groups, we will let $\mu_2 = 0$ and consider all combinations of $\mu_1 = -1, -2, -3$ and $\mu_3 = 1, 2, 3$.
+
+E: Group assignments for all observations
+
+M: Use the $k$-means algorithm (`kmeans` function in R) to assign groups. We will assume we know the true number of groups (3), so the "correct" $k=3$ is used.
+
+P: The probability that all group assignments are correct. (Alternatively, could look at the expected fraction of group assignments which are correct)
+
+
